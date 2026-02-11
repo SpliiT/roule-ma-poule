@@ -61,13 +61,13 @@ export default function AdminInterventionsPage() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'PENDING':
-                return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="h-3 w-3 mr-1" /> En attente</Badge>;
+                return <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20"><Clock className="h-3 w-3 mr-1" /> En attente</Badge>;
             case 'CONFIRMED':
-                return <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 border-blue-500/20"><CheckCircle2 className="h-3 w-3 mr-1" /> Confirmée</Badge>;
+                return <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20"><CheckCircle2 className="h-3 w-3 mr-1" /> Confirmée</Badge>;
             case 'IN_PROGRESS':
-                return <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 animate-pulse"><Navigation className="h-3 w-3 mr-1" /> En cours</Badge>;
+                return <Badge variant="secondary" className="bg-accent/10 text-accent border-accent/20 animate-pulse"><Navigation className="h-3 w-3 mr-1" /> En cours</Badge>;
             case 'COMPLETED':
-                return <Badge variant="secondary" className="bg-green-500/10 text-green-500 border-green-500/20">Terminée</Badge>;
+                return <Badge variant="secondary" className="bg-success/10 text-success border-success/20">Terminée</Badge>;
             case 'CANCELLED':
                 return <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">Annulée</Badge>;
             default:
@@ -289,4 +289,4 @@ export default function AdminInterventionsPage() {
             />
         </div>
     );
-}
+}

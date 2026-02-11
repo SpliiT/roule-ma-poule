@@ -27,6 +27,9 @@ import { BIKE_TYPES } from '@/types/bikes';
 import { ArrowLeft, Loader2, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
+import { BikeSearch } from '@/components/bikes/bike-search';
+import { Sparkles } from 'lucide-react';
+
 export default function AddBikePage() {
     const router = useRouter();
     const { createBike, isCreating } = useBikes();
@@ -41,6 +44,7 @@ export default function AddBikePage() {
             photoUrl: '',
         },
     });
+
     async function onSubmit(values: BikeFormValues) {
         try {
             await createBike(values);
@@ -49,167 +53,209 @@ export default function AddBikePage() {
             console.error(error);
         }
     }
+
+    const handleBikeSelect = (bike: any) => {
+        form.reset({
+            ...form.getValues(),
+            brand: bike.brand,
+            model: bike.model,
+            year: bike.year || new Date().getFullYear(),
+            type: bike.type,
+            isElectric: bike.isElectric,
+            photoUrl: bike.photoUrl || form.getValues().photoUrl,
+        });
+    };
+
     return (
         <div className="container mx-auto max-w-2xl py-8">
-            <div className="mb-6">
+            <div className="mb-8">
                 <Button variant="ghost" asChild className="mb-4 gap-2 px-0 hover:bg-transparent">
                     <Link href="/bikes">
                         <ArrowLeft className="h-4 w-4" />
                         Retour à la liste
                     </Link>
                 </Button>
-                <h1 className="text-3xl font-bold tracking-tight">Ajouter un vélo</h1>
-                <p className="text-muted-foreground">Renseignez les détails de votre monture.</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">Ajouter un vélo</h1>
+                        <p className="text-muted-foreground">Recherchez votre vélo pour remplir automatiquement les détails.</p>
+                    </div>
+                </div>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Informations du vélo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="brand"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Marque</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="ex: Specialized, Decathlon..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="model"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Modèle</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="ex: Rockrider, Sirrus..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    control={form.control}
-                                    name="type"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Type de vélo</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                            >
+
+            <div className="space-y-8">
+                {/* Magic Search Section */}
+                <Card className="border-2 border-primary/20 shadow-md overflow-hidden">
+                    <div className="bg-primary/5 px-6 py-4 border-b flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                        <h2 className="font-semibold">Recherche Intelligente</h2>
+                    </div>
+                    <CardContent className="p-6">
+                        <BikeSearch onSelect={handleBikeSelect} />
+                        <p className="text-xs text-muted-foreground mt-3 italic text-center">
+                            En sélectionnant un vélo, la marque, le modèle, l'année et le type seront remplis pour vous.
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {/* Main Form Section */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Détails du vélo</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="brand"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Marque</FormLabel>
                                                 <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Sélectionnez un type" />
-                                                    </SelectTrigger>
+                                                    <Input placeholder="ex: Specialized, Decathlon..." {...field} />
                                                 </FormControl>
-                                                <SelectContent>
-                                                    {BIKE_TYPES.map((type) => (
-                                                        <SelectItem key={type.value} value={type.value}>
-                                                            {type.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="model"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Modèle</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="ex: Rockrider, Sirrus..." {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <FormField
+                                        control={form.control}
+                                        name="type"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Type de vélo</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                >
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Sélectionnez un type" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {BIKE_TYPES.map((type) => (
+                                                            <SelectItem key={type.value} value={type.value}>
+                                                                {type.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="year"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Année</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        {...field}
+                                                        onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
+                                                        value={field.value || ''}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name="isElectric"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm bg-muted/30">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>Vélo à assistance électrique (VAE)</FormLabel>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Coché automatiquement s'il est identifié comme électrique.
+                                                </p>
+                                            </div>
                                         </FormItem>
                                     )}
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="year"
+                                    name="photoUrl"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Année (optionnel)</FormLabel>
+                                            <FormLabel>Photo du vélo</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    onChange={(e) => field.onChange(e.target.value === '' ? null : parseInt(e.target.value))}
-                                                    value={field.value || ''}
-                                                />
+                                                {field.value ? (
+                                                    <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-dashed p-1">
+                                                        <img src={field.value} alt="Aperçu du vélo" className="h-full w-full object-cover rounded-md" />
+                                                        <div className="absolute top-2 right-2 flex gap-2">
+                                                            <Button
+                                                                type="button"
+                                                                variant="destructive"
+                                                                size="icon"
+                                                                className="h-8 w-8"
+                                                                onClick={() => field.onChange('')}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                        {field.value.includes('bikeindex.org') && (
+                                                            <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded">
+                                                                Image via BikeIndex
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <CloudinaryUpload
+                                                        onUpload={(urls) => field.onChange(urls[0])}
+                                                        folder="bikes"
+                                                        buttonText="Ajouter une photo personnalisée"
+                                                        className="w-full"
+                                                    />
+                                                )}
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                            </div>
-                            <FormField
-                                control={form.control}
-                                name="isElectric"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                        <div className="space-y-1 leading-none">
-                                            <FormLabel>Vélo à assistance électrique (VAE)</FormLabel>
-                                            <p className="text-sm text-muted-foreground">
-                                                Cochez cette case s'il s'agit d'un vélo électrique.
-                                            </p>
-                                        </div>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="photoUrl"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Photo du vélo</FormLabel>
-                                        <FormControl>
-                                            {field.value ? (
-                                                <div className="relative aspect-video rounded-lg overflow-hidden border">
-                                                    <img src={field.value} alt="Aperçu du vélo" className="h-full w-full object-cover" />
-                                                    <Button
-                                                        type="button"
-                                                        variant="destructive"
-                                                        size="icon"
-                                                        className="absolute top-2 right-2 h-8 w-8"
-                                                        onClick={() => field.onChange('')}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <CloudinaryUpload
-                                                    onUpload={(urls) => field.onChange(urls[0])}
-                                                    folder="bikes"
-                                                    buttonText="Ajouter une photo"
-                                                    className="w-full"
-                                                />
-                                            )}
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex justify-end pt-4">
-                                <Button type="submit" className="w-full gap-2 sm:w-auto" disabled={isCreating}>
-                                    {isCreating ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Save className="h-4 w-4" />
-                                    )}
-                                    Enregistrer le vélo
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
+                                <div className="flex justify-end pt-4 border-t">
+                                    <Button type="submit" size="lg" className="w-full gap-2 sm:w-auto font-bold shadow-lg" disabled={isCreating}>
+                                        {isCreating ? (
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <Save className="h-5 w-5" />
+                                        )}
+                                        Enregistrer le vélo
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
-}
+}

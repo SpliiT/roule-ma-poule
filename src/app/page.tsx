@@ -26,7 +26,7 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <SignedOut>
               <Link href="/sign-in">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" className="bg-accent" size="sm">
                   Se connecter
                 </Button>
               </Link>
@@ -49,96 +49,102 @@ export default function HomePage() {
           </div>
         </div>
       </header>
-      { }
+      {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32">
+        {/* Modern background gradients */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,188,0,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(0,188,255,0.05),transparent_40%)]" />
+
         <div className="relative container mx-auto px-4">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div className="max-w-2xl animate-fade-in">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-bold text-accent border border-accent/20">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary border border-primary/20 backdrop-blur-sm">
                 <Wrench className="h-4 w-4" />
                 68 ans d&#39;expertise vélo — Lyon
               </div>
               <h1 className="text-5xl font-black tracking-tighter text-foreground sm:text-6xl lg:text-7xl leading-[0.9]">
                 VOTRE VÉLO <br />
-                <span className="text-primary italic">RÉPARÉ</span> <br />
+                <span className="text-primary italic drop-shadow-sm">RÉPARÉ</span> <br />
                 <span className="relative">
                   CHEZ VOUS
-                  <div className="absolute -bottom-2 left-0 h-3 w-full bg-primary/30 -z-10 -rotate-1" />
+                  <div className="absolute -bottom-2 left-0 h-3 w-full bg-primary/30 -z-10 -rotate-1 rounded-full" />
                 </span>
               </h1>
-              <p className="mt-8 text-xl text-muted-foreground md:text-2xl font-medium leading-relaxed">
+              <p className="mt-8 text-xl text-muted-foreground md:text-2xl font-medium leading-relaxed max-w-xl">
                 Plus besoin de porter votre vélo à l&#39;atelier.
                 <span className="text-foreground font-bold"> On vient à vous </span>
-                avec tout le matos pour que vous puissiez rouler l&#39;esprit libre.
+                avec tout le matos pour rouler l&#39;esprit libre.
               </p>
-              <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
+              <div className="mt-10 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
                 <Link href="/bookings/new">
-                  <Button size="lg" className="h-14 px-8 text-lg font-black shadow-xl shadow-primary/30 hover:scale-105 transition-transform uppercase italic">
+                  <Button size="lg" className="h-16 px-10 text-xl font-black shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all uppercase italic rounded-2xl">
                     Réserver maintenant
                   </Button>
                 </Link>
-                <div className="flex items-center gap-2 px-4 py-2">
-                  <div className="flex -space-x-2">
+                <div className="flex items-center gap-3 px-4 py-2 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50">
+                  <div className="flex -space-x-3">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-muted overflow-hidden">
-                        <Image src={`https://i.pravatar.cc/150?u=${i}`} alt="Client" width={32} height={32} />
+                      <div key={i} className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                        <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="Client" width={40} height={40} />
                       </div>
                     ))}
                   </div>
-                  <div className="text-xs font-bold text-muted-foreground">
-                    <div className="flex items-center text-accent">
-                      <Star className="h-3 w-3 fill-current" />
-                      <Star className="h-3 w-3 fill-current" />
-                      <Star className="h-3 w-3 fill-current" />
-                      <Star className="h-3 w-3 fill-current" />
-                      <Star className="h-3 w-3 fill-current" />
+                  <div className="text-xs font-bold leading-tight">
+                    <div className="flex items-center text-primary mb-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className="h-3 w-3 fill-current" />
+                      ))}
                     </div>
-                    +500 clients satisfaits
+                    <span className="text-muted-foreground">+500 avis positifs</span>
                   </div>
                 </div>
               </div>
             </div>
             <div className="relative flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[500px] animate-float">
-                <div className="absolute -inset-4 rounded-full bg-primary/20 blur-3xl opacity-50" />
+              <div className="relative w-full max-w-[550px] animate-float">
+                <div className="absolute -inset-10 rounded-full bg-primary/20 blur-[100px] opacity-60 animate-pulse" />
                 <Image
                   src="/images/mascotte.png"
                   alt="La mascotte Roule Ma Poule"
                   width={600}
                   height={600}
                   priority
-                  className="relative drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)] mx-auto"
+                  className="relative drop-shadow-[0_25px_60px_rgba(0,0,0,0.3)] mx-auto select-none"
                 />
               </div>
             </div>
           </div>
         </div>
       </section>
-      { }
-      <section className="bg-muted/30 py-24 relative overflow-hidden">
+
+      {/* Steps Section */}
+      <section className="bg-muted/30 py-32 relative overflow-hidden border-y border-border/50">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-4xl font-black tracking-tight uppercase italic">
-              Simple comme <span className="text-primary italic underline underline-offset-8">Roulez</span> !
+          <div className="mx-auto max-w-3xl text-center mb-20 text-foreground">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight uppercase italic mb-6">
+              Simple comme <span className="text-primary italic relative">
+                Roulez
+                <div className="absolute -bottom-2 left-0 h-1.5 w-full bg-primary rounded-full" />
+              </span> !
             </h2>
-            <p className="mt-4 text-xl text-muted-foreground font-medium">
-              3 étapes pour remettre votre bolide sur pied
+            <p className="text-xl text-muted-foreground font-medium">
+              3 étapes pour remettre votre bolide sur pied sans effort
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
             {[
-              { icon: CalendarPlus, title: "1. Réservez", desc: "Choisissez votre créneau et votre forfait en 2 minutes chrono.", color: "bg-primary/20 text-primary" },
-              { icon: Wrench, title: "2. On arrive", desc: "Le tech débarque chez vous avec l'atelier complet mobile.", color: "bg-accent/20 text-accent" },
-              { icon: CheckCircle, title: "3. Profitez", desc: "Votre vélo est prêt, payez sur place et repartez direct !", color: "bg-green-500/20 text-green-600" }
+              { icon: CalendarPlus, title: "1. Réservez", desc: "Choisissez votre forfait et votre créneau en 2 min chrono.", color: "text-primary", bg: "bg-primary/10" },
+              { icon: Wrench, title: "2. On arrive", desc: "Le technicien se déplace avec son atelier mobile complet.", color: "text-accent", bg: "bg-accent/10" },
+              { icon: CheckCircle, title: "3. Profitez", desc: "Votre vélo est prêt ! Payez sur place et repartez direct.", color: "text-success", bg: "bg-success/10" }
             ].map((step, idx) => (
-              <Card key={idx} className="border-2 border-border/50 bg-card hover:border-primary/50 transition-colors shadow-none rounded-2xl overflow-hidden group">
-                <CardContent className="p-8">
-                  <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-2xl ${step.color} group-hover:scale-110 transition-transform`}>
-                    <step.icon className="h-8 w-8" />
+              <Card key={idx} className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all shadow-xl shadow-transparent hover:shadow-primary/5 rounded-[2.5rem] overflow-hidden group">
+                <CardContent className="p-10 text-foreground">
+                  <div className={`mb-8 flex h-20 w-20 items-center justify-center rounded-3xl ${step.bg} ${step.color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500`}>
+                    <step.icon className="h-10 w-10" />
                   </div>
-                  <h3 className="text-2xl font-black mb-3">{step.title}</h3>
-                  <p className="text-muted-foreground font-medium">
+                  <h3 className="text-2xl font-black mb-4 uppercase italic">{step.title}</h3>
+                  <p className="text-muted-foreground font-medium text-lg leading-relaxed">
                     {step.desc}
                   </p>
                 </CardContent>
@@ -147,22 +153,23 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      { }
-      <section className="py-24">
+
+      {/* Benefits Section */}
+      <section className="py-32 relative">
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Home, title: "Sans bouger", sub: "À domicile ou au bureau", color: "text-primary" },
-              { icon: Zap, title: "Express", sub: "Intervention sous 48h", color: "text-accent" },
-              { icon: Shield, title: "Garanti", sub: "Expertise certifiée", color: "text-primary" },
-              { icon: MapPin, title: "Local", sub: "Partout dans le Grand Lyon", color: "text-green-500" }
+              { icon: Home, title: "Zéro déplacement", sub: "À domicile ou au bureau", color: "text-primary" },
+              { icon: Zap, title: "Service Express", sub: "Sous 48 heures garanties", color: "text-accent" },
+              { icon: Shield, title: "Garanti 100%", sub: "Expertise cycle certifiée", color: "text-primary" },
+              { icon: MapPin, title: "100% Lyonnais", sub: "Partout dans le Grand Lyon", color: "text-success" }
             ].map((benefit, idx) => (
-              <div key={idx} className="flex flex-col items-center text-center p-6 rounded-2xl border-2 border-transparent hover:border-border transition-all">
-                <div className={`mb-4 rounded-2xl bg-muted p-4 ${benefit.color}`}>
-                  <benefit.icon className="h-10 w-10" />
+              <div key={idx} className="group flex flex-col items-center text-center p-8 rounded-[2rem] border-2 border-transparent hover:border-border/50 hover:bg-muted/10 transition-all duration-300 text-foreground">
+                <div className={`mb-6 rounded-2xl bg-muted p-5 ${benefit.color} group-hover:bg-primary/5 transition-colors`}>
+                  <benefit.icon className="h-12 w-12" />
                 </div>
-                <h3 className="text-xl font-black mb-1 leading-tight">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground font-bold uppercase tracking-wider">
+                <h3 className="text-xl font-black mb-2 leading-tight uppercase italic">{benefit.title}</h3>
+                <p className="text-sm text-muted-foreground font-bold uppercase tracking-[0.2em]">
                   {benefit.sub}
                 </p>
               </div>
@@ -170,16 +177,21 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      { }
-      <footer className="border-t border-border bg-card py-12">
+
+      {/* Footer */}
+      <footer className="border-t border-border bg-card py-20 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center mb-6">
-            <Image src="/images/logo.png" alt="Logo" width={50} height={50} className="grayscale opacity-50" />
+          <div className="flex justify-center mb-8">
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Image src="/images/logo.png" alt="Logo" width={60} height={60} className="relative grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all" />
+            </div>
           </div>
-          <p className="text-muted-foreground font-bold">
+          <p className="text-muted-foreground font-black uppercase italic tracking-widest mb-6">
             © {new Date().getFullYear()} — Roule Ma Poule • Le Cycle Lyonnais
           </p>
-          <div className="mt-4 flex justify-center gap-6 text-sm text-muted-foreground font-medium">
+          <div className="flex justify-center gap-10 text-xs text-muted-foreground font-bold uppercase tracking-widest">
             <Link href="/terms" className="hover:text-primary transition-colors">CGU</Link>
             <Link href="/privacy" className="hover:text-primary transition-colors">Confidentialité</Link>
             <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>

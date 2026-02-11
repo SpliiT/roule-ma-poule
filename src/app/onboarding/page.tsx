@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Bike } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 export default function OnboardingPage() {
@@ -29,13 +29,15 @@ export default function OnboardingPage() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
             <div className="mb-8">
-                <span className="text-6xl">🚴</span>
+                <div className="bg-primary/10 p-6 rounded-3xl">
+                    <Bike className="h-16 w-16 text-primary" />
+                </div>
             </div>
-            <h1 className="mb-2 text-2xl font-bold">Préparation de votre espace...</h1>
+            <h1 className="mb-2 text-2xl font-bold italic uppercase tracking-tight">Préparation de votre espace...</h1>
             <p className="text-muted-foreground mb-8">
                 Nous créons votre profil dans notre base de données. Cela ne prendra que quelques secondes.
             </p>
             <Loader2 className="text-primary h-12 w-12 animate-spin" />
         </div>
     );
-}
+}

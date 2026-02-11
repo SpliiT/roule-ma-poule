@@ -18,11 +18,11 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-    PENDING: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-600' },
-    CONFIRMED: { label: 'Confirmée', color: 'bg-blue-500/10 text-blue-600' },
-    IN_PROGRESS: { label: 'En cours', color: 'bg-orange-500/10 text-orange-600' },
-    COMPLETED: { label: 'Terminée', color: 'bg-green-500/10 text-green-600' },
-    CANCELLED: { label: 'Annulée', color: 'bg-red-500/10 text-red-600' },
+    PENDING: { label: 'En attente', color: 'bg-warning/10 text-warning border-warning/20' },
+    CONFIRMED: { label: 'Confirmée', color: 'bg-primary/10 text-primary border-primary/20' },
+    IN_PROGRESS: { label: 'En cours', color: 'bg-accent/10 text-accent border-accent/20' },
+    COMPLETED: { label: 'Terminée', color: 'bg-success/10 text-success border-success/20' },
+    CANCELLED: { label: 'Annulée', color: 'bg-destructive/10 text-destructive border-destructive/20' },
 };
 export default function AdminDashboardPage() {
     const { data: stats, isLoading } = useQuery<any>({
@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Espace Administrateur</h1>
                 <p className="text-muted-foreground">Vue d'ensemble de l'activité Roule Ma Poule.</p>
             </div>
-            {}
+            { }
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
                 </Card>
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
-                {}
+                { }
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Répartition par statut</CardTitle>
@@ -104,7 +104,7 @@ export default function AdminDashboardPage() {
                                         : 0;
                                     return (
                                         <div key={s.status} className="flex items-center gap-3">
-                                            <Badge className={`${config.color} min-w-[100px] justify-center text-xs`}>
+                                            <Badge variant="secondary" className={`${config.color} min-w-[100px] justify-center text-xs border`}>
                                                 {config.label}
                                             </Badge>
                                             <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
                         )}
                     </CardContent>
                 </Card>
-                {}
+                { }
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-            {}
+            { }
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">Dernières interventions</CardTitle>
@@ -182,7 +182,7 @@ export default function AdminDashboardPage() {
                                                     )}
                                                 </td>
                                                 <td className="p-3">
-                                                    <Badge className={`${statusConfig.color} text-xs`}>{statusConfig.label}</Badge>
+                                                    <Badge variant="secondary" className={`${statusConfig.color} text-xs border`}>{statusConfig.label}</Badge>
                                                 </td>
                                             </tr>
                                         );
@@ -197,4 +197,4 @@ export default function AdminDashboardPage() {
             </Card>
         </div>
     );
-}
+}

@@ -104,7 +104,7 @@ export default function AdminCompanyPage() {
                             {form.logo ? (
                                 <img src={form.logo} alt="Logo" className="h-full w-full object-contain" />
                             ) : (
-                                <span className="text-3xl">🚴</span>
+                                <Building2 className="h-12 w-12 text-muted-foreground" />
                             )}
                         </div>
                         <CloudinaryUpload
@@ -206,4 +206,4 @@ export default function AdminCompanyPage() {
             </Card>
         </div>
     );
-}
+}

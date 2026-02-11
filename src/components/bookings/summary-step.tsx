@@ -36,7 +36,7 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
-                <CheckCircle2 className="text-green-500 h-5 w-5" />
+                <CheckCircle2 className="text-success h-5 w-5" />
                 <h2 className="text-xl font-semibold">Récapitulatif de votre commande</h2>
             </div>
             <div className="grid gap-6">
@@ -109,7 +109,7 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                         </>
                     )}
                 </div>
-                {}
+                { }
                 <Card className="bg-muted/50 border-0">
                     <CardContent className="p-4">
                         {displayTotal > 0 && (
@@ -145,4 +145,4 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
             </div>
         </div>
     );
-}
+}

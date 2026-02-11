@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
 
-// Charger .env.local (convention Next.js) puis .env en fallback
 dotenv.config({ path: ".env.local" });
 dotenv.config({ path: ".env", override: false });
 

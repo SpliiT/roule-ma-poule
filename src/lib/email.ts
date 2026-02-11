@@ -76,17 +76,17 @@ export async function sendStatusUpdate(intervention: {
     client: { email: string; name: string };
     forfait: { name: string };
 }) {
-    const statusMessages: Record<string, { emoji: string; label: string; description: string }> = {
-        CONFIRMED: { emoji: '', label: 'Confirmée', description: 'Un technicien a été assigné à votre intervention.' },
-        IN_PROGRESS: { emoji: '', label: 'En cours', description: 'Le technicien est arrivé et travaille sur votre vélo.' },
-        COMPLETED: { emoji: '', label: 'Terminée', description: 'Votre vélo a été réparé avec succès !' },
-        CANCELLED: { emoji: '', label: 'Annulée', description: 'Votre intervention a été annulée.' },
+    const statusMessages: Record<string, { label: string; description: string }> = {
+        CONFIRMED: { label: 'Confirmée', description: 'Un technicien a été assigné à votre intervention.' },
+        IN_PROGRESS: { label: 'En cours', description: 'Le technicien est arrivé et travaille sur votre vélo.' },
+        COMPLETED: { label: 'Terminée', description: 'Votre vélo a été réparé avec succès !' },
+        CANCELLED: { label: 'Annulée', description: 'Votre intervention a été annulée.' },
     };
     const status = statusMessages[intervention.status];
     if (!status) return;
     await sendEmail({
         to: intervention.client.email,
-        subject: `${status.emoji} Intervention ${status.label} — ${intervention.forfait.name}`,
+        subject: `Intervention ${status.label} — ${intervention.forfait.name}`,
         html: `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 40px 20px;">
                 <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
@@ -100,4 +100,4 @@ export async function sendStatusUpdate(intervention: {
             </div>
         `,
     });
-}
+}

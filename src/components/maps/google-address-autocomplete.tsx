@@ -53,7 +53,7 @@ export function GoogleAddressAutocomplete({
         const initGoogle = async () => {
             try {
                 const { AutocompleteSuggestion, AutocompleteSessionToken } = await importLibrary('places') as any;
-                autocompleteSuggestionRef.current = AutocompleteSuggestion; 
+                autocompleteSuggestionRef.current = AutocompleteSuggestion;
                 sessionTokenRef.current = new AutocompleteSessionToken();
                 console.log('Google Places API (New) fully loaded');
                 setIsLoaded(true);
@@ -156,12 +156,12 @@ export function GoogleAddressAutocomplete({
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
                 )}
                 {!isSearching && isValidated && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-success/10 flex items-center justify-center border border-success/20">
+                        <div className="h-2 w-2 rounded-full bg-success" />
                     </div>
                 )}
             </div>
-            {}
+            { }
             {showPredictions && predictions.length > 0 && (
                 <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto overflow-x-hidden py-1">
                     {predictions.map((p, idx) => (
@@ -179,8 +179,8 @@ export function GoogleAddressAutocomplete({
                 </div>
             )}
             {isValidated && (
-                <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-medium px-1">
-                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <div className="flex items-center gap-1.5 text-[10px] text-success font-medium px-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                     Lieu validé par le système
                 </div>
             )}
@@ -192,4 +192,4 @@ export function GoogleAddressAutocomplete({
             )}
         </div>
     );
-}
+}
