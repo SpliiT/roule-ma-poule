@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: roulemapoule-db
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: roulemapoule
+      POSTGRES_PASSWORD: roulemapoule_dev
+      POSTGRES_DB: roule_ma_poule
+    volumes:
+      - roulemapoule_data:/var/lib/postgresql/data
+
+volumes:
+  roulemapoule_data:
