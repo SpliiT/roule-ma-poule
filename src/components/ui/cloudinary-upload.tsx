@@ -1,10 +1,8 @@
 'use client';
-
 import { useState, useRef, useCallback } from 'react';
 import { UploadCloud, X, Image as ImageIcon, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
 interface CloudinaryUploadProps {
     onUpload: (urls: string[]) => void;
     multiple?: boolean;
@@ -14,7 +12,6 @@ interface CloudinaryUploadProps {
     size?: 'default' | 'sm' | 'lg' | 'icon';
     className?: string;
 }
-
 export function CloudinaryUpload({
     onUpload,
     multiple = false,
@@ -27,17 +24,13 @@ export function CloudinaryUpload({
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
     const uploadToCloudinary = async (file: File) => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'roule-ma-poule');
         formData.append('folder', folder);
-
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
         const xhr = new XMLHttpRequest();
-
         return new Promise<string>((resolve, reject) => {
             xhr.upload.addEventListener('progress', (e) => {
                 if (e.lengthComputable) {
@@ -45,7 +38,6 @@ export function CloudinaryUpload({
                     setUploadProgress(progress);
                 }
             });
-
             xhr.addEventListener('load', () => {
                 if (xhr.status === 200) {
                     const response = JSON.parse(xhr.responseText);
@@ -54,33 +46,25 @@ export function CloudinaryUpload({
                     reject(new Error('Upload failed'));
                 }
             });
-
             xhr.addEventListener('error', () => reject(new Error('Upload failed')));
-
             xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`);
             xhr.send(formData);
         });
     };
-
     const handleFiles = useCallback(async (files: FileList | null) => {
         if (!files || files.length === 0) return;
-
         setIsUploading(true);
         setUploadProgress(0);
-
         try {
             const fileArray = Array.from(files).slice(0, multiple ? 10 : 1);
             const urls: string[] = [];
-
             for (const file of fileArray) {
                 const url = await uploadToCloudinary(file);
                 urls.push(url);
             }
-
             setUploadedUrls(urls);
             onUpload(urls);
             setUploadProgress(100);
-
             setTimeout(() => {
                 setIsUploading(false);
                 setUploadProgress(0);
@@ -91,31 +75,25 @@ export function CloudinaryUpload({
             setUploadProgress(0);
         }
     }, [multiple, folder, onUpload]);
-
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);
     }, []);
-
     const handleDragLeave = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
     }, []);
-
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
         handleFiles(e.dataTransfer.files);
     }, [handleFiles]);
-
     const handleClick = () => {
         fileInputRef.current?.click();
     };
-
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleFiles(e.target.files);
     };
-
     return (
         <div className={cn('relative', className)}>
             <input
@@ -126,7 +104,6 @@ export function CloudinaryUpload({
                 onChange={handleFileChange}
                 className="hidden"
             />
-
             <div
                 onClick={handleClick}
                 onDragOver={handleDragOver}

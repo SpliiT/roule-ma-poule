@@ -1,15 +1,12 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     label?: string;
     error?: string;
 }
-
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     ({ className, label, error, id, ...props }, ref) => {
         const textareaId = id || label?.toLowerCase().replace(/\s+/g, '-');
-
         return (
             <div className="space-y-1.5">
                 {label && (
@@ -41,7 +38,5 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         );
     }
 );
-
 Textarea.displayName = 'Textarea';
-
-export { Textarea };
+export { Textarea };

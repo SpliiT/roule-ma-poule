@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-
 const companySchema = z.object({
     name: z.string().min(1).optional(),
     description: z.string().optional(),
@@ -13,39 +12,27 @@ const companySchema = z.object({
     logo: z.string().url().optional().or(z.literal('')),
     siret: z.string().optional(),
 });
-
-/**
- * GET — Récupérer les informations de l'entreprise.
- */
 export async function GET() {
     try {
         await requireRole('ADMIN');
-
         let company = await prisma.companyInfo.findFirst();
         if (!company) {
             company = await prisma.companyInfo.create({
                 data: { name: 'Roule Ma Poule' },
             });
         }
-
         return NextResponse.json({ data: company });
     } catch (error) {
         console.error('GET company error:', error);
         return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 }
-
-/**
- * PATCH — Mettre à jour les informations entreprise.
- */
 export async function PATCH(req: Request) {
     try {
         await requireRole('ADMIN');
         const body = await req.json();
         const data = companySchema.parse(body);
-
         let company = await prisma.companyInfo.findFirst();
-
         if (!company) {
             company = await prisma.companyInfo.create({
                 data: { name: data.name || 'Roule Ma Poule', ...data },
@@ -56,7 +43,6 @@ export async function PATCH(req: Request) {
                 data,
             });
         }
-
         return NextResponse.json({ data: company });
     } catch (error) {
         console.error('PATCH company error:', error);
@@ -65,4 +51,4 @@ export async function PATCH(req: Request) {
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}

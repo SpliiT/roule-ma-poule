@@ -3,16 +3,11 @@ import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendStatusUpdate } from '@/lib/email';
 import { z } from 'zod';
-
 const updateInterventionSchema = z.object({
     technicianId: z.string().optional(),
     status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
     technicianNotes: z.string().optional(),
 });
-
-/**
- * API pour mettre à jour une intervention spécifique (Admin uniquement).
- */
 export async function PATCH(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -21,21 +16,15 @@ export async function PATCH(
         await requireRole('ADMIN');
         const { id } = await params;
         const body = await req.json();
-
         const validatedData = updateInterventionSchema.parse(body);
-
         const currentIntervention = await prisma.intervention.findUnique({
             where: { id },
         });
-
         if (!currentIntervention) {
             return NextResponse.json({ error: 'Intervention introuvable' }, { status: 404 });
         }
-
-        // Si on assigne un technicien et que le statut est PENDING, on passe en CONFIRMED automatique
         const newStatus = validatedData.status ||
             (validatedData.technicianId && currentIntervention.status === 'PENDING' ? 'CONFIRMED' : currentIntervention.status);
-
         const updatedIntervention = await prisma.intervention.update({
             where: { id },
             data: {
@@ -44,8 +33,6 @@ export async function PATCH(
                 technicianNotes: validatedData.technicianNotes,
             },
         });
-
-        // Historique de statut
         if (newStatus !== currentIntervention.status) {
             await prisma.interventionStatusHistory.create({
                 data: {
@@ -54,8 +41,6 @@ export async function PATCH(
                     notes: `Mise à jour par l'administrateur${validatedData.technicianId ? ' (Assignation technicien)' : ''}`,
                 },
             });
-
-            // Notification pour le client
             await prisma.notification.create({
                 data: {
                     userId: currentIntervention.clientId,
@@ -65,8 +50,6 @@ export async function PATCH(
                     data: { interventionId: id, status: newStatus },
                 },
             });
-
-            // Notification pour le technicien si assigné
             if (validatedData.technicianId) {
                 await prisma.notification.create({
                     data: {
@@ -79,8 +62,6 @@ export async function PATCH(
                 });
             }
         }
-
-        // Envoyer email de changement de statut
         if (newStatus !== currentIntervention.status) {
             try {
                 const fullIntervention = await prisma.intervention.findUnique({
@@ -97,7 +78,6 @@ export async function PATCH(
                 console.error('Erreur envoi email statut:', emailError);
             }
         }
-
         return NextResponse.json({ data: updatedIntervention });
     } catch (error) {
         console.error('PATCH intervention error:', error);
@@ -106,4 +86,4 @@ export async function PATCH(
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}

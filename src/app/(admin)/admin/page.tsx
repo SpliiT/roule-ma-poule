@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +17,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     PENDING: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-600' },
     CONFIRMED: { label: 'Confirmée', color: 'bg-blue-500/10 text-blue-600' },
@@ -26,7 +24,6 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
     COMPLETED: { label: 'Terminée', color: 'bg-green-500/10 text-green-600' },
     CANCELLED: { label: 'Annulée', color: 'bg-red-500/10 text-red-600' },
 };
-
 export default function AdminDashboardPage() {
     const { data: stats, isLoading } = useQuery<any>({
         queryKey: ['admin-stats'],
@@ -35,7 +32,6 @@ export default function AdminDashboardPage() {
             return data.data;
         },
     });
-
     if (isLoading) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -43,15 +39,13 @@ export default function AdminDashboardPage() {
             </div>
         );
     }
-
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Espace Administrateur</h1>
                 <p className="text-muted-foreground">Vue d'ensemble de l'activité Roule Ma Poule.</p>
             </div>
-
-            {/* KPIs principaux */}
+            {}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -94,9 +88,8 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Interventions par statut */}
+                {}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Répartition par statut</CardTitle>
@@ -130,8 +123,7 @@ export default function AdminDashboardPage() {
                         )}
                     </CardContent>
                 </Card>
-
-                {/* Interventions par zone */}
+                {}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
@@ -154,8 +146,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-
-            {/* Interventions récentes */}
+            {}
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">Dernières interventions</CardTitle>
@@ -206,4 +197,4 @@ export default function AdminDashboardPage() {
             </Card>
         </div>
     );
-}
+}

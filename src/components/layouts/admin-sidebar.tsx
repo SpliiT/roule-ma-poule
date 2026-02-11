@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
@@ -18,7 +17,6 @@ import {
     Building2,
     Settings,
 } from 'lucide-react';
-
 const navItems = [
     { label: 'Tableau de bord', href: '/admin', icon: LayoutDashboard },
     { label: 'Interventions', href: '/admin/interventions', icon: ClipboardList },
@@ -29,19 +27,16 @@ const navItems = [
     { label: 'Entreprise', href: '/admin/company', icon: Building2 },
     { label: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
-
 interface AdminSidebarProps {
     user: User;
 }
-
 export function AdminSidebar({ user }: AdminSidebarProps) {
     const pathname = usePathname();
-
     return (
         <>
-            {/* Desktop sidebar */}
+            {}
             <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r border-border bg-card">
-                {/* Logo */}
+                {}
                 <div className="flex h-16 items-center gap-2 border-b border-border px-6">
                     <Image
                         src="/images/logo.png"
@@ -59,8 +54,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                         </div>
                     </div>
                 </div>
-
-                {/* Navigation */}
+                {}
                 <nav className="flex-1 space-y-1 overflow-y-auto p-4">
                     {navItems.map((item) => {
                         const isActive =
@@ -85,8 +79,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                         );
                     })}
                 </nav>
-
-                {/* User */}
+                {}
                 <div className="border-t border-border p-4">
                     <div className="flex items-center gap-3">
                         <UserButton afterSignOutUrl="/" />
@@ -102,8 +95,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     </div>
                 </div>
             </aside>
-
-            {/* Mobile bottom nav */}
+            {}
             <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card">
                 <div className="flex items-center justify-around py-2">
                     {navItems.slice(0, 4).map((item) => {
@@ -133,4 +125,4 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </nav>
         </>
     );
-}
+}

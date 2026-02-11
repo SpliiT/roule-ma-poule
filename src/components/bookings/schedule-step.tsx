@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
@@ -8,60 +7,49 @@ import { ArrowLeft, Clock, Calendar as CalendarIcon, Loader2 } from 'lucide-reac
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import axios from 'axios';
-
 interface Slot {
     start: string;
     end: string;
     available: boolean;
 }
-
 interface ScheduleStepProps {
     onNext: (date: Date, slot: string) => void;
     onBack: () => void;
     zoneId?: string;
     duration?: number;
 }
-
 export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: ScheduleStepProps) {
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [slot, setSlot] = useState<string>('');
     const [slots, setSlots] = useState<Slot[]>([]);
     const [loading, setLoading] = useState(false);
-
-    // Charger les créneaux dynamiquement quand la date change
     useEffect(() => {
         if (!date) {
             setSlots([]);
             setSlot('');
             return;
         }
-
         const dateStr = format(date, 'yyyy-MM-dd');
         setLoading(true);
         setSlot('');
-
         const params = new URLSearchParams({ date: dateStr, duration: String(duration) });
         if (zoneId) params.append('zoneId', zoneId);
-
         axios.get(`/api/bookings/slots?${params}`)
             .then(({ data }) => setSlots(data.data || []))
             .catch(() => setSlots([]))
             .finally(() => setLoading(false));
     }, [date, zoneId, duration]);
-
     const handleNext = () => {
         if (date && slot) {
             onNext(date, slot);
         }
     };
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
                 <CalendarIcon className="text-primary h-5 w-5" />
                 <h2 className="text-xl font-semibold">Quand souhaitez-vous l'intervention ?</h2>
             </div>
-
             <div className="grid gap-8 md:grid-cols-2">
                 <div className="flex flex-col items-center">
                     <Calendar
@@ -73,7 +61,6 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                         locale={fr}
                     />
                 </div>
-
                 <div className="space-y-4">
                     <label className="text-sm font-medium">Créneaux disponibles</label>
                     {!date ? (
@@ -114,7 +101,6 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                     )}
                 </div>
             </div>
-
             <div className="bg-primary/5 flex items-start gap-3 rounded-lg border border-primary/20 p-4">
                 <Clock className="text-primary mt-0.5 h-5 w-5" />
                 <div>
@@ -125,7 +111,6 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                     </p>
                 </div>
             </div>
-
             <div className="flex justify-between pt-6">
                 <Button variant="ghost" onClick={onBack} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -137,4 +122,4 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
             </div>
         </div>
     );
-}
+}

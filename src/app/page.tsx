@@ -1,16 +1,14 @@
 'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CalendarPlus, Home, Zap, CheckCircle, Wrench, MapPin, Shield, LayoutDashboard, Star } from 'lucide-react';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-background">
-      {/* Navbar */}
+      { }
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-20 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
@@ -51,8 +49,7 @@ export default function HomePage() {
           </div>
         </div>
       </header>
-
-      {/* Hero */}
+      { }
       <section className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,188,0,0.15),transparent_50%)]" />
         <div className="relative container mx-auto px-4">
@@ -85,7 +82,7 @@ export default function HomePage() {
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-muted overflow-hidden">
-                        <Image src={`https://i.pravatar.cc/100?u=${i}`} alt="avatar" width={32} height={32} />
+                        <Image src={`https://i.pravatar.cc/150?u=${i}`} alt="Client" width={32} height={32} />
                       </div>
                     ))}
                   </div>
@@ -102,7 +99,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
             <div className="relative flex justify-center lg:justify-end">
               <div className="relative w-full max-w-[500px] animate-float">
                 <div className="absolute -inset-4 rounded-full bg-primary/20 blur-3xl opacity-50" />
@@ -119,8 +115,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Features - How it works */}
+      { }
       <section className="bg-muted/30 py-24 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center mb-16">
@@ -152,8 +147,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Benefits */}
+      { }
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -176,8 +170,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
+      { }
       <footer className="border-t border-border bg-card py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="flex justify-center mb-6">
@@ -193,7 +186,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
       <style jsx global>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }

@@ -1,5 +1,4 @@
 'use client';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -13,7 +12,6 @@ import {
     Smartphone,
     Globe
 } from 'lucide-react';
-
 export default function AdminSettingsPage() {
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
@@ -21,7 +19,6 @@ export default function AdminSettingsPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Paramètres Généraux</h1>
                 <p className="text-muted-foreground">Configurez le comportement global de la plateforme.</p>
             </div>
-
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-2">
@@ -47,7 +44,6 @@ export default function AdminSettingsPage() {
                     </div>
                 </CardContent>
             </Card>
-
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-2">
@@ -73,7 +69,6 @@ export default function AdminSettingsPage() {
                     </div>
                 </CardContent>
             </Card>
-
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-2">
@@ -94,4 +89,4 @@ export default function AdminSettingsPage() {
             </Card>
         </div>
     );
-}
+}

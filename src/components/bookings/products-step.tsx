@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, Plus, Minus, Loader2 } from 'lucide-react';
-
 interface Product {
     id: string;
     name: string;
@@ -16,32 +14,26 @@ interface Product {
     stock: number;
     category: string | null;
 }
-
 interface SelectedProduct {
     productId: string;
     quantity: number;
     name: string;
     price: number;
 }
-
 interface ProductsStepProps {
     onNext: (products: SelectedProduct[]) => void;
     onBack: () => void;
     selectedProducts?: SelectedProduct[];
 }
-
 export function ProductsStep({ onNext, onBack, selectedProducts = [] }: ProductsStepProps) {
     const [selected, setSelected] = useState<SelectedProduct[]>(selectedProducts);
-
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['products-for-booking'],
         queryFn: async () => {
-            // Use the public forfaits-style endpoint — products visible to clients
             const { data } = await axios.get('/api/admin/products');
             return (data.data || []).filter((p: Product) => p.stock > 0);
         },
     });
-
     function addProduct(product: Product) {
         const existing = selected.find(p => p.productId === product.id);
         if (existing) {
@@ -59,7 +51,6 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
             }]);
         }
     }
-
     function removeProduct(productId: string) {
         const existing = selected.find(p => p.productId === productId);
         if (existing && existing.quantity > 1) {
@@ -70,24 +61,19 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
             setSelected(selected.filter(p => p.productId !== productId));
         }
     }
-
     function getQuantity(productId: string): number {
         return selected.find(p => p.productId === productId)?.quantity || 0;
     }
-
     const total = selected.reduce((sum, p) => sum + p.price * p.quantity, 0);
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
                 <Package className="text-primary h-5 w-5" />
                 <h2 className="text-xl font-semibold">Produits additionnels</h2>
             </div>
-
             <p className="text-muted-foreground text-sm">
                 Besoin de pièces de rechange ? Ajoutez-les à votre commande. <strong>Optionnel</strong> — vous pouvez passer cette étape.
             </p>
-
             {isLoading ? (
                 <div className="flex h-32 items-center justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -157,7 +143,6 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
                     })}
                 </div>
             )}
-
             {selected.length > 0 && (
                 <div className="bg-muted/50 rounded-lg border p-3">
                     <div className="flex justify-between items-center">
@@ -168,7 +153,6 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
                     </div>
                 </div>
             )}
-
             <div className="flex justify-between pt-6">
                 <Button variant="ghost" onClick={onBack} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -180,4 +164,4 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
             </div>
         </div>
     );
-}
+}

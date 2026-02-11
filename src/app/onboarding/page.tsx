@@ -1,24 +1,19 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
-
 export default function OnboardingPage() {
     const { user: clerkUser, isLoaded } = useUser();
     const router = useRouter();
     const [isSyncing, setIsSyncing] = useState(false);
-
     useEffect(() => {
         async function syncUser() {
             if (!isLoaded || !clerkUser || isSyncing) return;
-
             setIsSyncing(true);
             try {
-                // Appeler une API pour créer le user en DB s'il n'existe pas
                 await axios.post('/api/users/sync');
                 toast.success('Profil synchronisé !');
                 router.push('/dashboard');
@@ -29,10 +24,8 @@ export default function OnboardingPage() {
                 setIsSyncing(false);
             }
         }
-
         syncUser();
     }, [isLoaded, clerkUser, router]);
-
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 text-center">
             <div className="mb-8">
@@ -45,4 +38,4 @@ export default function OnboardingPage() {
             <Loader2 className="text-primary h-12 w-12 animate-spin" />
         </div>
     );
-}
+}

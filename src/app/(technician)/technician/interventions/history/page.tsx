@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { ClipboardCheck, Calendar, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 export default function TechnicianHistoryPage() {
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['technician-interventions-history'],
@@ -16,18 +14,15 @@ export default function TechnicianHistoryPage() {
             return data.data;
         },
     });
-
     const historyInterventions = interventions.filter((i: any) =>
         i.status === 'COMPLETED' || i.status === 'CANCELLED'
     );
-
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Historique</h1>
                 <p className="text-muted-foreground">Consultez vos interventions passées et les retours clients.</p>
             </div>
-
             {isLoading ? (
                 <div className="flex h-32 items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -70,4 +65,4 @@ export default function TechnicianHistoryPage() {
             )}
         </div>
     );
-}
+}

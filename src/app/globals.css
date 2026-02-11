@@ -1,100 +1,57 @@
 @import "tailwindcss";
-
 :root {
-    /* Primary - Jaune Poule (from mascot) */
     --primary: 43 96% 58%;
     --primary-foreground: 222 47% 11%;
-
-    /* Secondary - Crème/Beige léger */
     --secondary: 45 40% 96%;
     --secondary-foreground: 222 47% 11%;
-
-    /* Accent - Rouge Atelier (from apron) */
     --accent: 0 84% 60%;
     --accent-foreground: 210 40% 98%;
-
-    /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-
-    /* Backgrounds & Foregrounds */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
-
-    /* Muted */
     --muted: 45 20% 96%;
     --muted-foreground: 215 16% 47%;
-
-    /* Card */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-
-    /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-
-    /* Border & Input & Ring */
     --border: 45 32% 91%;
     --input: 45 32% 91%;
     --ring: 43 96% 58%;
-
-    /* Radius - slightly rounder for a friendlier look */
     --radius: 0.75rem;
-
-    /* Success / Warning */
     --success: 142 76% 36%;
     --success-foreground: 355 7% 97%;
     --warning: 38 92% 50%;
     --warning-foreground: 48 96% 89%;
 }
-
 @media (prefers-color-scheme: dark) {
     :root {
-        /* Primary - Jaune Poule (même que light mode pour cohérence) */
         --primary: 43 96% 58%;
         --primary-foreground: 222 47% 11%;
-
-        /* Secondary - Sombre et chaud */
         --secondary: 30 15% 12%;
         --secondary-foreground: 45 40% 98%;
-
-        /* Accent - Rouge Atelier */
         --accent: 0 84% 60%;
         --accent-foreground: 210 40% 98%;
-
-        /* Destructive */
         --destructive: 0 63% 31%;
         --destructive-foreground: 210 40% 98%;
-
-        /* Backgrounds & Foregrounds - Plus chaud, moins bleu */
         --background: 30 15% 4%;
         --foreground: 45 40% 98%;
-
-        /* Muted */
         --muted: 30 15% 12%;
         --muted-foreground: 30 5% 65%;
-
-        /* Card */
         --card: 30 10% 6%;
         --card-foreground: 45 40% 98%;
-
-        /* Popover */
         --popover: 30 10% 6%;
         --popover-foreground: 45 40% 98%;
-
-        /* Border & Input & Ring */
         --border: 30 15% 15%;
         --input: 30 15% 15%;
         --ring: 43 96% 58%;
-
-        /* Success / Warning */
         --success: 142 71% 45%;
         --success-foreground: 144 61% 20%;
         --warning: 48 96% 53%;
         --warning-foreground: 36 45% 15%;
     }
 }
-
 @theme inline {
     --color-background: hsl(var(--background));
     --color-foreground: hsl(var(--foreground));
@@ -125,11 +82,9 @@
     --radius-xl: calc(var(--radius) + 4px);
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
-
     --animate-fade-in: fade-in 0.3s ease-in-out;
     --animate-slide-in: slide-in-from-bottom 0.3s ease-out;
     --animate-slide-in-right: slide-in-from-right 0.3s ease-out;
-
     @keyframes fade-in {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -143,12 +98,26 @@
         to { opacity: 1; transform: translateX(0); }
     }
 }
-
 * {
     border-color: hsl(var(--border));
 }
-
-body {
-    background: hsl(var(--background));
+.premium-marker {
+    cursor: pointer;
+}
+.premium-popup .maplibregl-popup-content {
+    background: hsl(var(--card));
     color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+.premium-popup .maplibregl-popup-tip {
+    border-top-color: hsl(var(--card));
+}
+.premium-popup .maplibregl-popup-close-button {
+    color: hsl(var(--muted-foreground));
+    padding: 4px;
+    font-size: 16px;
 }

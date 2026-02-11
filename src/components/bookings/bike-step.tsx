@@ -1,20 +1,16 @@
 'use client';
-
 import { useBikes } from '@/hooks/use-bikes';
 import { BikeCard } from '@/components/bikes/bike-card';
 import { Button } from '@/components/ui/button';
 import { Plus, Bike as BikeIcon, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-
 interface BikeStepProps {
     selectedBikeId: string | null;
     onNext: (bikeId: string) => void;
     onBack: () => void;
 }
-
 export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
     const { bikes, isLoading } = useBikes();
-
     if (isLoading) {
         return (
             <div className="flex h-64 flex-col items-center justify-center gap-4">
@@ -23,7 +19,6 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
             </div>
         );
     }
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between border-b pb-4">
@@ -38,7 +33,6 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
                     </Link>
                 </Button>
             </div>
-
             {bikes.length === 0 ? (
                 <div className="bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed py-12 text-center">
                     <BikeIcon className="text-muted-foreground mb-4 h-12 w-12 opacity-20" />
@@ -62,7 +56,6 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
                     ))}
                 </div>
             )}
-
             <div className="flex justify-between pt-6">
                 <Button variant="ghost" onClick={onBack} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -71,4 +64,4 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
             </div>
         </div>
     );
-}
+}

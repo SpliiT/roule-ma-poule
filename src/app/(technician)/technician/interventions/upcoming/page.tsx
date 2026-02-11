@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 export default function TechnicianUpcomingPage() {
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['technician-interventions-upcoming'],
@@ -16,19 +14,15 @@ export default function TechnicianUpcomingPage() {
             return data.data;
         },
     });
-
-    // In a real app, filtering would be done on server
     const upcomingInterventions = interventions.filter((i: any) =>
         new Date(i.scheduledAt) > new Date() && i.status === 'CONFIRMED'
     );
-
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Interventions à venir</h1>
                 <p className="text-muted-foreground">Préparez votre planning pour les prochains jours.</p>
             </div>
-
             {isLoading ? (
                 <div className="flex h-32 items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -68,4 +62,4 @@ export default function TechnicianUpcomingPage() {
             )}
         </div>
     );
-}
+}

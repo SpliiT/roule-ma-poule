@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -21,10 +20,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
-
 export default function AdminCompanyPage() {
     const queryClient = useQueryClient();
-
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -35,7 +32,6 @@ export default function AdminCompanyPage() {
         siret: '',
         logo: '',
     });
-
     const { data: company, isLoading } = useQuery<any>({
         queryKey: ['admin-company'],
         queryFn: async () => {
@@ -43,7 +39,6 @@ export default function AdminCompanyPage() {
             return data.data;
         },
     });
-
     useEffect(() => {
         if (company) {
             setForm({
@@ -58,7 +53,6 @@ export default function AdminCompanyPage() {
             });
         }
     }, [company]);
-
     const saveMutation = useMutation({
         mutationFn: async (data: typeof form) => {
             const { data: result } = await axios.patch('/api/admin/company', data);
@@ -70,11 +64,9 @@ export default function AdminCompanyPage() {
         },
         onError: () => toast.error('Erreur lors de la sauvegarde'),
     });
-
     const handleChange = (field: string, value: string) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
-
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -82,7 +74,6 @@ export default function AdminCompanyPage() {
             </div>
         );
     }
-
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center">
@@ -103,7 +94,6 @@ export default function AdminCompanyPage() {
                     Enregistrer
                 </Button>
             </div>
-
             <div className="grid gap-6 md:grid-cols-3">
                 <Card className="md:col-span-1">
                     <CardHeader>
@@ -126,7 +116,6 @@ export default function AdminCompanyPage() {
                         <p className="text-[10px] text-muted-foreground">Format JPG, PNG ou SVG. Max 2Mo.</p>
                     </CardContent>
                 </Card>
-
                 <Card className="md:col-span-2">
                     <CardHeader>
                         <CardTitle className="text-sm">Informations Générales</CardTitle>
@@ -160,7 +149,6 @@ export default function AdminCompanyPage() {
                     </CardContent>
                 </Card>
             </div>
-
             <Card>
                 <CardHeader>
                     <CardTitle className="text-sm">Coordonnées de Contact</CardTitle>
@@ -218,4 +206,4 @@ export default function AdminCompanyPage() {
             </Card>
         </div>
     );
-}
+}

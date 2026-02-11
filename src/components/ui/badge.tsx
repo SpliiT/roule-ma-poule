@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
     variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning';
 }
-
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     ({ className, variant = 'default', ...props }, ref) => {
         const variants: Record<string, string> = {
@@ -15,7 +13,6 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             success: 'bg-success text-success-foreground',
             warning: 'bg-warning text-warning-foreground',
         };
-
         return (
             <span
                 ref={ref}
@@ -29,7 +26,5 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         );
     }
 );
-
 Badge.displayName = 'Badge';
-
-export { Badge };
+export { Badge };

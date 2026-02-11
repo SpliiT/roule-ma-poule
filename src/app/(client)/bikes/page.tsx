@@ -1,14 +1,11 @@
 'use client';
-
 import { useBikes } from '@/hooks/use-bikes';
 import { Button } from '@/components/ui/button';
 import { BikeCard } from '@/components/bikes/bike-card';
 import { Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-
 export default function BikesPage() {
     const { bikes, isLoading, deleteBike } = useBikes();
-
     return (
         <div className="container mx-auto max-w-5xl py-8">
             <div className="mb-8 flex items-center justify-between">
@@ -25,7 +22,6 @@ export default function BikesPage() {
                     </Link>
                 </Button>
             </div>
-
             {isLoading ? (
                 <div className="flex h-64 items-center justify-center">
                     <Loader2 className="text-primary h-8 w-8 animate-spin" />
@@ -56,4 +52,4 @@ export default function BikesPage() {
             )}
         </div>
     );
-}
+}

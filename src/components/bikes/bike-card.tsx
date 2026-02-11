@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { type Bike, type BikeType } from '@/types/bikes';
 import { Bike as BikeIcon, Zap, Settings2, Trash2 } from 'lucide-react';
-
 interface BikeCardProps {
     bike: Bike;
     onEdit?: (bike: Bike) => void;
@@ -12,7 +11,6 @@ interface BikeCardProps {
     onSelect?: (bike: Bike) => void;
     isSelected?: boolean;
 }
-
 const bikeTypeLabels: Record<BikeType, string> = {
     CITY: 'Urbain',
     VTT: 'VTT',
@@ -23,7 +21,6 @@ const bikeTypeLabels: Record<BikeType, string> = {
     FOLDING: 'Pliant',
     OTHER: 'Autre',
 };
-
 export function BikeCard({
     bike,
     onEdit,
@@ -63,7 +60,6 @@ export function BikeCard({
                     </div>
                 </div>
             </CardHeader>
-
             <CardContent className="pb-4 pt-2">
                 {bike.year && (
                     <p className="text-sm text-muted-foreground">
@@ -71,7 +67,6 @@ export function BikeCard({
                     </p>
                 )}
             </CardContent>
-
             {!isSelectable && (
                 <CardFooter className="flex justify-end space-x-2 border-t pt-4">
                     <Button
@@ -100,10 +95,9 @@ export function BikeCard({
                     </Button>
                 </CardFooter>
             )}
-
             {isSelected && (
                 <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary ring-4 ring-primary/20" />
             )}
         </Card>
     );
-}
+}

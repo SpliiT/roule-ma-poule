@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,13 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Check, ArrowLeft, Loader2, Settings } from 'lucide-react';
 import type { Forfait, Product } from '@prisma/client';
-
 interface ServiceStepProps {
     selectedServiceId: string | null;
     onNext: (serviceId: string) => void;
     onBack: () => void;
 }
-
 export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepProps) {
     const { data: forfaits = [], isLoading } = useQuery<Forfait[]>({
         queryKey: ['forfaits'],
@@ -22,7 +19,6 @@ export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepPr
             return data.data;
         },
     });
-
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -30,14 +26,12 @@ export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepPr
             </div>
         );
     }
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
                 <Settings className="text-primary h-5 w-5" />
                 <h2 className="text-xl font-semibold">Choisissez votre forfait</h2>
             </div>
-
             <div className="grid gap-4 md:grid-cols-2">
                 {forfaits.map((forfait) => (
                     <Card
@@ -64,7 +58,6 @@ export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepPr
                     </Card>
                 ))}
             </div>
-
             <div className="flex justify-between pt-6">
                 <Button variant="ghost" onClick={onBack} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -73,4 +66,4 @@ export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepPr
             </div>
         </div>
     );
-}
+}

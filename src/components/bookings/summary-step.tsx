@@ -1,5 +1,4 @@
 'use client';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,14 +6,12 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, ArrowLeft, Loader2, Bike, Settings, Calendar, MapPin, Package, Euro } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 interface SelectedProduct {
     productId: string;
     quantity: number;
     name: string;
     price: number;
 }
-
 interface SummaryStepProps {
     data: {
         address: any;
@@ -31,20 +28,17 @@ interface SummaryStepProps {
     onConfirm: () => void;
     isSubmitting: boolean;
 }
-
 export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting }: SummaryStepProps) {
     const products = data.products || [];
     const forfaitPrice = data.servicePrice || 0;
     const productsTotal = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const displayTotal = totalPrice ?? (forfaitPrice + productsTotal);
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
                 <CheckCircle2 className="text-green-500 h-5 w-5" />
                 <h2 className="text-xl font-semibold">Récapitulatif de votre commande</h2>
             </div>
-
             <div className="grid gap-6">
                 <div className="space-y-4">
                     <div className="flex items-start gap-4">
@@ -58,9 +52,7 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                             </p>
                         </div>
                     </div>
-
                     <Separator />
-
                     <div className="flex items-start gap-4">
                         <div className="bg-primary/10 rounded-full p-2">
                             <Settings className="text-primary h-5 w-5" />
@@ -77,9 +69,7 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                             </p>
                         </div>
                     </div>
-
                     <Separator />
-
                     <div className="flex items-start gap-4">
                         <div className="bg-primary/10 rounded-full p-2">
                             <Calendar className="text-primary h-5 w-5" />
@@ -93,7 +83,6 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                             </p>
                         </div>
                     </div>
-
                     {products.length > 0 && (
                         <>
                             <Separator />
@@ -120,8 +109,7 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                         </>
                     )}
                 </div>
-
-                {/* Total + bouton de confirmation */}
+                {}
                 <Card className="bg-muted/50 border-0">
                     <CardContent className="p-4">
                         {displayTotal > 0 && (
@@ -149,7 +137,6 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
                     </CardContent>
                 </Card>
             </div>
-
             <div className="flex justify-between pt-6">
                 <Button variant="ghost" onClick={onBack} disabled={isSubmitting} className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
@@ -158,4 +145,4 @@ export function SummaryStep({ data, totalPrice, onBack, onConfirm, isSubmitting 
             </div>
         </div>
     );
-}
+}

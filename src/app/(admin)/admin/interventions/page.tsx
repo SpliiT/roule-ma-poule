@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -35,7 +34,6 @@ import { fr } from 'date-fns/locale';
 import { AssignTechnicianDialog } from '@/components/admin/assign-technician-dialog';
 import { CreateInterventionDialog } from '@/components/admin/create-intervention-dialog';
 import { toast } from 'sonner';
-
 export default function AdminInterventionsPage() {
     const queryClient = useQueryClient();
     const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -43,7 +41,6 @@ export default function AdminInterventionsPage() {
     const [selectedIntervention, setSelectedIntervention] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
-
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['admin-interventions-list'],
         queryFn: async () => {
@@ -51,7 +48,6 @@ export default function AdminInterventionsPage() {
             return data.data;
         },
     });
-
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }: { id: string; status: string }) => {
             return axios.patch(`/api/admin/interventions/${id}`, { status });
@@ -62,7 +58,6 @@ export default function AdminInterventionsPage() {
         },
         onError: () => toast.error('Erreur lors de la mise à jour'),
     });
-
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'PENDING':
@@ -79,7 +74,6 @@ export default function AdminInterventionsPage() {
                 return <Badge>{status}</Badge>;
         }
     };
-
     const handleExportCSV = async () => {
         try {
             const params = new URLSearchParams();
@@ -97,7 +91,6 @@ export default function AdminInterventionsPage() {
             toast.error('Erreur lors de l\'export');
         }
     };
-
     const filteredInterventions = interventions.filter((i: any) => {
         if (statusFilter !== 'ALL' && i.status !== statusFilter) return false;
         if (searchQuery) {
@@ -109,7 +102,6 @@ export default function AdminInterventionsPage() {
         }
         return true;
     });
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -128,7 +120,6 @@ export default function AdminInterventionsPage() {
                     </Button>
                 </div>
             </div>
-
             <Card className="border-2 border-primary/5 shadow-xl">
                 <CardHeader className="pb-3 border-b">
                     <div className="flex items-center gap-4">
@@ -285,7 +276,6 @@ export default function AdminInterventionsPage() {
                     )}
                 </CardContent>
             </Card>
-
             {selectedIntervention && (
                 <AssignTechnicianDialog
                     open={assignDialogOpen}
@@ -293,11 +283,10 @@ export default function AdminInterventionsPage() {
                     intervention={selectedIntervention}
                 />
             )}
-
             <CreateInterventionDialog
                 open={createDialogOpen}
                 onOpenChange={setCreateDialogOpen}
             />
         </div>
     );
-}
+}

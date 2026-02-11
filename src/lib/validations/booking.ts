@@ -1,9 +1,4 @@
 import { z } from 'zod';
-
-// ============================================
-// BOOKING VALIDATION SCHEMAS
-// ============================================
-
 export const addressSchema = z.object({
     street: z.string().min(3, 'Adresse requise (min. 3 caractères)'),
     addressComplement: z.string().optional(),
@@ -12,7 +7,6 @@ export const addressSchema = z.object({
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
 });
-
 export const bookingSchema = z.object({
     address: z.string().min(3, 'Adresse requise'),
     addressComplement: z.string().optional(),
@@ -26,6 +20,5 @@ export const bookingSchema = z.object({
     clientNotes: z.string().max(1000, 'Notes trop longues (max 1000 caractères)').optional(),
     productIds: z.array(z.string()).optional(),
 });
-
 export type BookingFormValues = z.infer<typeof bookingSchema>;
-export type AddressFormValues = z.infer<typeof addressSchema>;
+export type AddressFormValues = z.infer<typeof addressSchema>;

@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
@@ -13,26 +12,22 @@ import {
     ClipboardList,
     User as UserIcon,
 } from 'lucide-react';
-
 const navItems = [
     { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Réserver', href: '/bookings/new', icon: CalendarPlus },
     { label: 'Mes vélos', href: '/bikes', icon: Bike },
     { label: 'Mon profil', href: '/profile', icon: UserIcon },
 ];
-
 interface ClientSidebarProps {
     user: User;
 }
-
 export function ClientSidebar({ user }: ClientSidebarProps) {
     const pathname = usePathname();
-
     return (
         <>
-            {/* Desktop sidebar */}
+            {}
             <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r border-border bg-card">
-                {/* Logo */}
+                {}
                 <div className="flex h-16 items-center gap-2 border-b border-border px-6">
                     <Image
                         src="/images/logo.png"
@@ -45,8 +40,7 @@ export function ClientSidebar({ user }: ClientSidebarProps) {
                         Roule Ma Poule
                     </span>
                 </div>
-
-                {/* Navigation */}
+                {}
                 <nav className="flex-1 space-y-1 p-4">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -68,8 +62,7 @@ export function ClientSidebar({ user }: ClientSidebarProps) {
                         );
                     })}
                 </nav>
-
-                {/* User */}
+                {}
                 <div className="border-t border-border p-4">
                     <div className="flex items-center gap-3">
                         <UserButton afterSignOutUrl="/" />
@@ -84,8 +77,7 @@ export function ClientSidebar({ user }: ClientSidebarProps) {
                     </div>
                 </div>
             </aside>
-
-            {/* Mobile bottom nav */}
+            {}
             <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card">
                 <div className="flex items-center justify-around py-2">
                     {navItems.slice(0, 4).map((item) => {
@@ -114,4 +106,4 @@ export function ClientSidebar({ user }: ClientSidebarProps) {
             </nav>
         </>
     );
-}
+}

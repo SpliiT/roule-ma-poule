@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-
-/**
- * GET /api/admin/interventions — list all interventions.
- * POST /api/admin/interventions — create a new intervention from admin panel.
- */
 export async function GET() {
     try {
         await requireRole('ADMIN');
@@ -25,7 +20,6 @@ export async function GET() {
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
 }
-
 export async function POST(req: Request) {
     try {
         await requireRole('ADMIN');
@@ -44,20 +38,16 @@ export async function POST(req: Request) {
             scheduledAt,
             clientNotes,
         } = body;
-
         if (!clientId || !forfaitId || !bikeId || !address || !postalCode || !city || !scheduledAt) {
             return NextResponse.json(
                 { error: 'Champs obligatoires manquants (client, forfait, vélo, adresse, date)' },
                 { status: 400 }
             );
         }
-
-        // Get forfait to calculate price and duration
         const forfait = await prisma.forfait.findUnique({ where: { id: forfaitId } });
         if (!forfait) {
             return NextResponse.json({ error: 'Forfait introuvable' }, { status: 404 });
         }
-
         const intervention = await prisma.intervention.create({
             data: {
                 clientId,
@@ -83,10 +73,9 @@ export async function POST(req: Request) {
                 bike: { select: { id: true, brand: true, model: true } },
             },
         });
-
         return NextResponse.json({ data: intervention });
     } catch (error) {
         console.error('POST admin intervention error:', error);
         return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 });
     }
-}
+}

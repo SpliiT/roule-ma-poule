@@ -1,16 +1,10 @@
 import axios from 'axios';
-
 const MAPTILER_API_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
-
 export interface RouteData {
-    coordinates: [number, number][]; // [lng, lat]
-    distance: number; // en mètres
-    duration: number; // en secondes
+    coordinates: [number, number][];
+    distance: number;
+    duration: number;
 }
-
-/**
- * Service pour calculer des itinéraires via l'API MapTiler.
- */
 export async function getDrivingRoute(
     start: [number, number],
     end: [number, number]
@@ -18,17 +12,13 @@ export async function getDrivingRoute(
     if (!MAPTILER_API_KEY) {
         throw new Error('API Key MapTiler manquante');
     }
-
-    const url = `https://api.maptiler.com/routing/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}.json?key=${MAPTILER_API_KEY}&alternatives=false&geometries=geojson&overview=full`;
-
+    const url = `https://api.maptiler.com/routing/v1/driving/${start.join(',')};${end.join(',')}.json?key=${MAPTILER_API_KEY}`;
     try {
         const response = await axios.get(url);
         const route = response.data.features[0];
-
         if (!route) {
             throw new Error('Aucun itinéraire trouvé');
         }
-
         return {
             coordinates: route.geometry.coordinates,
             distance: route.properties.distance,

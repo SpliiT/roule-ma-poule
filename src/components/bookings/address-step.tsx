@@ -1,5 +1,4 @@
 'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addressFormSchema, type AddressFormFormValues } from '../../lib/validations/auth';
@@ -8,11 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MapPin, Search } from 'lucide-react';
 import { GoogleAddressAutocomplete } from '@/components/maps/google-address-autocomplete';
-
 interface AddressStepProps {
     onNext: (address: AddressFormFormValues) => void;
 }
-
 export function AddressStep({ onNext }: AddressStepProps) {
     const form = useForm<AddressFormFormValues>({
         resolver: zodResolver(addressFormSchema),
@@ -27,11 +24,9 @@ export function AddressStep({ onNext }: AddressStepProps) {
             addressComplement: '',
         },
     });
-
     const onSubmit = (values: AddressFormFormValues) => {
         onNext(values);
     };
-
     const handleAddressSelect = (address: {
         street: string;
         city: string;
@@ -45,14 +40,12 @@ export function AddressStep({ onNext }: AddressStepProps) {
         form.setValue('latitude', address.latitude);
         form.setValue('longitude', address.longitude);
     };
-
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 border-b pb-4">
                 <MapPin className="text-primary h-5 w-5" />
                 <h2 className="text-xl font-semibold">Où doit-on intervenir ?</h2>
             </div>
-
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <FormField
@@ -72,7 +65,6 @@ export function AddressStep({ onNext }: AddressStepProps) {
                             </FormItem>
                         )}
                     />
-
                     <div className="grid gap-4 sm:grid-cols-2">
                         <FormField
                             control={form.control}
@@ -101,13 +93,11 @@ export function AddressStep({ onNext }: AddressStepProps) {
                             )}
                         />
                     </div>
-
                     <div className="bg-muted/30 rounded-lg border p-4">
                         <p className="text-muted-foreground text-sm">
                             Note: Pour le moment, nous intervenons uniquement sur la métropole de Lyon.
                         </p>
                     </div>
-
                     <div className="flex justify-end pt-4">
                         <Button type="submit" className="gap-2">
                             Continuer
@@ -118,4 +108,4 @@ export function AddressStep({ onNext }: AddressStepProps) {
             </Form>
         </div>
     );
-}
+}

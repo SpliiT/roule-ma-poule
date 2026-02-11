@@ -1,5 +1,4 @@
 'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bikeSchema, type BikeFormValues } from '@/lib/validations/auth';
@@ -28,11 +27,9 @@ import { BIKE_TYPES } from '@/types/bikes';
 import { ArrowLeft, Loader2, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
-
 export default function AddBikePage() {
     const router = useRouter();
     const { createBike, isCreating } = useBikes();
-
     const form = useForm<BikeFormValues>({
         resolver: zodResolver(bikeSchema),
         defaultValues: {
@@ -44,7 +41,6 @@ export default function AddBikePage() {
             photoUrl: '',
         },
     });
-
     async function onSubmit(values: BikeFormValues) {
         try {
             await createBike(values);
@@ -53,7 +49,6 @@ export default function AddBikePage() {
             console.error(error);
         }
     }
-
     return (
         <div className="container mx-auto max-w-2xl py-8">
             <div className="mb-6">
@@ -66,7 +61,6 @@ export default function AddBikePage() {
                 <h1 className="text-3xl font-bold tracking-tight">Ajouter un vélo</h1>
                 <p className="text-muted-foreground">Renseignez les détails de votre monture.</p>
             </div>
-
             <Card>
                 <CardHeader>
                     <CardTitle>Informations du vélo</CardTitle>
@@ -102,7 +96,6 @@ export default function AddBikePage() {
                                     )}
                                 />
                             </div>
-
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <FormField
                                     control={form.control}
@@ -150,7 +143,6 @@ export default function AddBikePage() {
                                     )}
                                 />
                             </div>
-
                             <FormField
                                 control={form.control}
                                 name="isElectric"
@@ -171,7 +163,6 @@ export default function AddBikePage() {
                                     </FormItem>
                                 )}
                             />
-
                             <FormField
                                 control={form.control}
                                 name="photoUrl"
@@ -205,7 +196,6 @@ export default function AddBikePage() {
                                     </FormItem>
                                 )}
                             />
-
                             <div className="flex justify-end pt-4">
                                 <Button type="submit" className="w-full gap-2 sm:w-auto" disabled={isCreating}>
                                     {isCreating ? (
@@ -222,4 +212,4 @@ export default function AddBikePage() {
             </Card>
         </div>
     );
-}
+}

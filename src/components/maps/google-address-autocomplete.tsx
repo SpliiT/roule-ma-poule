@@ -1,15 +1,10 @@
 'use client';
-
 import { useEffect, useRef, useState } from 'react';
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
 interface GoogleAddressAutocompleteProps {
-    /**
-     * Callback appelé lors de la sélection d'une adresse validée.
-     */
     onAddressSelect: (address: {
         street: string;
         city: string;
@@ -17,20 +12,9 @@ interface GoogleAddressAutocompleteProps {
         latitude: number;
         longitude: number;
     }) => void;
-    /**
-     * Valeur par défaut pour l'input.
-     */
     defaultValue?: string;
-    /**
-     * Classes CSS additionnelles pour l'input.
-     */
     className?: string;
 }
-
-/**
- * Composant d'autocomplétion d'adresse utilisant l'API Google Maps Places.
- * Permet une validation robuste de l'adresse et récupère les coordonnées GPS.
- */
 export function GoogleAddressAutocomplete({
     onAddressSelect,
     defaultValue = '',
@@ -42,16 +26,13 @@ export function GoogleAddressAutocomplete({
     const [isValidated, setIsValidated] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [showPredictions, setShowPredictions] = useState(false);
-
     const autocompleteSuggestionRef = useRef<any>(null);
     const sessionTokenRef = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-
     const onAddressSelectRef = useRef(onAddressSelect);
     useEffect(() => {
         onAddressSelectRef.current = onAddressSelect;
     }, [onAddressSelect]);
-
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -61,21 +42,18 @@ export function GoogleAddressAutocomplete({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
     useEffect(() => {
         const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
         if (!apiKey || apiKey.includes('XXXXX')) return;
-
         setOptions({
             key: apiKey,
             v: 'weekly',
             language: 'fr',
         });
-
         const initGoogle = async () => {
             try {
                 const { AutocompleteSuggestion, AutocompleteSessionToken } = await importLibrary('places') as any;
-                autocompleteSuggestionRef.current = AutocompleteSuggestion; // On garde la classe pour les méthodes statiques
+                autocompleteSuggestionRef.current = AutocompleteSuggestion; 
                 sessionTokenRef.current = new AutocompleteSessionToken();
                 console.log('Google Places API (New) fully loaded');
                 setIsLoaded(true);
@@ -83,30 +61,25 @@ export function GoogleAddressAutocomplete({
                 console.error('Failed to init Google Places New:', err);
             }
         };
-
         initGoogle();
     }, []);
-
     const fetchPredictions = async (input: string) => {
         if (!input || input.length < 2 || !autocompleteSuggestionRef.current) {
             setPredictions([]);
             return;
         }
-
         try {
             const request = {
                 input,
                 sessionToken: sessionTokenRef.current,
                 locationRestriction: {
-                    north: 45.81,
-                    south: 45.73,
-                    east: 4.93,
-                    west: 4.79,
+                    north: 46.05,
+                    south: 45.45,
+                    east: 5.15,
+                    west: 4.48,
                 },
                 includedRegionCodes: ['fr']
             };
-
-            // Méthode statique de l'API New (AutocompleteSuggestion.fetchAutocompleteSuggestions)
             const { suggestions } = await autocompleteSuggestionRef.current.fetchAutocompleteSuggestions(request);
             setPredictions(suggestions || []);
             setShowPredictions(true);
@@ -115,34 +88,28 @@ export function GoogleAddressAutocomplete({
             setPredictions([]);
         }
     };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setInputValue(val);
         setIsValidated(false);
         fetchPredictions(val);
     };
-
     const handleSelectPrediction = async (suggestion: any) => {
         const place = suggestion.placePrediction?.toPlace();
         if (!place) return;
-
         setIsSearching(true);
         setShowPredictions(false);
         setInputValue(suggestion.placePrediction?.text?.text || '');
-
         try {
             console.log('Fetching details for:', place.id);
             await place.fetchFields({
                 fields: ['addressComponents', 'location', 'formattedAddress', 'displayName']
             });
-
             const components = place.addressComponents || [];
             let streetNumber = '';
             let route = '';
             let city = '';
             let postalCode = '';
-
             components.forEach((component: any) => {
                 const types = component.types;
                 if (types.includes('street_number')) streetNumber = component.longText;
@@ -150,11 +117,9 @@ export function GoogleAddressAutocomplete({
                 if (types.includes('locality')) city = component.longText;
                 if (types.includes('postal_code')) postalCode = component.longText;
             });
-
             const streetFromComponents = `${streetNumber} ${route}`.trim();
             const name = place.displayName || '';
             const streetValue = streetFromComponents || name || (place.formattedAddress?.split(',')[0].trim()) || '';
-
             const details = {
                 street: streetValue,
                 city: city || 'Lyon',
@@ -162,12 +127,10 @@ export function GoogleAddressAutocomplete({
                 latitude: place.location?.lat() || 0,
                 longitude: place.location?.lng() || 0,
             };
-
             console.log('Address validated manually (Truly New API):', details);
             setInputValue(place.formattedAddress || streetValue);
             setIsValidated(true);
             onAddressSelectRef.current(details);
-
             const { AutocompleteSessionToken } = await importLibrary('places') as any;
             sessionTokenRef.current = new AutocompleteSessionToken();
         } catch (err) {
@@ -177,7 +140,6 @@ export function GoogleAddressAutocomplete({
             setIsSearching(false);
         }
     };
-
     return (
         <div ref={containerRef} className="relative w-full space-y-1">
             <div className="relative">
@@ -190,19 +152,16 @@ export function GoogleAddressAutocomplete({
                     disabled={!isLoaded || isSearching}
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
                 {isSearching && (
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
                 )}
-
                 {!isSearching && isValidated && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
                     </div>
                 )}
             </div>
-
-            {/* Liste des prédictions */}
+            {}
             {showPredictions && predictions.length > 0 && (
                 <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto overflow-x-hidden py-1">
                     {predictions.map((p, idx) => (
@@ -219,7 +178,6 @@ export function GoogleAddressAutocomplete({
                     ))}
                 </div>
             )}
-
             {isValidated && (
                 <div className="flex items-center gap-1.5 text-[10px] text-green-500 font-medium px-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -234,4 +192,4 @@ export function GoogleAddressAutocomplete({
             )}
         </div>
     );
-}
+}

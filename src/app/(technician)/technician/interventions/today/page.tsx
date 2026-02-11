@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,27 +7,23 @@ import { Clock, MapPin, Calendar, CheckCircle2, Navigation } from 'lucide-react'
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-
 export default function TechnicianTodayPage() {
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['technician-interventions-today'],
         queryFn: async () => {
             const { data } = await axios.get('/api/bookings/technician');
-            return data.data; // Note: In real app, API would filter by today
+            return data.data; 
         },
     });
-
     const todayInterventions = interventions.filter((i: any) =>
         i.status !== 'COMPLETED' && i.status !== 'CANCELLED'
     );
-
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Interventions d'aujourd'hui</h1>
                 <p className="text-muted-foreground">Liste complète de vos rendez-vous pour la journée.</p>
             </div>
-
             {isLoading ? (
                 <div className="flex h-32 items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -88,4 +83,4 @@ export default function TechnicianTodayPage() {
             )}
         </div>
     );
-}
+}

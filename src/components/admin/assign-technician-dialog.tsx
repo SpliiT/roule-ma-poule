@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -17,13 +16,11 @@ import { Loader2, UserCheck, MapPin, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 interface AssignTechnicianDialogProps {
     intervention: any;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
-
 export function AssignTechnicianDialog({
     intervention,
     open,
@@ -31,8 +28,6 @@ export function AssignTechnicianDialog({
 }: AssignTechnicianDialogProps) {
     const queryClient = useQueryClient();
     const [selectedTechId, setSelectedTechId] = useState<string | null>(null);
-
-    // Récupérer la liste des techniciens
     const { data: technicians = [], isLoading: loadingTechs } = useQuery({
         queryKey: ['admin-technicians'],
         queryFn: async () => {
@@ -41,8 +36,6 @@ export function AssignTechnicianDialog({
         },
         enabled: open,
     });
-
-    // Mutation pour assigner
     const assignMutation = useMutation({
         mutationFn: async (techId: string) => {
             return axios.patch(`/api/admin/interventions/${intervention.id}`, {
@@ -59,7 +52,6 @@ export function AssignTechnicianDialog({
             toast.error("Erreur lors de l'assignation");
         },
     });
-
     const handleConfirm = () => {
         if (!selectedTechId) {
             toast.error('Veuillez sélectionner un technicien');
@@ -67,9 +59,7 @@ export function AssignTechnicianDialog({
         }
         assignMutation.mutate(selectedTechId);
     };
-
     if (!intervention) return null;
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
@@ -82,9 +72,8 @@ export function AssignTechnicianDialog({
                         Sélectionnez un technicien pour l'intervention de <strong>{intervention.client.name}</strong>.
                     </DialogDescription>
                 </DialogHeader>
-
                 <div className="space-y-4 py-4">
-                    {/* Détails de l'intervention */}
+                    {}
                     <div className="bg-muted/50 p-4 rounded-lg border border-primary/10 space-y-2">
                         <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 text-primary" />
@@ -100,7 +89,6 @@ export function AssignTechnicianDialog({
                             {intervention.forfait.name}
                         </Badge>
                     </div>
-
                     <div className="space-y-2">
                         <h4 className="text-sm font-bold uppercase italic tracking-wider text-muted-foreground">Techniciens disponibles</h4>
                         {loadingTechs ? (
@@ -140,7 +128,6 @@ export function AssignTechnicianDialog({
                         )}
                     </div>
                 </div>
-
                 <DialogFooter className="gap-2 sm:gap-0">
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
                         Annuler
@@ -157,4 +144,4 @@ export function AssignTechnicianDialog({
             </DialogContent>
         </Dialog>
     );
-}
+}

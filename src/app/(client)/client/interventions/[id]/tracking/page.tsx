@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -9,31 +8,26 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Bike, Clock, MapPin, Phone } from 'lucide-react';
-
 export default function ClientTrackingPage() {
     const { id } = useParams();
     const router = useRouter();
     const [lastLoc, setLastLoc] = useState<[number, number] | null>(null);
-
     const { data: tracking, isLoading, error } = useQuery({
         queryKey: ['intervention-tracking', id],
         queryFn: async () => {
             const { data } = await axios.get(`/api/interventions/tracking/${id}`);
             return data;
         },
-        refetchInterval: 5000, // Poll every 5 seconds
+        refetchInterval: 5000, 
     });
-
     useEffect(() => {
         if (tracking?.location?.lng && tracking?.location?.lat) {
             setLastLoc([tracking.location.lng, tracking.location.lat]);
         }
     }, [tracking]);
-
     if (isLoading) {
         return <div className="h-screen flex items-center justify-center font-black italic uppercase text-primary animate-pulse">Recherche du technicien...</div>;
     }
-
     if (error || (tracking && !tracking.trackingActive)) {
         return (
             <div className="h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
@@ -46,17 +40,15 @@ export default function ClientTrackingPage() {
             </div>
         );
     }
-
     return (
         <div className="h-screen w-screen flex flex-col bg-background overflow-hidden relative">
-            {/* Header */}
+            {}
             <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
                 <Button variant="secondary" size="icon" onClick={() => router.back()} className="rounded-full shadow-lg border-2 border-primary/20">
                     <ChevronLeft className="h-5 w-5" />
                 </Button>
             </div>
-
-            {/* Map Tracking */}
+            {}
             <div className="flex-1 relative">
                 <MapView
                     center={lastLoc || [tracking.targetLocation.lng, tracking.targetLocation.lat]}
@@ -68,8 +60,7 @@ export default function ClientTrackingPage() {
                     ]}
                     className="h-full w-full"
                 />
-
-                {/* Info Card "Uber Eats" style */}
+                {}
                 <div className="absolute bottom-8 left-4 right-4 md:left-4 md:right-auto md:w-96 bg-background/95 backdrop-blur-md border-4 border-primary rounded-3xl shadow-2xl z-50 overflow-hidden transform animate-in slide-in-from-bottom-8">
                     <div className="bg-primary p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -83,7 +74,6 @@ export default function ClientTrackingPage() {
                         </div>
                         <Badge className="bg-background text-primary hover:bg-background/90 font-black italic uppercase">À VÉLO</Badge>
                     </div>
-
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-4">
@@ -102,7 +92,6 @@ export default function ClientTrackingPage() {
                                 <Phone className="h-5 w-5 text-primary" />
                             </Button>
                         </div>
-
                         <div className="space-y-4 border-t pt-6 border-primary/5">
                             <div className="flex items-start gap-4">
                                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
@@ -124,4 +113,4 @@ export default function ClientTrackingPage() {
             </div>
         </div>
     );
-}
+}

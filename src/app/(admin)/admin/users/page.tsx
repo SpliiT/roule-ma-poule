@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -29,10 +28,8 @@ import {
     Eye
 } from 'lucide-react';
 import { toast } from 'sonner';
-
 export default function AdminUsersPage() {
     const queryClient = useQueryClient();
-
     const { data: users = [], isLoading } = useQuery({
         queryKey: ['admin-users-list'],
         queryFn: async () => {
@@ -40,7 +37,6 @@ export default function AdminUsersPage() {
             return data.data;
         },
     });
-
     const updateMutation = useMutation({
         mutationFn: async ({ id, data }: { id: string, data: any }) => {
             return axios.patch(`/api/admin/users/${id}`, data);
@@ -51,7 +47,6 @@ export default function AdminUsersPage() {
         },
         onError: () => toast.error('Erreur lors de la mise à jour'),
     });
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -64,7 +59,6 @@ export default function AdminUsersPage() {
                     Inviter un utilisateur
                 </Button>
             </div>
-
             <Card className="border-2 border-primary/5 shadow-xl">
                 <CardHeader className="border-b bg-muted/30">
                     <div className="relative">
@@ -118,7 +112,6 @@ export default function AdminUsersPage() {
                                                 Depuis le {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                                             </span>
                                         </div>
-
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-primary/20 hover:border-primary/20 border border-transparent transition-all">
@@ -128,7 +121,6 @@ export default function AdminUsersPage() {
                                             <DropdownMenuContent align="end" className="w-64 border-2 shadow-xl">
                                                 <DropdownMenuLabel className="font-black italic uppercase text-[10px] tracking-widest text-muted-foreground py-2">Gestion utilisateur</DropdownMenuLabel>
                                                 <DropdownMenuSeparator />
-
                                                 <DropdownMenuItem asChild className="gap-2 focus:bg-primary/10 focus:text-primary cursor-pointer font-bold py-2.5">
                                                     <Link href={`/admin/users/${user.id}`}>
                                                         <Eye className="h-4 w-4" />
@@ -136,7 +128,6 @@ export default function AdminUsersPage() {
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-
                                                 {user.role !== 'TECHNICIEN' && user.role !== 'ADMIN' && (
                                                     <DropdownMenuItem
                                                         className="gap-2 focus:bg-blue-500/10 focus:text-blue-500 cursor-pointer font-bold py-2.5"
@@ -146,7 +137,6 @@ export default function AdminUsersPage() {
                                                         Nommer Technicien
                                                     </DropdownMenuItem>
                                                 )}
-
                                                 {user.role === 'TECHNICIEN' && (
                                                     <DropdownMenuItem
                                                         className="gap-2 focus:bg-orange-500/10 focus:text-orange-500 cursor-pointer font-bold py-2.5"
@@ -156,9 +146,7 @@ export default function AdminUsersPage() {
                                                         Retirer rôle Technicien
                                                     </DropdownMenuItem>
                                                 )}
-
                                                 <DropdownMenuSeparator />
-
                                                 {user.isActive ? (
                                                     <DropdownMenuItem
                                                         className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold py-2.5"
@@ -191,4 +179,4 @@ export default function AdminUsersPage() {
             </Card>
         </div>
     );
-}
+}

@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -22,16 +21,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
-
 export function CreateInterventionDialog({ open, onOpenChange }: Props) {
     const queryClient = useQueryClient();
-
-    // Form state
     const [clientId, setClientId] = useState('');
     const [forfaitId, setForfaitId] = useState('');
     const [bikeId, setBikeId] = useState('');
@@ -45,8 +40,6 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
     const [clientNotes, setClientNotes] = useState('');
-
-    // Fetch all users once
     const { data: users = [], isLoading: isLoadingUsers } = useQuery<any[]>({
         queryKey: ['admin-users-all'],
         queryFn: async () => {
@@ -62,10 +55,8 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
         },
         enabled: open,
     });
-
     const clients = users.filter((u: any) => u.role === 'CLIENT');
     const technicians = users.filter((u: any) => u.role === 'TECHNICIEN');
-
     const { data: forfaits = [] } = useQuery<any[]>({
         queryKey: ['forfaits'],
         queryFn: async () => {
@@ -74,8 +65,6 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
         },
         enabled: open,
     });
-
-    // Fetch bikes for selected client
     const { data: bikes = [] } = useQuery<any[]>({
         queryKey: ['client-bikes', clientId],
         queryFn: async () => {
@@ -85,12 +74,9 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
         },
         enabled: open && !!clientId,
     });
-
-    // Reset bike when client changes
     useEffect(() => {
         setBikeId('');
     }, [clientId]);
-
     const createMutation = useMutation({
         mutationFn: async (payload: any) => {
             return axios.post('/api/admin/interventions', payload);
@@ -105,7 +91,6 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
             toast.error(err.response?.data?.error || 'Erreur lors de la création');
         },
     });
-
     const resetForm = () => {
         setClientId('');
         setForfaitId('');
@@ -121,27 +106,20 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
         setLongitude(0);
         setClientNotes('');
     };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validation plus précise
         const missingFields = [];
         if (!clientId) missingFields.push('Client');
         if (!forfaitId) missingFields.push('Forfait');
         if (!bikeId) missingFields.push('Vélo');
         if (!scheduledAt) missingFields.push('Date/Heure');
         if (!address) missingFields.push('Adresse');
-
-        // On peut être plus souple sur CP/Ville si l'adresse est là, mais Prisma les veut
-        const finalPostalCode = postalCode || '69000'; // Fallback Lyon générique si sélection incomplète
+        const finalPostalCode = postalCode || '69000'; 
         const finalCity = city || 'Lyon';
-
         if (missingFields.length > 0) {
             toast.error(`Champs manquants : ${missingFields.join(', ')}`);
             return;
         }
-
         const payload = {
             clientId,
             forfaitId,
@@ -155,11 +133,9 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
             longitude,
             clientNotes: clientNotes || null,
         };
-
         console.log('Submitting intervention:', payload);
         createMutation.mutate(payload);
     };
-
     const handleAddressSelect = useCallback((details: any) => {
         console.log('Address selected details:', details);
         setAddress(details.street);
@@ -168,9 +144,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
         setLatitude(details.latitude);
         setLongitude(details.longitude);
     }, []);
-
     const selectedForfait = forfaits.find((f: any) => f.id === forfaitId);
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -183,9 +157,8 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                         Créez une intervention manuellement pour un client.
                     </DialogDescription>
                 </DialogHeader>
-
                 <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-                    {/* Client */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <User className="h-3 w-3" /> Client *
@@ -204,8 +177,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             ))}
                         </select>
                     </div>
-
-                    {/* Bike (depends on client) */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <Bike className="h-3 w-3" /> Vélo *
@@ -231,8 +203,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             ))}
                         </select>
                     </div>
-
-                    {/* Forfait */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <Wrench className="h-3 w-3" /> Forfait *
@@ -258,8 +229,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             </p>
                         )}
                     </div>
-
-                    {/* Technician (optional) */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <User className="h-3 w-3" /> Technicien (optionnel)
@@ -277,8 +247,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             ))}
                         </select>
                     </div>
-
-                    {/* Date/Time Premium */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <CalendarIcon className="h-3 w-3" /> Date et heure *
@@ -311,7 +280,6 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                                     />
                                 </PopoverContent>
                             </Popover>
-
                             <div className="flex items-center gap-1 border rounded-md px-2 bg-background">
                                 <Clock className="h-4 w-4 text-muted-foreground" />
                                 <Select value={selectedHour} onValueChange={setSelectedHour}>
@@ -342,8 +310,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             </div>
                         </div>
                     </div>
-
-                    {/* Address */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold flex items-center gap-1">
                             <MapPin className="h-3 w-3" /> Adresse *
@@ -353,8 +320,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             defaultValue={address}
                         />
                     </div>
-
-                    {/* Feedback visuel de l'adresse */}
+                    {}
                     <div className="min-h-[40px]">
                         {(city || postalCode || address) ? (
                             <div className="px-3 py-2 bg-green-500/5 rounded border border-green-500/20 flex flex-col gap-1 text-[11px]">
@@ -373,8 +339,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             </div>
                         )}
                     </div>
-
-                    {/* Notes */}
+                    {}
                     <div className="space-y-1.5">
                         <Label className="text-xs font-bold">Notes</Label>
                         <textarea
@@ -384,8 +349,7 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
                             onChange={(e) => setClientNotes(e.target.value)}
                         />
                     </div>
-
-                    {/* Submit */}
+                    {}
                     <div className="flex gap-3 pt-2">
                         <Button
                             type="button"
@@ -412,4 +376,4 @@ export function CreateInterventionDialog({ open, onOpenChange }: Props) {
             </DialogContent>
         </Dialog >
     );
-}
+}

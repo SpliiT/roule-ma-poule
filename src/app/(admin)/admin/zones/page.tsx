@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -25,15 +24,10 @@ import {
     CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-/* ------------------------------------------------------------------ */
-/*  Utility                                                           */
-/* ------------------------------------------------------------------ */
 const parseGeometry = (geometryStr: string) => {
     if (!geometryStr) return null;
     try {
         const parsed = JSON.parse(geometryStr);
-        // Wrap bare geometry in a Feature for GeoJSON sources
         if (parsed.type === 'Polygon' || parsed.type === 'MultiPolygon') {
             return { type: 'Feature', geometry: parsed, properties: {} };
         }
@@ -42,18 +36,12 @@ const parseGeometry = (geometryStr: string) => {
         return null;
     }
 };
-
-/* ------------------------------------------------------------------ */
-/*  Page                                                              */
-/* ------------------------------------------------------------------ */
 export default function AdminZonesPage() {
     const queryClient = useQueryClient();
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
     const drawRef = useRef<any>(null);
     const zonesLoadedRef = useRef(false);
-
-    // UI state
     const [mode, setMode] = useState<'idle' | 'create' | 'edit'>('idle');
     const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
     const [zoneName, setZoneName] = useState('');
@@ -61,8 +49,6 @@ export default function AdminZonesPage() {
     const [zoneDescription, setZoneDescription] = useState('');
     const [selectedTechIds, setSelectedTechIds] = useState<string[]>([]);
     const [drawnGeometry, setDrawnGeometry] = useState<any>(null);
-
-    /* ---------- Queries ---------- */
     const { data: zones = [], isLoading } = useQuery<any[]>({
         queryKey: ['admin-zones'],
         queryFn: async () => {
@@ -70,7 +56,6 @@ export default function AdminZonesPage() {
             return data.data;
         },
     });
-
     const { data: technicians = [] } = useQuery<any[]>({
         queryKey: ['admin-technicians'],
         queryFn: async () => {
@@ -78,8 +63,6 @@ export default function AdminZonesPage() {
             return (data.data || []).filter((u: any) => u.role === 'TECHNICIEN');
         },
     });
-
-    /* ---------- Mutations ---------- */
     const saveMutation = useMutation({
         mutationFn: async (payload: any) => {
             if (payload.id) {
@@ -94,7 +77,6 @@ export default function AdminZonesPage() {
         },
         onError: () => toast.error('Erreur lors de la sauvegarde'),
     });
-
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => axios.delete(`/api/admin/zones/${id}`),
         onSuccess: () => {
@@ -104,8 +86,6 @@ export default function AdminZonesPage() {
         },
         onError: () => toast.error('Erreur lors de la suppression'),
     });
-
-    /* ---------- Helpers ---------- */
     const resetForm = useCallback(() => {
         setMode('idle');
         setSelectedZoneId(null);
@@ -116,14 +96,12 @@ export default function AdminZonesPage() {
         setDrawnGeometry(null);
         drawRef.current?.deleteAll();
     }, []);
-
     const startCreate = useCallback(() => {
         resetForm();
         setMode('create');
         drawRef.current?.deleteAll();
         drawRef.current?.changeMode('draw_polygon');
     }, [resetForm]);
-
     const startEdit = useCallback((zone: any) => {
         setMode('edit');
         setSelectedZoneId(zone.id);
@@ -133,8 +111,6 @@ export default function AdminZonesPage() {
         setSelectedTechIds(
             (zone.technicians || []).map((tz: any) => tz.technician?.id || tz.technicianId)
         );
-
-        // Load the zone geometry into draw
         drawRef.current?.deleteAll();
         const geo = parseGeometry(zone.geometry);
         if (geo) {
@@ -143,8 +119,6 @@ export default function AdminZonesPage() {
                 setDrawnGeometry(geo.geometry || geo);
             }
         }
-
-        // Fly to zone
         if (geo) {
             const bounds = new maplibregl.LngLatBounds();
             const coords =
@@ -156,25 +130,20 @@ export default function AdminZonesPage() {
             }
         }
     }, []);
-
     const handleSave = () => {
         if (!zoneName.trim()) {
             toast.error('Veuillez donner un nom à la zone');
             return;
         }
-
-        // Get geometry from draw
         const allFeatures = drawRef.current?.getAll();
         let geometry = drawnGeometry;
         if (allFeatures?.features?.length > 0) {
             geometry = allFeatures.features[0].geometry;
         }
-
         if (!geometry) {
             toast.error('Veuillez dessiner la zone sur la carte');
             return;
         }
-
         saveMutation.mutate({
             ...(mode === 'edit' && { id: selectedZoneId }),
             name: zoneName.trim(),
@@ -184,12 +153,10 @@ export default function AdminZonesPage() {
             technicianIds: selectedTechIds,
         });
     };
-
     const handleDelete = (zone: any) => {
         if (!confirm(`Supprimer la zone "${zone.name}" ? Cette action est irréversible.`)) return;
         deleteMutation.mutate(zone.id);
     };
-
     const toggleTech = (techId: string) => {
         setSelectedTechIds((prev) =>
             prev.includes(techId)
@@ -197,44 +164,132 @@ export default function AdminZonesPage() {
                 : [...prev, techId]
         );
     };
-
-    /* ---------- Map Init ---------- */
     useEffect(() => {
         if (mapRef.current || !mapContainer.current) return;
-
         const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
         const styleUrl = maptilerKey
-            ? `https://api.maptiler.com/maps/streets-v2/style.json?key=${maptilerKey}`
+            ? `https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${maptilerKey}`
             : 'https://tiles.openfreemap.org/styles/liberty';
-
+        const LYON_BOUNDS: [[number, number], [number, number]] = [
+            [4.48, 45.45],
+            [5.15, 46.05],
+        ];
+        const LYON_CENTER: [number, number] = [4.8357, 45.7640];
         const m = new maplibregl.Map({
             container: mapContainer.current,
             style: styleUrl,
-            center: [-0.5792, 44.8378], // Bordeaux
+            center: LYON_CENTER,
             zoom: 12,
             pitch: 60,
             bearing: -30,
+            maxBounds: LYON_BOUNDS,
+            minZoom: 11,
         });
-
         m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
-
+        const drawStyles = [
+            {
+                'id': 'gl-draw-polygon-fill-inactive',
+                'type': 'fill',
+                'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+                'paint': {
+                    'fill-color': '#3bb2d0',
+                    'fill-outline-color': '#3bb2d0',
+                    'fill-opacity': 0.1
+                }
+            },
+            {
+                'id': 'gl-draw-polygon-fill-active',
+                'type': 'fill',
+                'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+                'paint': {
+                    'fill-color': '#fbb03b',
+                    'fill-outline-color': '#fbb03b',
+                    'fill-opacity': 0.1
+                }
+            },
+            {
+                'id': 'gl-draw-line-inactive',
+                'type': 'line',
+                'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
+                'layout': { 'line-cap': 'round', 'line-join': 'round' },
+                'paint': { 'line-color': '#3bb2d0', 'line-width': 2 }
+            },
+            {
+                'id': 'gl-draw-line-active',
+                'type': 'line',
+                'filter': ['all', ['==', 'active', 'true'], ['==', '$type', 'LineString']],
+                'layout': { 'line-cap': 'round', 'line-join': 'round' },
+                'paint': { 'line-color': '#fbb03b', 'line-dasharray': [0.2, 2], 'line-width': 2 }
+            },
+            {
+                'id': 'gl-draw-polygon-and-line-vertex-stroke-inactive',
+                'type': 'circle',
+                'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+                'paint': { 'circle-radius': 5, 'circle-color': '#fff' }
+            },
+            {
+                'id': 'gl-draw-polygon-and-line-vertex-inactive',
+                'type': 'circle',
+                'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
+                'paint': { 'circle-radius': 3, 'circle-color': '#fbb03b' }
+            },
+            {
+                'id': 'gl-draw-point-point-stroke-inactive',
+                'type': 'circle',
+                'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature'], ['!=', 'mode', 'static']],
+                'paint': { 'circle-radius': 5, 'circle-color': '#fff' }
+            },
+            {
+                'id': 'gl-draw-point-inactive',
+                'type': 'circle',
+                'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature'], ['!=', 'mode', 'static']],
+                'paint': { 'circle-radius': 3, 'circle-color': '#3bb2d0' }
+            },
+            {
+                'id': 'gl-draw-point-stroke-active',
+                'type': 'circle',
+                'filter': ['all', ['==', '$type', 'Point'], ['==', 'active', 'true'], ['!=', 'meta', 'vertex']],
+                'paint': { 'circle-radius': 7, 'circle-color': '#fff' }
+            },
+            {
+                'id': 'gl-draw-point-active',
+                'type': 'circle',
+                'filter': ['all', ['==', '$type', 'Point'], ['!=', 'meta', 'vertex'], ['==', 'active', 'true']],
+                'paint': { 'circle-radius': 5, 'circle-color': '#fbb03b' }
+            },
+            {
+                'id': 'gl-draw-polygon-fill-static',
+                'type': 'fill',
+                'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Polygon']],
+                'paint': { 'fill-color': '#404040', 'fill-outline-color': '#404040', 'fill-opacity': 0.1 }
+            },
+            {
+                'id': 'gl-draw-line-static',
+                'type': 'line',
+                'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'LineString']],
+                'layout': { 'line-cap': 'round', 'line-join': 'round' },
+                'paint': { 'line-color': '#404040', 'line-width': 2 }
+            },
+            {
+                'id': 'gl-draw-point-static',
+                'type': 'circle',
+                'filter': ['all', ['==', 'mode', 'static'], ['==', '$type', 'Point']],
+                'paint': { 'circle-radius': 5, 'circle-color': '#404040' }
+            }
+        ];
         const d = new MapboxDraw({
             displayControlsDefault: false,
             controls: { polygon: false, trash: false },
+            styles: drawStyles as any,
         });
         m.addControl(d as any, 'top-left');
-
         m.on('load', () => {
-            // Add 3D buildings layer if available
             const layers = m.getStyle().layers || [];
             const labelLayerId = layers.find(
                 (l: any) => l.type === 'symbol' && l.layout?.['text-field']
             )?.id;
-
-            // Try adding 3D buildings from the style's building source
             try {
                 if (!m.getSource('openmaptiles')) {
-                    // If not available, skip 3D buildings
                 } else {
                     m.addLayer(
                         {
@@ -255,35 +310,25 @@ export default function AdminZonesPage() {
                     );
                 }
             } catch {
-                // 3D buildings not available in the style
             }
         });
-
         m.on('draw.create', (e: any) => {
             setDrawnGeometry(e.features[0].geometry);
         });
-
         m.on('draw.update', (e: any) => {
             setDrawnGeometry(e.features[0].geometry);
         });
-
         mapRef.current = m;
         drawRef.current = d;
-
         return () => {
             m.remove();
             mapRef.current = null;
         };
     }, []);
-
-    /* ---------- Render Zones on Map ---------- */
     useEffect(() => {
         const m = mapRef.current;
         if (!m || !zones.length) return;
-
-        // Wait for map style to load
         const renderZones = () => {
-            // Remove old zone layers/sources
             zones.forEach((zone: any) => {
                 const id = `zone-${zone.id}`;
                 if (m.getLayer(`${id}-fill`)) m.removeLayer(`${id}-fill`);
@@ -291,8 +336,6 @@ export default function AdminZonesPage() {
                 if (m.getLayer(`${id}-label`)) m.removeLayer(`${id}-label`);
                 if (m.getSource(id)) m.removeSource(id);
             });
-
-            // Also clean up any leftover sources from deleted zones
             const style = m.getStyle();
             if (style?.sources) {
                 Object.keys(style.sources).forEach((key) => {
@@ -304,14 +347,11 @@ export default function AdminZonesPage() {
                     }
                 });
             }
-
             zones.forEach((zone: any) => {
                 const id = `zone-${zone.id}`;
                 const geo = parseGeometry(zone.geometry);
                 if (!geo) return;
-
                 m.addSource(id, { type: 'geojson', data: geo as any });
-
                 m.addLayer({
                     id: `${id}-fill`,
                     type: 'fill-extrusion',
@@ -323,7 +363,6 @@ export default function AdminZonesPage() {
                         'fill-extrusion-opacity': selectedZoneId === zone.id ? 0.6 : 0.35,
                     },
                 });
-
                 m.addLayer({
                     id: `${id}-outline`,
                     type: 'line',
@@ -334,23 +373,18 @@ export default function AdminZonesPage() {
                     },
                 });
             });
-
             zonesLoadedRef.current = true;
         };
-
         if (m.isStyleLoaded()) {
             renderZones();
         } else {
             m.on('load', renderZones);
         }
     }, [zones, selectedZoneId]);
-
-    /* ---------- Render ---------- */
     const selectedZone = zones.find((z: any) => z.id === selectedZoneId);
-
     return (
         <div className="flex flex-col gap-4 h-[calc(100vh-6rem)]">
-            {/* Header */}
+            { }
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Zones Géographiques</h1>
@@ -373,19 +407,17 @@ export default function AdminZonesPage() {
                     )}
                 </div>
             </div>
-
-            {/* Content */}
+            { }
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-1 min-h-0">
-                {/* Map */}
+                { }
                 <Card className="lg:col-span-3 overflow-hidden border-2 border-primary/10 relative">
                     <CardContent className="p-0 h-full">
                         <div ref={mapContainer} className="w-full h-full min-h-[500px]" />
                     </CardContent>
                 </Card>
-
-                {/* Sidebar */}
+                { }
                 <div className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto pr-1">
-                    {/* Create / Edit Panel */}
+                    { }
                     {mode !== 'idle' && (
                         <Card className="border-primary/30">
                             <CardHeader className="pb-3">
@@ -395,7 +427,7 @@ export default function AdminZonesPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {/* Name */}
+                                { }
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-bold">Nom</Label>
                                     <Input
@@ -404,8 +436,7 @@ export default function AdminZonesPage() {
                                         onChange={(e) => setZoneName(e.target.value)}
                                     />
                                 </div>
-
-                                {/* Color */}
+                                { }
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-bold">Couleur</Label>
                                     <div className="flex gap-2">
@@ -422,8 +453,7 @@ export default function AdminZonesPage() {
                                         />
                                     </div>
                                 </div>
-
-                                {/* Description */}
+                                { }
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-bold">Description</Label>
                                     <Input
@@ -432,8 +462,7 @@ export default function AdminZonesPage() {
                                         onChange={(e) => setZoneDescription(e.target.value)}
                                     />
                                 </div>
-
-                                {/* Technicians */}
+                                { }
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-bold flex items-center gap-1">
                                         <Users className="h-3 w-3" /> Techniciens assignés
@@ -463,15 +492,13 @@ export default function AdminZonesPage() {
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Drawing hint */}
+                                { }
                                 {!drawnGeometry && mode === 'create' && (
                                     <p className="text-[10px] text-center text-muted-foreground animate-pulse">
                                         👉 Cliquez sur la carte pour dessiner le polygone
                                     </p>
                                 )}
-
-                                {/* Actions */}
+                                { }
                                 <div className="flex gap-2 pt-2">
                                     <Button
                                         className="flex-1 gap-2"
@@ -485,7 +512,6 @@ export default function AdminZonesPage() {
                                         )}
                                         {mode === 'create' ? 'Créer' : 'Sauvegarder'}
                                     </Button>
-
                                     {mode === 'edit' && selectedZone && (
                                         <Button
                                             variant="destructive"
@@ -500,25 +526,21 @@ export default function AdminZonesPage() {
                             </CardContent>
                         </Card>
                     )}
-
-                    {/* Zone List */}
+                    { }
                     <div className="space-y-2">
                         <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground px-1">
                             Zones existantes
                         </h3>
-
                         {isLoading && (
                             <div className="flex justify-center py-6">
                                 <Loader2 className="animate-spin h-5 w-5 text-primary" />
                             </div>
                         )}
-
                         {!isLoading && zones.length === 0 && (
                             <p className="text-xs text-muted-foreground italic px-2">
                                 Aucune zone créée.
                             </p>
                         )}
-
                         {zones.map((zone: any) => {
                             const isSelected = selectedZoneId === zone.id;
                             const techCount = zone.technicians?.length || 0;
@@ -568,7 +590,6 @@ export default function AdminZonesPage() {
                                             </div>
                                         </div>
                                     </div>
-
                                     <div className="flex items-center gap-1">
                                         <Button
                                             variant="ghost"

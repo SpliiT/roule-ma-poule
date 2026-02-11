@@ -1,9 +1,4 @@
 import { z } from 'zod';
-
-// ============================================
-// ADMIN VALIDATION SCHEMAS
-// ============================================
-
 export const forfaitSchema = z.object({
     name: z.string().min(2, 'Nom requis (min. 2 caractères)'),
     description: z.string().min(10, 'Description requise (min. 10 caractères)'),
@@ -11,7 +6,6 @@ export const forfaitSchema = z.object({
     price: z.number().min(0, 'Le prix doit être positif'),
     isActive: z.boolean().optional().default(true),
 });
-
 export const productSchema = z.object({
     name: z.string().min(2, 'Nom requis'),
     description: z.string().optional(),
@@ -21,7 +15,6 @@ export const productSchema = z.object({
     imageUrl: z.string().url('URL invalide').optional().or(z.literal('')),
     isActive: z.boolean().optional().default(true),
 });
-
 export const zoneSchema = z.object({
     name: z.string().min(2, 'Nom requis'),
     description: z.string().optional(),
@@ -29,7 +22,6 @@ export const zoneSchema = z.object({
     color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Couleur hexadécimale invalide'),
     isActive: z.boolean().optional().default(true),
 });
-
 export const planningSchema = z.object({
     zoneId: z.string().min(1, 'Zone requise'),
     dayOfWeek: z.number().int().min(0).max(6),
@@ -40,7 +32,6 @@ export const planningSchema = z.object({
     (data) => data.startTime < data.endTime,
     { message: "L'heure de fin doit être après l'heure de début", path: ['endTime'] }
 );
-
 export const companyInfoSchema = z.object({
     name: z.string().min(2, 'Nom requis'),
     description: z.string().optional(),
@@ -51,9 +42,8 @@ export const companyInfoSchema = z.object({
     logo: z.string().optional(),
     siret: z.string().regex(/^\d{14}$/, 'SIRET invalide (14 chiffres)').optional().or(z.literal('')),
 });
-
 export type ForfaitFormValues = z.infer<typeof forfaitSchema>;
 export type ProductFormValues = z.infer<typeof productSchema>;
 export type ZoneFormValues = z.infer<typeof zoneSchema>;
 export type PlanningFormValues = z.infer<typeof planningSchema>;
-export type CompanyInfoFormValues = z.infer<typeof companyInfoSchema>;
+export type CompanyInfoFormValues = z.infer<typeof companyInfoSchema>;

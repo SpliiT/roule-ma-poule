@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 export default function TechnicianDashboardPage() {
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['technician-interventions'],
@@ -26,14 +24,12 @@ export default function TechnicianDashboardPage() {
             return data.data;
         },
     });
-
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Espace Technicien</h1>
                 <p className="text-muted-foreground">Consultez votre planning et gérez vos interventions du jour.</p>
             </div>
-
             <div className="grid gap-4 md:grid-cols-3">
                 <Card className="bg-primary/5 border-primary/20">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -56,7 +52,6 @@ export default function TechnicianDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-
             <div className="space-y-4">
                 <h2 className="text-xl font-bold">Planning des interventions</h2>
                 <div className="space-y-4">
@@ -99,7 +94,6 @@ export default function TechnicianDashboardPage() {
                                                 {i.status}
                                             </Badge>
                                         </div>
-
                                         <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
                                             <div className="rounded-lg border p-3">
                                                 <p className="text-muted-foreground mb-1 flex items-center gap-1 text-xs">
@@ -118,7 +112,6 @@ export default function TechnicianDashboardPage() {
                                                 <p className="text-muted-foreground text-xs">{i.bike.isElectric ? 'Vitesse Électrique' : 'Musculaire'}</p>
                                             </div>
                                         </div>
-
                                         <div className="flex gap-2">
                                             <Button className="flex-1 gap-2">
                                                 <Navigation className="h-4 w-4" />
@@ -138,4 +131,4 @@ export default function TechnicianDashboardPage() {
             </div>
         </div>
     );
-}
+}

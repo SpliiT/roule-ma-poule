@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Calendar, Plus, Clock, Trash2, Loader2, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
-
 const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const DAY_COLORS = [
     'bg-red-100 text-red-800',
@@ -26,7 +24,6 @@ const DAY_COLORS = [
     'bg-pink-100 text-pink-800',
     'bg-orange-100 text-orange-800',
 ];
-
 interface Planning {
     id: string;
     zoneId: string;
@@ -36,13 +33,11 @@ interface Planning {
     isActive: boolean;
     zone: { id: string; name: string; color: string };
 }
-
 interface Zone {
     id: string;
     name: string;
     color: string;
 }
-
 export default function AdminPlanningPage() {
     const queryClient = useQueryClient();
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -50,8 +45,6 @@ export default function AdminPlanningPage() {
     const [selectedDay, setSelectedDay] = useState('');
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('18:00');
-
-    // ── Queries ──
     const { data: plannings = [], isLoading } = useQuery({
         queryKey: ['admin-plannings'],
         queryFn: async () => {
@@ -59,7 +52,6 @@ export default function AdminPlanningPage() {
             return data.data as Planning[];
         },
     });
-
     const { data: zones = [] } = useQuery({
         queryKey: ['admin-zones-list'],
         queryFn: async () => {
@@ -67,8 +59,6 @@ export default function AdminPlanningPage() {
             return data.data as Zone[];
         },
     });
-
-    // ── Mutations ──
     const createPlanning = useMutation({
         mutationFn: async (payload: any) => {
             const { data } = await axios.post('/api/admin/planning', payload);
@@ -81,7 +71,6 @@ export default function AdminPlanningPage() {
         },
         onError: () => toast.error('Erreur lors de la création'),
     });
-
     const deletePlanning = useMutation({
         mutationFn: async (id: string) => {
             await axios.delete(`/api/admin/planning/${id}`);
@@ -92,7 +81,6 @@ export default function AdminPlanningPage() {
         },
         onError: () => toast.error('Erreur lors de la suppression'),
     });
-
     function closeDialog() {
         setDialogOpen(false);
         setSelectedZone('');
@@ -100,7 +88,6 @@ export default function AdminPlanningPage() {
         setStartTime('09:00');
         setEndTime('18:00');
     }
-
     function handleSubmit() {
         if (!selectedZone || selectedDay === '' || !startTime || !endTime) return;
         createPlanning.mutate({
@@ -110,15 +97,12 @@ export default function AdminPlanningPage() {
             endTime,
         });
     }
-
-    // Grouper les plannings par zone
     const groupedByZone = plannings.reduce((acc: Record<string, Planning[]>, p: Planning) => {
         const key = p.zone?.name || 'Sans zone';
         if (!acc[key]) acc[key] = [];
         acc[key].push(p);
         return acc;
     }, {});
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -131,7 +115,6 @@ export default function AdminPlanningPage() {
                     Ajouter un créneau
                 </Button>
             </div>
-
             {isLoading ? (
                 <div className="grid gap-4 md:grid-cols-2">
                     {Array(4).fill(0).map((_, i) => (
@@ -190,8 +173,7 @@ export default function AdminPlanningPage() {
                     ))}
                 </div>
             )}
-
-            {/* ── Dialog nouveau créneau ── */}
+            {}
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -249,4 +231,4 @@ export default function AdminPlanningPage() {
             </Dialog>
         </div>
     );
-}
+}

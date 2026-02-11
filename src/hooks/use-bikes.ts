@@ -1,14 +1,11 @@
 'use client';
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import type { Bike } from '@prisma/client';
 import type { ApiResponse } from '@/types';
 import { toast } from 'sonner';
-
 export function useBikes() {
     const queryClient = useQueryClient();
-
     const { data: bikes = [], isLoading } = useQuery<Bike[]>({
         queryKey: ['bikes'],
         queryFn: async () => {
@@ -16,7 +13,6 @@ export function useBikes() {
             return data.data || [];
         },
     });
-
     const createBikeMutation = useMutation({
         mutationFn: async (newBike: any) => {
             const { data } = await axios.post<ApiResponse<Bike>>('/api/bikes', newBike);
@@ -30,7 +26,6 @@ export function useBikes() {
             toast.error("Erreur lors de l'ajout du vélo");
         },
     });
-
     const deleteBikeMutation = useMutation({
         mutationFn: async (id: string) => {
             await axios.delete(`/api/bikes/${id}`);
@@ -43,7 +38,6 @@ export function useBikes() {
             toast.error('Erreur lors de la suppression');
         },
     });
-
     return {
         bikes,
         isLoading,
@@ -52,4 +46,4 @@ export function useBikes() {
         deleteBike: deleteBikeMutation.mutateAsync,
         isDeleting: deleteBikeMutation.isPending,
     };
-}
+}

@@ -1,16 +1,13 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
     icon?: React.ReactNode;
 }
-
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ({ className, type, label, error, icon, id, ...props }, ref) => {
         const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
-
         return (
             <div className="space-y-1.5">
                 {label && (
@@ -52,7 +49,5 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         );
     }
 );
-
 Input.displayName = 'Input';
-
-export { Input };
+export { Input };

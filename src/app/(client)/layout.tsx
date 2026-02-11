@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { getCurrentUser } from '@/lib/auth';
 import { ClientSidebar } from '@/components/layouts/client-sidebar';
-
 export default async function ClientLayout({
     children,
 }: {
@@ -10,23 +9,18 @@ export default async function ClientLayout({
 }) {
     const { userId: clerkId } = await auth();
     const user = await getCurrentUser();
-
     if (!clerkId) {
         redirect('/sign-in');
     }
-
     if (!user) {
         redirect('/onboarding');
     }
-
-    // Rediriger les admins et techniciens vers leur espace
     if (user.role === 'ADMIN') {
         redirect('/admin');
     }
     if (user.role === 'TECHNICIEN') {
         redirect('/technician');
     }
-
     return (
         <div className="flex min-h-screen">
             <ClientSidebar user={user} />
@@ -37,4 +31,4 @@ export default async function ClientLayout({
             </main>
         </div>
     );
-}
+}

@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +17,6 @@ import {
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 const statusLabels: Record<string, { label: string, color: string, icon: any }> = {
     PENDING: { label: 'En attente', color: 'bg-warning/20 text-warning border-warning/30', icon: Clock },
     CONFIRMED: { label: 'Confirmé', color: 'bg-info/20 text-info border-info/30', icon: Calendar },
@@ -26,7 +24,6 @@ const statusLabels: Record<string, { label: string, color: string, icon: any }> 
     COMPLETED: { label: 'Terminé', color: 'bg-success/20 text-success border-success/30', icon: CheckCircle2 },
     CANCELLED: { label: 'Annulé', color: 'bg-destructive/20 text-destructive border-destructive/30', icon: AlertCircle },
 };
-
 export default function ClientDashboardPage() {
     const { data: bookings = [], isLoading } = useQuery({
         queryKey: ['my-bookings'],
@@ -35,7 +32,6 @@ export default function ClientDashboardPage() {
             return data.data;
         },
     });
-
     const { data: stats } = useQuery({
         queryKey: ['client-stats'],
         queryFn: async () => {
@@ -43,7 +39,6 @@ export default function ClientDashboardPage() {
             return data.data;
         },
     });
-
     return (
         <div className="space-y-8 py-2">
             <div className="flex items-center justify-between">
@@ -58,7 +53,6 @@ export default function ClientDashboardPage() {
                     </Link>
                 </Button>
             </div>
-
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="border-primary/20 bg-primary/5">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -80,9 +74,8 @@ export default function ClientDashboardPage() {
                         <p className="text-muted-foreground text-xs">Garage à vélos</p>
                     </CardContent>
                 </Card>
-                {/* Add more stats if needed */}
+                {}
             </div>
-
             <div className="grid gap-8 lg:grid-cols-2">
                 <div className="space-y-4">
                     <h2 className="text-xl font-bold">Interventions à venir</h2>
@@ -145,10 +138,9 @@ export default function ClientDashboardPage() {
                         )}
                     </div>
                 </div>
-
                 <div className="space-y-4">
                     <h2 className="text-xl font-bold">Mon Garage</h2>
-                    {/* We can put a mini-version of the bike list here or a CTA */}
+                    {}
                     <Card>
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4">
@@ -169,4 +161,4 @@ export default function ClientDashboardPage() {
             </div>
         </div>
     );
-}
+}

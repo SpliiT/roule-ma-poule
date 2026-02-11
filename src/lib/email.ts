@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -9,16 +8,11 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASSWORD,
     },
 });
-
 interface EmailOptions {
     to: string;
     subject: string;
     html: string;
 }
-
-/**
- * Envoie un email via SMTP.
- */
 export async function sendEmail({ to, subject, html }: EmailOptions) {
     try {
         await transporter.sendMail({
@@ -30,13 +24,8 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
         console.log(`[Email] Envoyé à ${to}: ${subject}`);
     } catch (error) {
         console.error('[Email] Erreur envoi email:', error);
-        // Ne pas throw pour ne pas bloquer le flow principal
     }
 }
-
-/**
- * Email de confirmation de réservation.
- */
 export async function sendBookingConfirmation(intervention: {
     id: string;
     address: string;
@@ -50,7 +39,6 @@ export async function sendBookingConfirmation(intervention: {
     const date = new Date(intervention.scheduledAt);
     const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-
     await sendEmail({
         to: intervention.client.email,
         subject: `Réservation confirmée — ${intervention.forfait.name}`,
@@ -82,10 +70,6 @@ export async function sendBookingConfirmation(intervention: {
         `,
     });
 }
-
-/**
- * Email de changement de statut.
- */
 export async function sendStatusUpdate(intervention: {
     id: string;
     status: string;
@@ -98,10 +82,8 @@ export async function sendStatusUpdate(intervention: {
         COMPLETED: { emoji: '', label: 'Terminée', description: 'Votre vélo a été réparé avec succès !' },
         CANCELLED: { emoji: '', label: 'Annulée', description: 'Votre intervention a été annulée.' },
     };
-
     const status = statusMessages[intervention.status];
     if (!status) return;
-
     await sendEmail({
         to: intervention.client.email,
         subject: `${status.emoji} Intervention ${status.label} — ${intervention.forfait.name}`,
@@ -118,4 +100,4 @@ export async function sendStatusUpdate(intervention: {
             </div>
         `,
     });
-}
+}

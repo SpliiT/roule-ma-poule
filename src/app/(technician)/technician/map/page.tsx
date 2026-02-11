@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { MapView } from '@/components/maps/map-view';
@@ -8,12 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Navigation, MapPin, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
-/**
- * Page de carte pour les techniciens.
- * Affiche les interventions de la journée sous forme de marqueurs
- * avec un panneau latéral de navigation rapide.
- */
 export default function TechnicianMapPage() {
     const { data: interventions = [], isLoading } = useQuery({
         queryKey: ['technician-interventions-map'],
@@ -22,13 +15,9 @@ export default function TechnicianMapPage() {
             return data.data;
         },
     });
-
-    // Filtrer les interventions non terminées
     const activeInterventions = interventions.filter((i: any) =>
         i.status !== 'COMPLETED' && i.status !== 'CANCELLED'
     );
-
-    // Préparation des marqueurs pour la carte
     const markers = activeInterventions.map((i: any) => ({
         lng: i.longitude,
         lat: i.latitude,
@@ -43,7 +32,7 @@ export default function TechnicianMapPage() {
                         ${i.address}
                     </p>
                 </div>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${i.latitude},${i.longitude}" 
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${i.latitude},${i.longitude}"
                    target="_blank" 
                    class="flex items-center justify-center gap-2 w-full py-2 bg-primary text-primary-foreground rounded-lg text-xs font-bold transition-opacity hover:opacity-90">
                     Lancer le GPS
@@ -51,7 +40,6 @@ export default function TechnicianMapPage() {
             </div>
         `,
     }));
-
     return (
         <div className="flex flex-col gap-6 h-[calc(100vh-8rem)]">
             <div>
@@ -61,9 +49,8 @@ export default function TechnicianMapPage() {
                     Visualisez votre itinéraire et lancez la navigation vers vos rendez-vous.
                 </p>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
-                {/* Carte Principale */}
+                { }
                 <Card className="lg:col-span-3 overflow-hidden border-2 border-primary/10 shadow-2xl relative">
                     <CardContent className="p-0 h-full relative">
                         {isLoading && (
@@ -77,14 +64,12 @@ export default function TechnicianMapPage() {
                         <MapView markers={markers} />
                     </CardContent>
                 </Card>
-
-                {/* Panneau Latéral de Navigation */}
+                { }
                 <div className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
                     <h2 className="font-bold flex items-center gap-2 text-primary">
                         <Clock className="h-5 w-5" />
                         Chronologie
                     </h2>
-
                     {activeInterventions.length === 0 ? (
                         <Card className="border-dashed bg-muted/30">
                             <CardContent className="p-8 text-center">
@@ -111,14 +96,12 @@ export default function TechnicianMapPage() {
                                             <Navigation className="h-4 w-4" />
                                         </a>
                                     </div>
-
                                     <div className="space-y-1">
                                         <h3 className="font-bold text-sm leading-tight text-foreground underline-offset-4 decoration-primary/30 group-hover:underline">
                                             {i.forfait.name}
                                         </h3>
                                         <p className="text-xs font-medium text-muted-foreground">{i.client.name || 'Client'}</p>
                                     </div>
-
                                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/50 p-1.5 rounded">
                                         <MapPin className="h-3 w-3 shrink-0" />
                                         <span className="truncate">{i.address}</span>

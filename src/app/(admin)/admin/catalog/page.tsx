@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -24,9 +23,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
-
-// ────────────────────────── Types ──────────────────────────
-
 interface Forfait {
     id: string;
     name: string;
@@ -35,7 +31,6 @@ interface Forfait {
     price: number | string;
     isActive: boolean;
 }
-
 interface Product {
     id: string;
     name: string;
@@ -46,33 +41,22 @@ interface Product {
     imageUrl: string | null;
     isActive: boolean;
 }
-
-// ────────────────────────── Page ──────────────────────────
-
 export default function AdminCatalogPage() {
     const queryClient = useQueryClient();
-
-    // ── State for dialogs ──
     const [forfaitDialogOpen, setForfaitDialogOpen] = useState(false);
     const [productDialogOpen, setProductDialogOpen] = useState(false);
     const [editingForfait, setEditingForfait] = useState<Forfait | null>(null);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-    // ── Forfait form state ──
     const [forfaitName, setForfaitName] = useState('');
     const [forfaitDescription, setForfaitDescription] = useState('');
     const [forfaitDuration, setForfaitDuration] = useState('60');
     const [forfaitPrice, setForfaitPrice] = useState('');
-
-    // ── Product form state ──
     const [productName, setProductName] = useState('');
     const [productDescription, setProductDescription] = useState('');
     const [productPrice, setProductPrice] = useState('');
     const [productStock, setProductStock] = useState('0');
     const [productCategory, setProductCategory] = useState('');
     const [productImageUrl, setProductImageUrl] = useState('');
-
-    // ── Queries ──
     const { data: forfaits = [], isLoading: forfaitsLoading } = useQuery({
         queryKey: ['admin-forfaits-list'],
         queryFn: async () => {
@@ -80,7 +64,6 @@ export default function AdminCatalogPage() {
             return data.data;
         },
     });
-
     const { data: products = [], isLoading: productsLoading } = useQuery({
         queryKey: ['admin-products-list'],
         queryFn: async () => {
@@ -88,8 +71,6 @@ export default function AdminCatalogPage() {
             return data.data;
         },
     });
-
-    // ── Mutations: Forfaits ──
     const createForfait = useMutation({
         mutationFn: async (payload: any) => {
             const { data } = await axios.post('/api/forfaits', payload);
@@ -102,7 +83,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de la création du forfait'),
     });
-
     const updateForfait = useMutation({
         mutationFn: async ({ id, ...payload }: any) => {
             const { data } = await axios.patch(`/api/admin/forfaits/${id}`, payload);
@@ -115,7 +95,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de la mise à jour'),
     });
-
     const archiveForfait = useMutation({
         mutationFn: async (id: string) => {
             await axios.delete(`/api/admin/forfaits/${id}`);
@@ -126,8 +105,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de l\'archivage'),
     });
-
-    // ── Mutations: Products ──
     const createProduct = useMutation({
         mutationFn: async (payload: any) => {
             const { data } = await axios.post('/api/admin/products', payload);
@@ -140,7 +117,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de la création du produit'),
     });
-
     const updateProduct = useMutation({
         mutationFn: async ({ id, ...payload }: any) => {
             const { data } = await axios.patch(`/api/admin/products/${id}`, payload);
@@ -153,7 +129,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de la mise à jour'),
     });
-
     const archiveProduct = useMutation({
         mutationFn: async (id: string) => {
             await axios.delete(`/api/admin/products/${id}`);
@@ -164,8 +139,6 @@ export default function AdminCatalogPage() {
         },
         onError: () => toast.error('Erreur lors de l\'archivage'),
     });
-
-    // ── Dialog helpers ──
     function openForfaitDialog(f?: Forfait) {
         if (f) {
             setEditingForfait(f);
@@ -182,12 +155,10 @@ export default function AdminCatalogPage() {
         }
         setForfaitDialogOpen(true);
     }
-
     function closeForfaitDialog() {
         setForfaitDialogOpen(false);
         setEditingForfait(null);
     }
-
     function openProductDialog(p?: Product) {
         if (p) {
             setEditingProduct(p);
@@ -208,13 +179,10 @@ export default function AdminCatalogPage() {
         }
         setProductDialogOpen(true);
     }
-
     function closeProductDialog() {
         setProductDialogOpen(false);
         setEditingProduct(null);
     }
-
-    // ── Submit handlers ──
     function handleForfaitSubmit() {
         const payload = {
             name: forfaitName,
@@ -222,14 +190,12 @@ export default function AdminCatalogPage() {
             duration: parseInt(forfaitDuration),
             price: parseFloat(forfaitPrice),
         };
-
         if (editingForfait) {
             updateForfait.mutate({ id: editingForfait.id, ...payload });
         } else {
             createForfait.mutate(payload);
         }
     }
-
     function handleProductSubmit() {
         const payload = {
             name: productName,
@@ -239,17 +205,14 @@ export default function AdminCatalogPage() {
             category: productCategory || undefined,
             imageUrl: productImageUrl || undefined,
         };
-
         if (editingProduct) {
             updateProduct.mutate({ id: editingProduct.id, ...payload });
         } else {
             createProduct.mutate(payload);
         }
     }
-
     const isForfaitSubmitting = createForfait.isPending || updateForfait.isPending;
     const isProductSubmitting = createProduct.isPending || updateProduct.isPending;
-
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -258,7 +221,6 @@ export default function AdminCatalogPage() {
                     <p className="text-muted-foreground">Gérez vos forfaits de réparation et votre stock de pièces.</p>
                 </div>
             </div>
-
             <Tabs defaultValue="forfaits" className="w-full">
                 <TabsList className="mb-4">
                     <TabsTrigger value="forfaits" className="gap-2">
@@ -268,8 +230,7 @@ export default function AdminCatalogPage() {
                         <Package className="h-4 w-4" /> Pièces & Produits
                     </TabsTrigger>
                 </TabsList>
-
-                {/* ══════════════════ ONGLET FORFAITS ══════════════════ */}
+                {}
                 <TabsContent value="forfaits">
                     <div className="flex justify-end mb-4">
                         <Button className="gap-2" onClick={() => openForfaitDialog()}>
@@ -338,8 +299,7 @@ export default function AdminCatalogPage() {
                         )}
                     </div>
                 </TabsContent>
-
-                {/* ══════════════════ ONGLET PRODUITS ══════════════════ */}
+                {}
                 <TabsContent value="products">
                     <div className="flex justify-end mb-4">
                         <Button className="gap-2" onClick={() => openProductDialog()}>
@@ -420,8 +380,7 @@ export default function AdminCatalogPage() {
                     </div>
                 </TabsContent>
             </Tabs>
-
-            {/* ══════════════════ DIALOG FORFAIT ══════════════════ */}
+            {}
             <Dialog open={forfaitDialogOpen} onOpenChange={setForfaitDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -459,8 +418,7 @@ export default function AdminCatalogPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            {/* ══════════════════ DIALOG PRODUIT ══════════════════ */}
+            {}
             <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -527,4 +485,4 @@ export default function AdminCatalogPage() {
             </Dialog>
         </div>
     );
-}
+}

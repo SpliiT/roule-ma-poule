@@ -1,22 +1,18 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { TechnicianSidebar } from '@/components/layouts/technician-sidebar';
-
 export default async function TechnicianLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     const user = await getCurrentUser();
-
     if (!user) {
         redirect('/sign-in');
     }
-
     if (user.role !== 'TECHNICIEN' && user.role !== 'ADMIN') {
         redirect('/dashboard');
     }
-
     return (
         <div className="flex min-h-screen">
             <TechnicianSidebar user={user} />
@@ -27,4 +23,4 @@ export default async function TechnicianLayout({
             </main>
         </div>
     );
-}
+}

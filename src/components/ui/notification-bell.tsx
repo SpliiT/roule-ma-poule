@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -11,7 +10,6 @@ import {
 import { Bell, Check, CheckCheck, CheckCircle2, HardHat, RefreshCw, Timer } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 interface Notification {
     id: string;
     type: string;
@@ -20,37 +18,31 @@ interface Notification {
     isRead: boolean;
     createdAt: string;
 }
-
 export function NotificationBell() {
     const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
-
     const { data } = useQuery({
         queryKey: ['notifications'],
         queryFn: async () => {
             const { data } = await axios.get('/api/notifications');
             return data;
         },
-        refetchInterval: 30000, // Polling toutes les 30s
+        refetchInterval: 30000, 
     });
-
     const markRead = useMutation({
         mutationFn: async (payload: { notificationId?: string; markAllRead?: boolean }) => {
             await axios.patch('/api/notifications', payload);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
     });
-
     const notifications: Notification[] = data?.data || [];
     const unreadCount: number = data?.unreadCount || 0;
-
     const typeIcons: Record<string, React.ReactNode> = {
         BOOKING_CONFIRMED: <CheckCircle2 className="h-4 w-4 text-green-500" />,
         INTERVENTION_ASSIGNED: <HardHat className="h-4 w-4 text-blue-500" />,
         STATUS_CHANGED: <RefreshCw className="h-4 w-4 text-orange-500" />,
         REMINDER: <Timer className="h-4 w-4 text-yellow-500" />,
     };
-
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -110,4 +102,4 @@ export function NotificationBell() {
             </PopoverContent>
         </Popover>
     );
-}
+}

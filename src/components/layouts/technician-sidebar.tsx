@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
@@ -14,7 +13,6 @@ import {
     ClipboardList,
     Navigation,
 } from 'lucide-react';
-
 const navItems = [
     { label: 'Tableau de bord', href: '/technician', icon: LayoutDashboard },
     { label: 'Aujourd\'hui', href: '/technician/interventions/today', icon: ClipboardList },
@@ -22,19 +20,16 @@ const navItems = [
     { label: 'Historique', href: '/technician/interventions/history', icon: ClipboardList },
     { label: 'Carte & Navigation', href: '/technician/map', icon: Navigation },
 ];
-
 interface TechnicianSidebarProps {
     user: User;
 }
-
 export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
     const pathname = usePathname();
-
     return (
         <>
-            {/* Desktop sidebar */}
+            {}
             <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-64 flex-col border-r border-border bg-card">
-                {/* Logo */}
+                {}
                 <div className="flex h-16 items-center gap-2 border-b border-border px-6">
                     <Image
                         src="/images/logo.png"
@@ -52,8 +47,7 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
                         </div>
                     </div>
                 </div>
-
-                {/* Navigation */}
+                {}
                 <nav className="flex-1 space-y-1 p-4">
                     {navItems.map((item) => {
                         const isActive =
@@ -78,8 +72,7 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
                         );
                     })}
                 </nav>
-
-                {/* Offline status indicator */}
+                {}
                 <div className="border-t border-border p-4">
                     <div className="mb-3 flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2">
                         <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
@@ -99,8 +92,7 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
                     </div>
                 </div>
             </aside>
-
-            {/* Mobile bottom nav */}
+            {}
             <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card">
                 <div className="flex items-center justify-around py-2">
                     {navItems.slice(0, 4).map((item) => {
@@ -130,4 +122,4 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
             </nav>
         </>
     );
-}
+}

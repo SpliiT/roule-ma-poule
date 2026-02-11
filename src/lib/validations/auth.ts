@@ -1,9 +1,4 @@
 import { z } from 'zod';
-
-// ============================================
-// USER / AUTH VALIDATION SCHEMAS
-// ============================================
-
 export const updateUserSchema = z.object({
     name: z.string().min(2, 'Nom requis (min. 2 caractères)').optional(),
     phone: z.string()
@@ -13,7 +8,6 @@ export const updateUserSchema = z.object({
     role: z.enum(['CLIENT', 'TECHNICIEN', 'ADMIN']).optional(),
     isActive: z.boolean().optional(),
 });
-
 export const bikeSchema = z.object({
     brand: z.string().min(1, 'Marque requise'),
     model: z.string().min(1, 'Modèle requis'),
@@ -22,7 +16,6 @@ export const bikeSchema = z.object({
     isElectric: z.boolean(),
     photoUrl: z.string().url('URL invalide').optional().or(z.literal('')),
 });
-
 export const addressFormSchema = z.object({
     label: z.string().optional(),
     street: z.string().min(3, 'Adresse requise'),
@@ -33,7 +26,6 @@ export const addressFormSchema = z.object({
     longitude: z.number(),
     isDefault: z.boolean(),
 });
-
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 export type BikeFormValues = z.infer<typeof bikeSchema>;
-export type AddressFormFormValues = z.infer<typeof addressFormSchema>;
+export type AddressFormFormValues = z.infer<typeof addressFormSchema>;

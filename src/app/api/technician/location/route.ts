@@ -2,22 +2,15 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-
 const locationSchema = z.object({
     latitude: z.number(),
     longitude: z.number(),
 });
-
-/**
- * API pour mettre à jour la position en temps réel du technicien.
- */
 export async function POST(req: Request) {
     try {
         const user = await requireRole('TECHNICIEN');
         const body = await req.json();
-
         const { latitude, longitude } = locationSchema.parse(body);
-
         const updatedUser = await prisma.user.update({
             where: { id: user.id },
             data: {
@@ -26,10 +19,6 @@ export async function POST(req: Request) {
                 lastLocUpdate: new Date(),
             },
         });
-
-        // Optionnel: Chercher l'intervention en cours pour vérifier si le tracking doit être activé
-        // (Pour l'instant on met juste à jour la position globale du technicien)
-
         return NextResponse.json({ success: true, data: { lat: latitude, lng: longitude } });
     } catch (error) {
         console.error('Update location error:', error);
@@ -38,4 +27,4 @@ export async function POST(req: Request) {
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}

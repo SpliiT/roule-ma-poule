@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,11 +13,8 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 type BookingStep = 'address' | 'bike' | 'service' | 'schedule' | 'products' | 'summary';
-
 const STEPS: BookingStep[] = ['address', 'bike', 'service', 'schedule', 'products', 'summary'];
-
 const STEP_LABELS: Record<BookingStep, string> = {
     address: 'Localisation',
     bike: 'Votre Vélo',
@@ -27,14 +23,12 @@ const STEP_LABELS: Record<BookingStep, string> = {
     products: 'Produits',
     summary: 'Confirmation',
 };
-
 interface SelectedProduct {
     productId: string;
     quantity: number;
     name: string;
     price: number;
 }
-
 export default function NewBookingPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState<BookingStep>('address');
@@ -50,20 +44,16 @@ export default function NewBookingPage() {
         slot: null as any,
         products: [] as SelectedProduct[],
     });
-
     const stepIndex = STEPS.indexOf(currentStep);
     const progress = ((stepIndex + 1) / STEPS.length) * 100;
-
     const nextStep = () => {
         const nextIdx = stepIndex + 1;
         if (nextIdx < STEPS.length) setCurrentStep(STEPS[nextIdx]);
     };
-
     const prevStep = () => {
         const prevIdx = stepIndex - 1;
         if (prevIdx >= 0) setCurrentStep(STEPS[prevIdx]);
     };
-
     const handleConfirm = async () => {
         setIsSubmitting(true);
         try {
@@ -77,7 +67,6 @@ export default function NewBookingPage() {
                     quantity: p.quantity,
                 })),
             };
-
             await axios.post('/api/bookings', payload);
             toast.success('Votre réservation a été confirmée !');
             router.push('/dashboard');
@@ -88,19 +77,15 @@ export default function NewBookingPage() {
             setIsSubmitting(false);
         }
     };
-
-    // Calcul du prix total
     const forfaitPrice = bookingData.servicePrice || 0;
     const productsTotal = bookingData.products.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const totalPrice = forfaitPrice + productsTotal;
-
     return (
         <div className="container mx-auto max-w-4xl py-8">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold">Réserver une intervention</h1>
                 <p className="text-muted-foreground">Suivez les étapes pour planifier votre réparation.</p>
             </div>
-
             <div className="mb-8 space-y-2">
                 <div className="flex justify-between text-sm font-medium">
                     <span>Étape {stepIndex + 1} sur {STEPS.length}</span>
@@ -108,7 +93,6 @@ export default function NewBookingPage() {
                 </div>
                 <Progress value={progress} className="h-2" />
             </div>
-
             <div className="grid gap-8 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <Card className="min-h-[450px]">
@@ -179,7 +163,6 @@ export default function NewBookingPage() {
                         </CardContent>
                     </Card>
                 </div>
-
                 <div className="hidden lg:block">
                     <Card>
                         <CardContent className="pt-6">
@@ -229,4 +212,4 @@ export default function NewBookingPage() {
             </div>
         </div>
     );
-}
+}

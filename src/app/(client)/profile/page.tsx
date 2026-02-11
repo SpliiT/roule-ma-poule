@@ -1,8 +1,20 @@
 'use client';
-
-import { UserProfile } from '@clerk/nextjs';
-
+import { UserProfile, useUser } from '@clerk/nextjs';
+import { useEffect } from 'react';
+import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
 export default function ProfilePage() {
+    const { user: clerkUser, isLoaded } = useUser();
+    const queryClient = useQueryClient();
+    useEffect(() => {
+        if (isLoaded && clerkUser) {
+            axios.post('/api/users/sync').then(() => {
+                queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+            }).catch(err => {
+                console.error('Erreur sync profil:', err);
+            });
+        }
+    }, [isLoaded, clerkUser, queryClient]);
     return (
         <div className="flex flex-col items-center justify-center py-6">
             <div className="w-full max-w-4xl">
@@ -10,7 +22,6 @@ export default function ProfilePage() {
                     <h1 className="text-3xl font-bold tracking-tight text-center md:text-left">Mon Profil</h1>
                     <p className="text-muted-foreground text-center md:text-left">Gérez votre identité et vos paramètres de sécurité.</p>
                 </div>
-
                 <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
                     <UserProfile
                         appearance={{
@@ -32,4 +43,4 @@ export default function ProfilePage() {
             </div>
         </div>
     );
-}
+}

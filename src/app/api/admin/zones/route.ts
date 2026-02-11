@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-
-/**
- * API pour lister et créer des zones géographiques (Admin uniquement).
- */
 export async function GET() {
     try {
         await requireRole('ADMIN');
@@ -24,17 +20,14 @@ export async function GET() {
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
 }
-
 export async function POST(req: Request) {
     try {
         await requireRole('ADMIN');
         const body = await req.json();
         const { name, geometry, color, description, technicianIds } = body;
-
         if (!name || !geometry) {
             return NextResponse.json({ error: 'Nom et géométrie requis' }, { status: 400 });
         }
-
         const zone = await prisma.zone.create({
             data: {
                 name,
@@ -58,10 +51,9 @@ export async function POST(req: Request) {
                 },
             },
         });
-
         return NextResponse.json({ data: zone });
     } catch (error) {
         console.error('POST zone error:', error);
         return NextResponse.json({ error: 'Erreur lors de la création de la zone' }, { status: 500 });
     }
-}
+}

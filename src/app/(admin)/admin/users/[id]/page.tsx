@@ -1,5 +1,4 @@
 'use client';
-
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -23,7 +22,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
     PENDING: { label: 'En attente', color: 'bg-yellow-500/10 text-yellow-600', icon: Clock },
     CONFIRMED: { label: 'Confirmée', color: 'bg-blue-500/10 text-blue-600', icon: CheckCircle2 },
@@ -31,11 +29,9 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
     COMPLETED: { label: 'Terminée', color: 'bg-green-500/10 text-green-600', icon: CheckCircle2 },
     CANCELLED: { label: 'Annulée', color: 'bg-red-500/10 text-red-600', icon: XCircle },
 };
-
 export default function AdminUserDetailPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
-
     const { data: user, isLoading } = useQuery<any>({
         queryKey: ['admin-user-detail', id],
         queryFn: async () => {
@@ -44,7 +40,6 @@ export default function AdminUserDetailPage() {
         },
         enabled: !!id,
     });
-
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -52,7 +47,6 @@ export default function AdminUserDetailPage() {
             </div>
         );
     }
-
     if (!user) {
         return (
             <div className="text-center py-12">
@@ -63,14 +57,12 @@ export default function AdminUserDetailPage() {
             </div>
         );
     }
-
     const totalSpent = (user.clientInterventions || [])
         .filter((i: any) => i.isPaid)
         .reduce((sum: number, i: any) => sum + Number(i.totalPrice || 0), 0);
-
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
-            {/* Header */}
+            {}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -88,8 +80,7 @@ export default function AdminUserDetailPage() {
                     {user.isActive ? 'Actif' : 'Inactif'}
                 </Badge>
             </div>
-
-            {/* KPIs */}
+            {}
             <div className="grid gap-4 sm:grid-cols-3">
                 <Card>
                     <CardContent className="pt-6">
@@ -131,9 +122,8 @@ export default function AdminUserDetailPage() {
                     </CardContent>
                 </Card>
             </div>
-
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Infos personnelles */}
+                {}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm flex items-center gap-2">
@@ -157,8 +147,7 @@ export default function AdminUserDetailPage() {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* Adresses */}
+                {}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm flex items-center gap-2">
@@ -181,8 +170,7 @@ export default function AdminUserDetailPage() {
                     </CardContent>
                 </Card>
             </div>
-
-            {/* Vélos */}
+            {}
             {user.bikes?.length > 0 && (
                 <Card>
                     <CardHeader>
@@ -206,8 +194,7 @@ export default function AdminUserDetailPage() {
                     </CardContent>
                 </Card>
             )}
-
-            {/* Historique interventions */}
+            {}
             <Card>
                 <CardHeader>
                     <CardTitle className="text-sm">Historique des interventions</CardTitle>
@@ -258,4 +245,4 @@ export default function AdminUserDetailPage() {
             </Card>
         </div>
     );
-}
+}

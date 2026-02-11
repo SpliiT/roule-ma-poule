@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -19,7 +18,6 @@ import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
-
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
     PENDING: { label: 'En attente', icon: <Timer className="h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800' },
     CONFIRMED: { label: 'Confirmée', icon: <CheckCircle2 className="h-4 w-4" />, color: 'bg-blue-100 text-blue-800' },
@@ -27,14 +25,11 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; colo
     COMPLETED: { label: 'Terminée', icon: <PartyPopper className="h-4 w-4" />, color: 'bg-green-100 text-green-800' },
     CANCELLED: { label: 'Annulée', icon: <XCircle className="h-4 w-4" />, color: 'bg-red-100 text-red-800' },
 };
-
 export default function TechnicianInterventionDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const queryClient = useQueryClient();
-
     const [notes, setNotes] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
-
     const { data: intervention, isLoading } = useQuery<any>({
         queryKey: ['tech-intervention', id],
         queryFn: async () => {
@@ -45,7 +40,6 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
             if (data?.technicianNotes) setNotes(data.technicianNotes);
         },
     } as any);
-
     const updateIntervention = useMutation({
         mutationFn: async (payload: any) => {
             const { data } = await axios.patch(`/api/technician/interventions/${id}`, payload);
@@ -57,7 +51,6 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
         },
         onError: () => toast.error('Erreur lors de la mise à jour'),
     });
-
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
@@ -65,7 +58,6 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
             </div>
         );
     }
-
     if (!intervention) {
         return (
             <div className="space-y-4">
@@ -74,11 +66,9 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
             </div>
         );
     }
-
     const statusInfo = STATUS_CONFIG[intervention.status] || STATUS_CONFIG.PENDING;
     const isActive = ['CONFIRMED', 'IN_PROGRESS'].includes(intervention.status);
     const isCompleted = intervention.status === 'COMPLETED';
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -97,10 +87,9 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                     {statusInfo.icon} {statusInfo.label}
                 </Badge>
             </div>
-
             <div className="grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Infos client */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><User className="h-4 w-4 text-primary" /> Client</CardTitle></CardHeader>
                         <CardContent className="grid gap-2 text-sm">
@@ -109,8 +98,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             {intervention.client?.phone && <p className="text-muted-foreground flex items-center gap-2"><Phone className="h-3 w-3" /> {intervention.client.phone}</p>}
                         </CardContent>
                     </Card>
-
-                    {/* Adresse */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><MapPin className="h-4 w-4 text-primary" /> Localisation</CardTitle></CardHeader>
                         <CardContent className="text-sm">
@@ -120,8 +108,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             </Link>
                         </CardContent>
                     </Card>
-
-                    {/* Vélo */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Bike className="h-4 w-4 text-primary" /> Vélo</CardTitle></CardHeader>
                         <CardContent className="text-sm">
@@ -130,8 +117,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             {intervention.clientNotes && <p className="mt-2 text-muted-foreground italic">« {intervention.clientNotes} »</p>}
                         </CardContent>
                     </Card>
-
-                    {/* Notes technicien */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><MessageSquare className="h-4 w-4 text-primary" /> Notes</CardTitle></CardHeader>
                         <CardContent className="space-y-3">
@@ -152,8 +138,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             </Button>
                         </CardContent>
                     </Card>
-
-                    {/* Photos */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Camera className="h-4 w-4 text-primary" /> Photos</CardTitle></CardHeader>
                         <CardContent>
@@ -181,8 +166,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             )}
                         </CardContent>
                     </Card>
-
-                    {/* Historique */}
+                    {}
                     {intervention.statusHistory?.length > 0 && (
                         <Card>
                             <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Clock className="h-4 w-4 text-primary" /> Historique</CardTitle></CardHeader>
@@ -205,10 +189,9 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                         </Card>
                     )}
                 </div>
-
-                {/* Colonne latérale : actions */}
+                {}
                 <div className="space-y-6">
-                    {/* Actions statut */}
+                    {}
                     {isActive && (
                         <Card className="border-primary/20">
                             <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Zap className="h-4 w-4 text-primary fill-primary/20" /> Actions rapides</CardTitle></CardHeader>
@@ -235,8 +218,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             </CardContent>
                         </Card>
                     )}
-
-                    {/* Produits */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Package className="h-4 w-4 text-primary" /> Produits</CardTitle></CardHeader>
                         <CardContent>
@@ -254,8 +236,7 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
                             )}
                         </CardContent>
                     </Card>
-
-                    {/* Paiement */}
+                    {}
                     <Card>
                         <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-base"><Euro className="h-4 w-4 text-primary" /> Paiement</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
@@ -297,4 +278,4 @@ export default function TechnicianInterventionDetailPage({ params }: { params: P
             </div>
         </div>
     );
-}
+}

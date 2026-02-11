@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
-
 const createProductSchema = z.object({
     name: z.string().min(1, 'Nom requis'),
     description: z.string().optional(),
@@ -11,7 +10,6 @@ const createProductSchema = z.object({
     category: z.string().optional(),
     imageUrl: z.string().url().optional(),
 });
-
 export async function GET() {
     try {
         await requireRole('ADMIN');
@@ -27,13 +25,11 @@ export async function GET() {
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
 }
-
 export async function POST(req: Request) {
     try {
         await requireRole('ADMIN');
         const body = await req.json();
         const data = createProductSchema.parse(body);
-
         const product = await prisma.product.create({
             data: {
                 name: data.name,
@@ -45,7 +41,6 @@ export async function POST(req: Request) {
                 isActive: true,
             },
         });
-
         return NextResponse.json({ data: product }, { status: 201 });
     } catch (error) {
         console.error('POST product error:', error);
@@ -54,4 +49,4 @@ export async function POST(req: Request) {
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}
