@@ -20,13 +20,14 @@ import { Button } from '@/components/ui/button';
 import { BikeType } from '@/types/bikes';
 
 interface BikeSearchResult {
-    id: number;
+    id: string | number;
     brand: string;
     model: string;
     year: number | null;
     image: string | null;
     type: BikeType; // Maintenant renvoyé mappé par le backend
     isElectric: boolean;
+    isLocal?: boolean;
 }
 
 interface BikeSearchProps {
@@ -108,8 +109,29 @@ export function BikeSearch({ onSelect, className }: BikeSearchProps) {
                                 </div>
                             )}
                             {!isLoading && results.length === 0 && searchTerm.length >= 3 && (
-                                <CommandEmpty className="p-8 text-center text-muted-foreground">
-                                    Aucun vélo trouvé. Vous pouvez le saisir manuellement ci-dessous.
+                                <CommandEmpty>
+                                    <div className="flex items-center justify-center p-8 text-center">
+                                        <div className="flex flex-col gap-2">
+                                            <p className="text-muted-foreground font-medium">Aucun vélo trouvé correspondant à "{searchTerm}".</p>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => {
+                                                    onSelect({
+                                                        brand: searchTerm.split(' ')[0] || '',
+                                                        model: searchTerm.split(' ').slice(1).join(' ') || searchTerm,
+                                                        year: null,
+                                                        type: 'OTHER',
+                                                        isElectric: false,
+                                                        photoUrl: null,
+                                                    });
+                                                    setOpen(false);
+                                                }}
+                                            >
+                                                Utiliser quand même "{searchTerm}"
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </CommandEmpty>
                             )}
                             {!isLoading && searchTerm.length < 3 && (
@@ -117,11 +139,11 @@ export function BikeSearch({ onSelect, className }: BikeSearchProps) {
                                     Commencez à taper la marque et le modèle...
                                 </div>
                             )}
-                            <CommandGroup heading="Résultats suggérés">
+                            <CommandGroup heading={results.length > 0 ? "Suggestions trouvées" : ""}>
                                 {results.map((bike) => (
                                     <CommandItem
                                         key={bike.id}
-                                        value={`${bike.brand} ${bike.model}`}
+                                        value={`${bike.brand} ${bike.model} ${bike.id}`}
                                         onSelect={() => {
                                             onSelect({
                                                 brand: bike.brand,
@@ -131,31 +153,71 @@ export function BikeSearch({ onSelect, className }: BikeSearchProps) {
                                                 isElectric: bike.isElectric,
                                                 photoUrl: bike.image,
                                             });
+                                            setSearchTerm(`${bike.brand} ${bike.model}`);
                                             setOpen(false);
                                         }}
                                         className="flex items-center gap-3 p-3 cursor-pointer"
                                     >
-                                        <div className="h-12 w-12 rounded border bg-muted flex-shrink-0 overflow-hidden">
+                                        <div className="h-12 w-12 rounded border bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center relative">
                                             {bike.image ? (
                                                 <img src={bike.image} alt={bike.model} className="h-full w-full object-cover" />
                                             ) : (
-                                                <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground">
-                                                    Pas d'image
+                                                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                                    <Search className="h-4 w-4 opacity-20" />
+                                                    <span className="text-[8px] uppercase font-bold opacity-40">No Photo</span>
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm">{bike.brand}</span>
-                                            <span className="text-xs text-muted-foreground">{bike.model} {bike.year ? `(${bike.year})` : ''}</span>
+                                        <div className="flex flex-col flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-sm truncate">{bike.brand}</span>
+                                                {bike.isElectric && (
+                                                    <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1 rounded font-bold uppercase">⚡ Elec</span>
+                                                )}
+                                            </div>
+                                            <span className="text-xs text-muted-foreground truncate">
+                                                {bike.model} {bike.year ? `(${bike.year})` : ''}
+                                            </span>
                                         </div>
-                                        <Check className="ml-auto h-4 w-4 opacity-0 group-data-[selected=true]:opacity-100" />
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded italic">
+                                                {bike.type.replace('_', ' ')}
+                                            </span>
+                                            {bike.isLocal && (
+                                                <span className="text-[9px] text-primary font-medium">Déjà utilisé</span>
+                                            )}
+                                        </div>
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
+
+                            {searchTerm.length >= 3 && !results.some(r => `${r.brand} ${r.model}`.toLowerCase() === searchTerm.toLowerCase()) && (
+                                <CommandGroup heading="Autre option">
+                                    <CommandItem
+                                        onSelect={() => {
+                                            onSelect({
+                                                brand: searchTerm.split(' ')[0] || '',
+                                                model: searchTerm.split(' ').slice(1).join(' ') || searchTerm,
+                                                year: null,
+                                                type: 'OTHER',
+                                                isElectric: false,
+                                                photoUrl: null,
+                                            });
+                                            setOpen(false);
+                                        }}
+                                        className="p-3 cursor-pointer"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-sm">Ajouter "{searchTerm}"</span>
+                                            <span className="text-xs text-muted-foreground text-italic">Saisie manuelle</span>
+                                        </div>
+                                    </CommandItem>
+                                </CommandGroup>
+                            )}
                         </CommandList>
                     </Command>
                 </PopoverContent>
-            </Popover>
-        </div>
+            </Popover >
+        </div >
     );
 }
