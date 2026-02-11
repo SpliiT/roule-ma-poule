@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
+import { NotificationsManager } from '@/components/notifications/notifications-manager';
 import './globals.css';
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,8 +29,11 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Roule Ma Poule',
+  },
+  icons: {
+    apple: '/images/logo.png',
   },
   formatDetection: {
     telephone: false,
@@ -47,6 +51,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
+          <NotificationsManager />
           {children}
         </Providers>
       </body>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendBookingConfirmation } from '@/lib/email';
+import { sendPushNotification } from '@/lib/push';
 import { z } from 'zod';
 const bookingSchema = z.object({
     bikeId: z.string(),
@@ -116,6 +117,13 @@ export async function POST(req: Request) {
                     },
                 },
             },
+        });
+
+        // Push notification pour le client
+        await sendPushNotification(user.id, {
+            title: 'Réservation confirmée ! 📅',
+            body: `Votre demande pour le forfait "${forfait.name}" a bien été prise en compte.`,
+            data: { interventionId: intervention.id, url: '/dashboard' }
         });
 
         await prisma.notification.create({

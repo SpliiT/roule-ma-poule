@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendStatusUpdate } from '@/lib/email';
+import { sendPushNotification } from '@/lib/push';
 import { z } from 'zod';
 const updateInterventionSchema = z.object({
     technicianId: z.string().optional(),
@@ -51,6 +52,13 @@ export async function PATCH(
                     data: { interventionId: id, status: newStatus },
                 },
             });
+            // Push notification pour le client
+            await sendPushNotification(currentIntervention.clientId, {
+                title: 'Statut mis à jour 🚲',
+                body: `Votre intervention est désormais ${newStatus === 'CONFIRMED' ? 'confirmée' : newStatus === 'CANCELLED' ? 'annulée' : newStatus === 'IN_PROGRESS' ? 'en cours' : newStatus === 'COMPLETED' ? 'terminée' : newStatus}.`,
+                data: { interventionId: id, url: `/dashboard` }
+            });
+
             if (validatedData.technicianId) {
                 await prisma.notification.create({
                     data: {
@@ -60,6 +68,12 @@ export async function PATCH(
                         message: `Une nouvelle intervention à ${currentIntervention.city} vous a été assignée.`,
                         data: { interventionId: id },
                     },
+                });
+                // Push notification pour le technicien
+                await sendPushNotification(validatedData.technicianId, {
+                    title: 'Nouvelle mission ! 🛠️',
+                    body: `Une intervention à ${currentIntervention.city} vous a été assignée.`,
+                    data: { interventionId: id, url: `/technician` }
                 });
             }
         }

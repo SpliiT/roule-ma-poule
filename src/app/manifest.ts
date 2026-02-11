@@ -11,17 +11,18 @@ export default function manifest(): MetadataRoute.Manifest {
         theme_color: '#fab72b', // Based on --primary: 43 96% 58%
         icons: [
             {
-                src: '/favicon.ico',
+                src: '/images/favicon.png',
                 sizes: 'any',
-                type: 'image/x-icon',
-            },
-            {
-                src: '/images/pwa-icon-192.png',
-                sizes: '192x192',
                 type: 'image/png',
             },
             {
-                src: '/images/pwa-icon-512.png',
+                src: '/images/mascotte.png',
+                sizes: '192x192',
+                type: 'image/png',
+                purpose: 'maskable',
+            },
+            {
+                src: '/images/logo.png',
                 sizes: '512x512',
                 type: 'image/png',
             },

@@ -11,6 +11,6 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DIRECT_URL"] || process.env["DATABASE_URL"],
+    url: process.env["POSTGRES_URL_NON_POOLING"] || process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"],
   },
 });

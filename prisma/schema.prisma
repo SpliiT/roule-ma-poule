@@ -1,60 +1,41 @@
-// prisma/schema.prisma
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
-// ============================================
-// MODÈLES UTILISATEURS
-// ============================================
-
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String?
-  phone     String?
-  role      UserRole @default(CLIENT)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Tracking Temps Réel (Techniciens)
-  currentLat    Float?
-  currentLng    Float?
-  lastLocUpdate DateTime?
-
-  // Relations
+  id                      String           @id @default(cuid())
+  clerkId                 String           @unique
+  email                   String           @unique
+  name                    String?
+  phone                   String?
+  role                    UserRole         @default(CLIENT)
+  isActive                Boolean          @default(true)
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  currentLat              Float?
+  currentLng              Float?
+  lastLocUpdate           DateTime?
   addresses               Address[]
   bikes                   Bike[]
-  clientInterventions     Intervention[]     @relation("ClientInterventions")
-  technicianInterventions Intervention[]     @relation("TechnicianInterventions")
-  technicianZones         TechnicianZone[]
+  clientInterventions     Intervention[]   @relation("ClientInterventions")
+  technicianInterventions Intervention[]   @relation("TechnicianInterventions")
   notifications           Notification[]
+  pushSubscriptions       PushSubscription[]
+  technicianZones         TechnicianZone[]
 
   @@index([clerkId])
   @@index([email])
 }
 
-enum UserRole {
-  CLIENT
-  TECHNICIEN
-  ADMIN
-}
-
-// ============================================
-// ADRESSES
-// ============================================
-
 model Address {
   id                String   @id @default(cuid())
   userId            String
-  label             String?  // "Domicile", "Bureau", etc.
+  label             String?
   street            String
   addressComplement String?
   postalCode        String
@@ -64,32 +45,204 @@ model Address {
   isDefault         Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-// ============================================
-// VÉLOS
-// ============================================
-
 model Bike {
-  id         String   @id @default(cuid())
-  userId     String
-  brand      String
-  model      String
-  year       Int?
-  type       BikeType
-  isElectric Boolean  @default(false)
-  photoUrl   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id            String         @id @default(cuid())
+  userId        String
+  brand         String
+  model         String
+  year          Int?
+  type          BikeType
+  isElectric    Boolean        @default(false)
+  photoUrl      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   interventions Intervention[]
 
   @@index([userId])
+}
+
+model Zone {
+  id            String           @id @default(cuid())
+  name          String
+  description   String?
+  geometry      String
+  color         String           @default("#3B82F6")
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  interventions Intervention[]
+  plannings     Planning[]
+  technicians   TechnicianZone[]
+
+  @@index([isActive])
+}
+
+model TechnicianZone {
+  id           String   @id @default(cuid())
+  technicianId String
+  zoneId       String
+  priority     Int      @default(1)
+  createdAt    DateTime @default(now())
+  technician   User     @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  zone         Zone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@unique([technicianId, zoneId])
+  @@index([zoneId])
+}
+
+model Forfait {
+  id            String         @id @default(cuid())
+  name          String
+  description   String
+  duration      Int
+  price         Decimal        @db.Decimal(10, 2)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  interventions Intervention[]
+
+  @@index([isActive])
+}
+
+model Product {
+  id                   String                @id @default(cuid())
+  name                 String
+  description          String?
+  price                Decimal               @db.Decimal(10, 2)
+  stock                Int                   @default(0)
+  category             String?
+  imageUrl             String?
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  interventionProducts InterventionProduct[]
+
+  @@index([isActive])
+  @@index([category])
+}
+
+model Intervention {
+  id                String                      @id @default(cuid())
+  clientId          String
+  technicianId      String?
+  zoneId            String?
+  bikeId            String
+  forfaitId         String
+  address           String
+  addressComplement String?
+  postalCode        String
+  city              String
+  latitude          Float
+  longitude         Float
+  scheduledAt       DateTime
+  completedAt       DateTime?
+  duration          Int
+  status            InterventionStatus          @default(PENDING)
+  trackingEnabled   Boolean                     @default(false)
+  clientNotes       String?
+  technicianNotes   String?
+  photos            String[]
+  totalPrice        Decimal                     @db.Decimal(10, 2)
+  isPaid            Boolean                     @default(false)
+  paidAt            DateTime?
+  paymentMethod     String?
+  rating            Int?
+  ratingComment     String?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  bike              Bike                        @relation(fields: [bikeId], references: [id])
+  client            User                        @relation("ClientInterventions", fields: [clientId], references: [id])
+  forfait           Forfait                     @relation(fields: [forfaitId], references: [id])
+  technician        User?                       @relation("TechnicianInterventions", fields: [technicianId], references: [id])
+  zone              Zone?                       @relation(fields: [zoneId], references: [id])
+  products          InterventionProduct[]
+  statusHistory     InterventionStatusHistory[]
+
+  @@index([clientId])
+  @@index([technicianId])
+  @@index([zoneId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([latitude, longitude])
+}
+
+model InterventionProduct {
+  id             String       @id @default(cuid())
+  interventionId String
+  productId      String
+  quantity       Int          @default(1)
+  priceAtTime    Decimal      @db.Decimal(10, 2)
+  intervention   Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+
+  @@index([interventionId])
+  @@index([productId])
+}
+
+model InterventionStatusHistory {
+  id             String             @id @default(cuid())
+  interventionId String
+  status         InterventionStatus
+  notes          String?
+  createdAt      DateTime           @default(now())
+  intervention   Intervention       @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  @@index([interventionId])
+}
+
+model Planning {
+  id        String   @id @default(cuid())
+  zoneId    String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  zone      Zone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@index([zoneId])
+  @@index([dayOfWeek])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model CompanyInfo {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  logo        String?
+  siret       String?
+  updatedAt   DateTime @updatedAt
+}
+
+enum UserRole {
+  CLIENT
+  TECHNICIEN
+  ADMIN
 }
 
 enum BikeType {
@@ -103,232 +256,22 @@ enum BikeType {
   OTHER
 }
 
-// ============================================
-// ZONES GÉOGRAPHIQUES
-// ============================================
-
-model Zone {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  geometry    String   @db.Text // GeoJSON ou WKT pour stockage des limites de zone
-  color       String   @default("#3B82F6")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  technicians   TechnicianZone[]
-  interventions Intervention[]
-  plannings     Planning[]
-
-  @@index([isActive])
-}
-
-model TechnicianZone {
-  id           String   @id @default(cuid())
-  technicianId String
-  zoneId       String
-  priority     Int      @default(1)
-  createdAt    DateTime @default(now())
-
-  technician User @relation(fields: [technicianId], references: [id], onDelete: Cascade)
-  zone       Zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-  @@unique([technicianId, zoneId])
-  @@index([zoneId])
-}
-
-// ============================================
-// FORFAITS
-// ============================================
-
-model Forfait {
-  id          String   @id @default(cuid())
-  name        String
-  description String   @db.Text
-  duration    Int // en minutes
-  price       Decimal  @db.Decimal(10, 2)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  interventions Intervention[]
-
-  @@index([isActive])
-}
-
-// ============================================
-// PRODUITS ADDITIONNELS
-// ============================================
-
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  category    String?
-  imageUrl    String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  interventionProducts InterventionProduct[]
-
-  @@index([isActive])
-  @@index([category])
-}
-
-// ============================================
-// INTERVENTIONS
-// ============================================
-
-model Intervention {
-  id                String             @id @default(cuid())
-  clientId          String
-  technicianId      String?
-  zoneId            String?
-  bikeId            String
-  forfaitId         String
-
-  // Adresse
-  address           String
-  addressComplement String?
-  postalCode        String
-  city              String
-  latitude          Float
-  longitude         Float
-
-  // Planning
-  scheduledAt       DateTime
-  completedAt       DateTime?
-  duration          Int // en minutes
-
-  // Statut
-  status            InterventionStatus @default(PENDING)
-
-  // Détails
-  trackingEnabled   Boolean            @default(false)
-  clientNotes       String?            @db.Text
-  technicianNotes   String?            @db.Text
-  photos            String[] // URLs Cloudinary
-
-  // Paiement
-  totalPrice        Decimal            @db.Decimal(10, 2)
-  isPaid            Boolean            @default(false)
-  paidAt            DateTime?
-  paymentMethod     String?
-
-  // Notation
-  rating            Int?
-  ratingComment     String?            @db.Text
-
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  client        User                       @relation("ClientInterventions", fields: [clientId], references: [id])
-  technician    User?                      @relation("TechnicianInterventions", fields: [technicianId], references: [id])
-  zone          Zone?                      @relation(fields: [zoneId], references: [id])
-  bike          Bike                       @relation(fields: [bikeId], references: [id])
-  forfait       Forfait                    @relation(fields: [forfaitId], references: [id])
-  products      InterventionProduct[]
-  statusHistory InterventionStatusHistory[]
-
-  @@index([clientId])
-  @@index([technicianId])
-  @@index([zoneId])
-  @@index([status])
-  @@index([scheduledAt])
-  @@index([latitude, longitude])
-}
-
 enum InterventionStatus {
-  PENDING      // En attente de validation
-  CONFIRMED    // Confirmée
-  IN_PROGRESS  // En cours
-  COMPLETED    // Terminée
-  CANCELLED    // Annulée
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
-model InterventionProduct {
-  id             String  @id @default(cuid())
-  interventionId String
-  productId      String
-  quantity       Int     @default(1)
-  priceAtTime    Decimal @db.Decimal(10, 2)
-
-  intervention Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
-  product      Product      @relation(fields: [productId], references: [id])
-
-  @@index([interventionId])
-  @@index([productId])
-}
-
-model InterventionStatusHistory {
-  id             String             @id @default(cuid())
-  interventionId String
-  status         InterventionStatus
-  notes          String?            @db.Text
-  createdAt      DateTime           @default(now())
-
-  intervention Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
-
-  @@index([interventionId])
-}
-
-// ============================================
-// PLANNING
-// ============================================
-
-model Planning {
-  id        String   @id @default(cuid())
-  zoneId    String
-  dayOfWeek Int // 0 = Dimanche, 1 = Lundi, etc.
-  startTime String // Format "HH:MM"
-  endTime   String // Format "HH:MM"
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  zone Zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-  @@index([zoneId])
-  @@index([dayOfWeek])
-}
-
-// ============================================
-// NOTIFICATIONS
-// ============================================
-
-model Notification {
+model PushSubscription {
   id        String   @id @default(cuid())
   userId    String
-  type      String   // BOOKING_CONFIRMED, INTERVENTION_ASSIGNED, REMINDER, etc.
-  title     String
-  message   String   @db.Text
-  isRead    Boolean  @default(false)
-  data      Json?    // metadata (interventionId, etc.)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, isRead])
-  @@index([createdAt])
-}
-
-// ============================================
-// PARAMÈTRES DE L'APPLICATION
-// ============================================
-
-model CompanyInfo {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  address     String?
-  phone       String?
-  email       String?
-  website     String?
-  logo        String?
-  siret       String?
-  updatedAt   DateTime @updatedAt
+  @@index([userId])
 }

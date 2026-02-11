@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendStatusUpdate } from '@/lib/email';
+import { sendPushNotification } from '@/lib/push';
 import { z } from 'zod';
 const updateSchema = z.object({
     status: z.enum(['IN_PROGRESS', 'COMPLETED']).optional(),
@@ -22,8 +23,8 @@ export async function GET(
     try {
         const user = await requireRole('TECHNICIEN');
         const { id } = await params;
-        const intervention = await prisma.intervention.findFirst({
-            where: { id, technicianId: user.id },
+        const intervention = await prisma.intervention.findUnique({
+            where: { id },
             include: {
                 client: {
                     select: { id: true, name: true, email: true, phone: true },
@@ -56,11 +57,22 @@ export async function PATCH(
         const { id } = await params;
         const body = await req.json();
         const data = updateSchema.parse(body);
-        const current = await prisma.intervention.findFirst({
-            where: { id, technicianId: user.id },
+        const current = await prisma.intervention.findUnique({
+            where: { id },
         });
         if (!current) {
-            return NextResponse.json({ error: 'Intervention introuvable ou non assignée' }, { status: 404 });
+            return NextResponse.json({ error: 'Intervention introuvable' }, { status: 404 });
+        }
+        // Si l'intervention est assignée à quelqu'un d'autre
+        if (current.technicianId && current.technicianId !== user.id) {
+            return NextResponse.json({ error: 'Intervention déjà assignée à un autre technicien' }, { status: 403 });
+        }
+        // Si non assignée, on l'assigne automatiquement au premier technicien qui interagit avec
+        if (!current.technicianId) {
+            await prisma.intervention.update({
+                where: { id },
+                data: { technicianId: user.id }
+            });
         }
         const updateData: any = {};
         if (data.status) {
@@ -105,6 +117,14 @@ export async function PATCH(
                     data: { interventionId: id, status: data.status },
                 },
             });
+            // Push notification pour le client
+            await sendPushNotification(current.clientId, {
+                title: data.status === 'COMPLETED' ? 'Vélo prêt ! ✨' : 'Intervention en cours 🛠️',
+                body: data.status === 'COMPLETED'
+                    ? 'Votre vélo a été réparé avec succès !'
+                    : 'Le technicien a commencé le travail sur votre vélo.',
+                data: { interventionId: id, url: `/dashboard` }
+            });
             try {
                 const fullIntervention = await prisma.intervention.findUnique({
                     where: { id },
@@ -116,7 +136,7 @@ export async function PATCH(
                 if (fullIntervention) {
                     await sendStatusUpdate(fullIntervention as any);
                 }
-            } catch {  }
+            } catch { }
         }
         if (data.addProducts && data.addProducts.length > 0) {
             for (const item of data.addProducts) {
@@ -165,4 +185,4 @@ export async function PATCH(
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}
