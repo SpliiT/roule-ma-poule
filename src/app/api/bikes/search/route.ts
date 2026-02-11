@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { mapBikeIndexTypeToInternal } from '@/lib/utils/bike-mapping';
 import { prisma } from '@/lib/prisma';
+import { getFromCache, setInCache } from '@/lib/cache'; // Importation du cache
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -26,57 +27,76 @@ export async function GET(request: Request) {
         // On cherche des vélos qui ont été précédemment saisis
         if (decodedQuery.length >= 2) {
             searchPromises.push(
-                prisma.bike.findMany({
-                    where: {
-                        OR: [
-                            { brand: { contains: decodedQuery, mode: 'insensitive' } },
-                            { model: { contains: decodedQuery, mode: 'insensitive' } },
-                        ],
-                    },
-                    distinct: ['brand', 'model', 'year'],
-                    take: 20,
-                }).then(bikes => bikes.map(bike => ({
-                    id: `local-${bike.id}`,
-                    brand: bike.brand,
-                    model: bike.model,
-                    year: bike.year,
-                    image: bike.photoUrl,
-                    type: bike.type,
-                    isElectric: bike.isElectric,
-                    isLocal: true
-                })))
+                (async () => {
+                    console.time('Prisma Query');
+                    const bikes = await prisma.bike.findMany({
+                        where: {
+                            OR: [
+                                { brand: { contains: decodedQuery, mode: 'insensitive' } },
+                                { model: { contains: decodedQuery, mode: 'insensitive' } },
+                            ],
+                        },
+                        distinct: ['brand', 'model', 'year'],
+                        take: 20,
+                    });
+                    console.timeEnd('Prisma Query');
+                    return bikes.map(bike => ({
+                        id: `local-${bike.id}`,
+                        brand: bike.brand,
+                        model: bike.model,
+                        year: bike.year,
+                        image: bike.photoUrl,
+                        type: bike.type,
+                        isElectric: bike.isElectric,
+                        isLocal: true
+                    }));
+                })()
             );
         }
 
         // 2. Recherche sur BikeIndex
         // stolenness=all pour ne pas cacher des modèles légitimes
-        let bikeIndexUrl = `https://bikeindex.org/api/v3/search?query=${encodeURIComponent(decodedQuery)}&per_page=50&stolenness=all`;
-        if (type === 'model' && manufacturer) {
-            bikeIndexUrl += `&manufacturer=${encodeURIComponent(manufacturer)}`;
-        }
+        if (decodedQuery.length >= 3) { // Condition ajoutée pour BikeIndex
+            let bikeIndexUrl = `https://bikeindex.org/api/v3/search?query=${encodeURIComponent(decodedQuery)}&per_page=50&stolenness=all`;
+            if (type === 'model' && manufacturer) {
+                bikeIndexUrl += `&manufacturer=${encodeURIComponent(manufacturer)}`;
+            }
 
-        searchPromises.push(
-            fetch(bikeIndexUrl, {
-                headers: { 'Accept': 'application/json' }
-            }).then(async res => {
-                if (!res.ok) return [];
-                const data = await res.json();
-                return (data.bikes || []).map((bike: any) => ({
-                    id: bike.id,
-                    brand: bike.manufacturer_name,
-                    model: bike.frame_model,
-                    year: bike.year,
-                    image: bike.large_img || bike.thumb,
-                    type: mapBikeIndexTypeToInternal({
-                        slug: bike.cycle_type_slug,
-                        model: bike.frame_model,
-                        title: bike.title
-                    }),
-                    isElectric: bike.propulsion_type_slug === 'ebike-pedelec' || bike.propulsion_type_slug === 'ebike-throttle',
-                    isLocal: false
-                }));
-            })
-        );
+            // Vérifier le cache avant de faire l'appel à BikeIndex
+            const cachedBikeIndexResults = getFromCache<any[]>(bikeIndexUrl);
+            if (cachedBikeIndexResults) {
+                console.log('BikeIndex results from cache');
+                searchPromises.push(Promise.resolve(cachedBikeIndexResults));
+            } else {
+                searchPromises.push(
+                    (async () => {
+                        console.time('BikeIndex Fetch');
+                        const res = await fetch(bikeIndexUrl, {
+                            headers: { 'Accept': 'application/json' }
+                        });
+                        console.timeEnd('BikeIndex Fetch');
+                        if (!res.ok) return [];
+                        const data = await res.json();
+                        const bikeIndexResults = (data.bikes || []).map((bike: any) => ({
+                            id: bike.id,
+                            brand: bike.manufacturer_name,
+                            model: bike.frame_model,
+                            year: bike.year,
+                            image: bike.large_img || bike.thumb,
+                            type: mapBikeIndexTypeToInternal({
+                                slug: bike.cycle_type_slug,
+                                model: bike.frame_model,
+                                title: bike.title
+                            }),
+                            isElectric: bike.propulsion_type_slug === 'ebike-pedelec' || bike.propulsion_type_slug === 'ebike-throttle',
+                            isLocal: false
+                        }));
+                        setInCache(bikeIndexUrl, bikeIndexResults, 3600); // Mettre en cache pour 1 heure
+                        return bikeIndexResults;
+                    })()
+                );
+            }
+        }
 
         // Attendre tous les résultats
         const allResults = await Promise.all(searchPromises);

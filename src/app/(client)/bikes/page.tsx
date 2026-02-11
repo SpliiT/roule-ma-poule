@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { BikeCard } from '@/components/bikes/bike-card';
 import { Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 export default function BikesPage() {
+    const router = useRouter();
     const { bikes, isLoading, deleteBike } = useBikes();
     return (
         <div className="container mx-auto max-w-5xl py-8">
@@ -46,10 +48,11 @@ export default function BikesPage() {
                             key={bike.id}
                             bike={bike}
                             onDelete={deleteBike}
+                            onEdit={(b) => router.push(`/bikes/${b.id}/edit`)}
                         />
                     ))}
                 </div>
             )}
         </div>
     );
-}
+}

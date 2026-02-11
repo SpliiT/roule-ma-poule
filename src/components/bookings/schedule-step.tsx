@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { ArrowLeft, Clock, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -56,8 +57,12 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        className="rounded-md border shadow"
-                        disabled={(d) => d < new Date() || d.getDay() === 0}
+                        className="rounded-md border shadow w-full"
+                        disabled={(d) => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            return d < today || d.getDay() === 0;
+                        }}
                         locale={fr}
                     />
                 </div>
@@ -76,27 +81,30 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                             <p className="text-muted-foreground text-sm">Aucun créneau disponible ce jour</p>
                         </div>
                     ) : (
-                        <div className="grid gap-2">
-                            {slots.map((s) => {
-                                const label = `${s.start} - ${s.end}`;
-                                return (
-                                    <Button
-                                        key={label}
-                                        variant={slot === label ? 'default' : 'outline'}
-                                        className="justify-start gap-2"
-                                        disabled={!s.available}
-                                        onClick={() => setSlot(label)}
-                                    >
-                                        <Clock className="h-4 w-4" />
-                                        {label}
-                                        {!s.available && (
-                                            <Badge variant="secondary" className="ml-auto text-[10px]">
-                                                Indisponible
-                                            </Badge>
-                                        )}
-                                    </Button>
-                                );
-                            })}
+                        <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                {slots.map((s) => {
+                                    const label = `${s.start}`;
+                                    const isSelected = slot === s.start;
+                                    return (
+                                        <Button
+                                            key={s.start}
+                                            variant={isSelected ? 'default' : 'outline'}
+                                            className={cn(
+                                                "h-10 text-sm font-medium transition-all",
+                                                isSelected ? "border-primary" : "hover:border-primary/50"
+                                            )}
+                                            disabled={!s.available}
+                                            onClick={() => setSlot(s.start)}
+                                        >
+                                            <div className="flex flex-col items-center leading-tight">
+                                                <span>{s.start}</span>
+                                                {!s.available && <span className="text-[8px] uppercase font-bold opacity-50">Complet</span>}
+                                            </div>
+                                        </Button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -122,4 +130,4 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
             </div>
         </div>
     );
-}
+}

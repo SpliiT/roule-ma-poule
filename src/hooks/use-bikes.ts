@@ -38,12 +38,30 @@ export function useBikes() {
             toast.error('Erreur lors de la suppression');
         },
     });
+
+    const updateBikeMutation = useMutation({
+        mutationFn: async ({ id, data }: { id: string, data: any }) => {
+            const { data: responseData } = await axios.patch<ApiResponse<Bike>>(`/api/bikes/${id}`, data);
+            return responseData.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bikes'] });
+            toast.success('Vélo mis à jour avec succès !');
+        },
+        onError: () => {
+            toast.error('Erreur lors de la mise à jour du vélo');
+        },
+    });
+
     return {
         bikes,
         isLoading,
         createBike: createBikeMutation.mutateAsync,
         isCreating: createBikeMutation.isPending,
+        updateBike: updateBikeMutation.mutateAsync,
+        isUpdating: updateBikeMutation.isPending,
         deleteBike: deleteBikeMutation.mutateAsync,
         isDeleting: deleteBikeMutation.isPending,
     };
-}
+}
+

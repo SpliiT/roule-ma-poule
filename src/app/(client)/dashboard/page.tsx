@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,11 +13,13 @@ import {
     AlertCircle,
     Plus,
     Loader2,
-    Wrench
+    Wrench,
+    Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { RatingModal } from '@/components/interventions/rating-modal';
 const statusLabels: Record<string, { label: string, color: string, icon: any }> = {
     PENDING: { label: 'En attente', color: 'bg-warning/20 text-warning border-warning/30', icon: Clock },
     CONFIRMED: { label: 'Confirmé', color: 'bg-info/20 text-info border-info/30', icon: Calendar },
@@ -25,6 +28,8 @@ const statusLabels: Record<string, { label: string, color: string, icon: any }> 
     CANCELLED: { label: 'Annulé', color: 'bg-destructive/20 text-destructive border-destructive/30', icon: AlertCircle },
 };
 export default function ClientDashboardPage() {
+    const [selectedInterventionId, setSelectedInterventionId] = useState<string | null>(null);
+    const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
     const { data: bookings = [], isLoading } = useQuery({
         queryKey: ['my-bookings'],
         queryFn: async () => {
@@ -74,7 +79,7 @@ export default function ClientDashboardPage() {
                         <p className="text-muted-foreground text-xs">Garage à vélos</p>
                     </CardContent>
                 </Card>
-                {}
+                { }
             </div>
             <div className="grid gap-8 lg:grid-cols-2">
                 <div className="space-y-4">
@@ -131,6 +136,25 @@ export default function ClientDashboardPage() {
                                                     </span>
                                                 </div>
                                             </div>
+                                            {booking.status === 'COMPLETED' && !booking.rating && (
+                                                <Button
+                                                    size="sm"
+                                                    className="gap-2"
+                                                    onClick={() => {
+                                                        setSelectedInterventionId(booking.id);
+                                                        setIsRatingModalOpen(true);
+                                                    }}
+                                                >
+                                                    <Star className="h-4 w-4 fill-current" />
+                                                    Évaluer
+                                                </Button>
+                                            )}
+                                            {booking.status === 'COMPLETED' && booking.rating && (
+                                                <div className="flex items-center gap-1 text-primary">
+                                                    <Star className="h-4 w-4 fill-current" />
+                                                    <span className="text-sm font-bold">{booking.rating}/5</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </Card>
                                 );
@@ -138,9 +162,16 @@ export default function ClientDashboardPage() {
                         )}
                     </div>
                 </div>
+                {selectedInterventionId && (
+                    <RatingModal
+                        interventionId={selectedInterventionId}
+                        isOpen={isRatingModalOpen}
+                        onClose={() => setIsRatingModalOpen(false)}
+                    />
+                )}
                 <div className="space-y-4">
                     <h2 className="text-xl font-bold">Mon Garage</h2>
-                    {}
+                    { }
                     <Card>
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4">
@@ -161,4 +192,4 @@ export default function ClientDashboardPage() {
             </div>
         </div>
     );
-}
+}

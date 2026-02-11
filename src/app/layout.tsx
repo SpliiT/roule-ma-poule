@@ -25,6 +25,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'fr_FR',
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Roule Ma Poule',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 export default function RootLayout({
   children,

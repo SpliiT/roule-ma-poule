@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider   = "postgresql"
-  // extensions = [postgis]
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================
@@ -219,6 +220,10 @@ model Intervention {
   isPaid            Boolean            @default(false)
   paidAt            DateTime?
   paymentMethod     String?
+
+  // Notation
+  rating            Int?
+  ratingComment     String?            @db.Text
 
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt

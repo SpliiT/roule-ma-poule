@@ -49,7 +49,7 @@ export async function POST(req: Request) {
             }
         }
         const scheduledAt = new Date(validatedData.scheduledAt);
-        const duration = forfait.duration; 
+        const duration = forfait.duration;
         const scheduledEnd = new Date(scheduledAt.getTime() + duration * 60 * 1000);
         const conflictingIntervention = await prisma.intervention.findFirst({
             where: {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
                 status: { not: 'CANCELLED' },
                 AND: {
                     scheduledAt: {
-                        gte: new Date(scheduledAt.getTime() - 180 * 60 * 1000), 
+                        gte: new Date(scheduledAt.getTime() - 180 * 60 * 1000),
                     },
                 },
             },
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
             try {
                 const geometry = typeof zone.geometry === 'string' ? JSON.parse(zone.geometry) : zone.geometry as any;
                 if (geometry && geometry.coordinates) {
-                    const coords = geometry.coordinates[0]; 
+                    const coords = geometry.coordinates[0];
                     if (isPointInPolygon(validatedData.latitude, validatedData.longitude, coords)) {
                         zoneId = zone.id;
                         const activeTech = zone.technicians.find((tz: any) => tz.technician?.isActive);
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
                         break;
                     }
                 }
-            } catch {  }
+            } catch { }
         }
         const intervention = await prisma.intervention.create({
             data: {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
                 longitude: validatedData.longitude,
                 scheduledAt,
                 totalPrice,
-                duration, 
+                duration,
                 status: 'PENDING',
                 products: productDetails.length > 0 ? {
                     createMany: {
@@ -115,6 +115,16 @@ export async function POST(req: Request) {
                         notes: 'Réservation créée par le client',
                     },
                 },
+            },
+        });
+
+        await prisma.notification.create({
+            data: {
+                userId: user.id,
+                type: 'BOOKING_CREATED',
+                title: 'Réservation enregistrée',
+                message: `Votre demande pour le forfait "${forfait.name}" a bien été prise en compte.`,
+                data: { interventionId: intervention.id },
             },
         });
         try {
@@ -143,11 +153,11 @@ export async function POST(req: Request) {
 function isPointInPolygon(lat: number, lng: number, polygon: number[][]): boolean {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i][1], yi = polygon[i][0]; 
+        const xi = polygon[i][1], yi = polygon[i][0];
         const xj = polygon[j][1], yj = polygon[j][0];
         const intersect = ((yi > lng) !== (yj > lng)) &&
             (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
         if (intersect) inside = !inside;
     }
     return inside;
-}
+}

@@ -19,6 +19,7 @@ export async function PATCH(
         const validatedData = updateInterventionSchema.parse(body);
         const currentIntervention = await prisma.intervention.findUnique({
             where: { id },
+            include: { forfait: { select: { name: true } } },
         });
         if (!currentIntervention) {
             return NextResponse.json({ error: 'Intervention introuvable' }, { status: 404 });
@@ -46,7 +47,7 @@ export async function PATCH(
                     userId: currentIntervention.clientId,
                     type: 'BOOKING_STATUS_CHANGED',
                     title: 'Statut de votre intervention mis à jour',
-                    message: `Votre intervention pour le forfait "${id}" est désormais ${newStatus}.`,
+                    message: `Votre intervention pour le forfait "${currentIntervention?.forfait.name || id}" est désormais ${newStatus === 'CONFIRMED' ? 'confirmée' : newStatus === 'CANCELLED' ? 'annulée' : newStatus === 'IN_PROGRESS' ? 'en cours' : newStatus === 'COMPLETED' ? 'terminée' : newStatus}.`,
                     data: { interventionId: id, status: newStatus },
                 },
             });
@@ -86,4 +87,4 @@ export async function PATCH(
         }
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
-}
+}
