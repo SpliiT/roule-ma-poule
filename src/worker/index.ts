@@ -105,7 +105,7 @@ self.addEventListener('push', async (event: any) => {
             tag: 'roule-ma-poule-notif',
             renotify: true,
             vibrate: [100, 50, 100],
-            requireInteraction: false
+            requireInteraction: true
         } as any;
 
         event.waitUntil(
