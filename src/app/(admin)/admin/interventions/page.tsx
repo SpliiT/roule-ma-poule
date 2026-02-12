@@ -112,11 +112,11 @@ export default function AdminInterventionsPage() {
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     <Button variant="outline" className="flex-1 sm:flex-none gap-2" onClick={handleExportCSV}>
                         <Download className="h-4 w-4" />
-                        <span className="hidden xs:inline">Exporter</span>
+                        <span className=" xs:inline">Exporter</span>
                     </Button>
                     <Button className="flex-[2] sm:flex-none gap-2 font-black italic uppercase tracking-tighter" onClick={() => setCreateDialogOpen(true)}>
                         <ClipboardList className="h-4 w-4" />
-                        <span>Nouvelle <span className="hidden xs:inline">Intervention</span></span>
+                        <span>Nouvelle <span className=" xs:inline">Intervention</span></span>
                     </Button>
                 </div>
             </div>

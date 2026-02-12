@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Bell, Check, Loader2, ChevronLeft, Trash2 } from 'lucide-react';
@@ -15,6 +16,13 @@ import { useRouter } from 'next/navigation';
 export default function NotificationsPage() {
     const queryClient = useQueryClient();
     const router = useRouter();
+    const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setNotificationPermission(Notification.permission);
+        }
+    }, []);
 
     const { data, isLoading } = useQuery({
         queryKey: ['notifications'],
@@ -62,7 +70,7 @@ export default function NotificationsPage() {
                 )}
             </header>
 
-            {typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted' && (
+            {notificationPermission !== null && notificationPermission !== 'granted' && (
                 <div className="bg-primary/10 border-b border-primary/20 px-4 py-3">
                     <div className="container mx-auto max-w-2xl flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -72,17 +80,20 @@ export default function NotificationsPage() {
                             <div>
                                 <h4 className="text-sm font-black italic uppercase tracking-tight">Activer les alertes mobiles</h4>
                                 <p className="text-[10px] text-muted-foreground font-medium leading-tight">
-                                    {Notification.permission === 'denied'
+                                    {notificationPermission === 'denied'
                                         ? "Les notifications sont bloquées dans votre navigateur."
                                         : "Recevez une notification WhatsApp-style même quand l'app est fermée."}
                                 </p>
                             </div>
                         </div>
-                        {Notification.permission === 'default' && (
+                        {notificationPermission === 'default' && (
                             <Button
                                 size="sm"
                                 className="font-black italic uppercase text-[10px] tracking-widest h-8"
-                                onClick={() => window.dispatchEvent(new CustomEvent('trigger-push-setup'))}
+                                onClick={() => {
+                                    window.dispatchEvent(new CustomEvent('trigger-push-setup'));
+                                    setTimeout(() => setNotificationPermission(Notification.permission), 500);
+                                }}
                             >
                                 Autoriser
                             </Button>

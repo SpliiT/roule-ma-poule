@@ -20,7 +20,7 @@ export default function HomePage() {
               className="object-contain md:w-16 md:h-16"
             />
             <span className="text-lg md:text-2xl font-black tracking-tighter text-foreground uppercase italic px-1">
-              Roule <span className="text-primary">Ma</span> <span className="hidden xs:inline">Poule</span>
+              Roule <span className="text-primary">Ma</span> <span className="xs:inline">Poule</span>
             </span>
           </Link>
           <div className="flex items-center gap-2">
