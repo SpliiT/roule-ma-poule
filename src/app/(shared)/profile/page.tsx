@@ -6,11 +6,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Bell, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 export default function ProfilePage() {
     const { user: clerkUser, isLoaded } = useUser();
     const queryClient = useQueryClient();
     const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+    const [isTesting, setIsTesting] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -71,9 +73,30 @@ export default function ProfilePage() {
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                             {notificationPermission === 'granted' ? (
-                                                <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 font-black uppercase italic text-[10px] tracking-widest">
-                                                    <ShieldCheck className="h-3 w-3 mr-1" /> Activé
-                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 font-black uppercase italic text-[10px] tracking-widest">
+                                                        <ShieldCheck className="h-3 w-3 mr-1" /> Activé
+                                                    </Badge>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 text-[10px] font-black uppercase italic tracking-widest hover:bg-primary/10"
+                                                        disabled={isTesting}
+                                                        onClick={async () => {
+                                                            setIsTesting(true);
+                                                            try {
+                                                                await axios.post('/api/notifications/push/test');
+                                                                toast.success('Test envoyé !');
+                                                            } catch (err) {
+                                                                toast.error('Erreur lors du test');
+                                                            } finally {
+                                                                setIsTesting(false);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {isTesting ? 'Envoi...' : 'Tester'}
+                                                    </Button>
+                                                </div>
                                             ) : notificationPermission === 'denied' ? (
                                                 <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 font-black uppercase italic text-[10px] tracking-widest">
                                                     <AlertCircle className="h-3 w-3 mr-1" /> Bloqué

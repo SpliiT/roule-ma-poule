@@ -96,20 +96,17 @@ self.addEventListener('push', async (event: any) => {
 
         const options = {
             body: body || 'Nouvelle notification',
-            icon: icon || '/images/mascotte.png',
+            icon: '/images/mascotte.png',
             badge: '/images/favicon.png',
             data: {
                 ...customData,
                 url: customData?.url || '/'
             },
-            tag: 'roule-ma-poule-notif', // Groups notifications
-            renotify: true, // Vibrates even if another notif with same tag exists
-            vibrate: [200, 100, 200, 100, 200],
-            requireInteraction: false,
-            actions: [
-                { action: 'open', title: 'Voir' }
-            ]
-        };
+            tag: 'roule-ma-poule-notif',
+            renotify: true,
+            vibrate: [100, 50, 100],
+            requireInteraction: false
+        } as any;
 
         event.waitUntil(
             (self as any).registration.showNotification(title || 'Roule Ma Poule', options)
