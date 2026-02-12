@@ -16,10 +16,12 @@ if (vapidKeys.publicKey && vapidKeys.privateKey) {
 
 export async function sendPushNotification(userId: string, payload: { title: string; body: string; data?: any }) {
     try {
+        console.log(`[Push] Attempting to send notification to user: ${userId}`);
         const subscriptions = await prisma.pushSubscription.findMany({
             where: { userId },
         });
 
+        console.log(`[Push] Found ${subscriptions.length} subscriptions for user: ${userId}`);
         if (subscriptions.length === 0) return;
 
         const results = await Promise.allSettled(
@@ -32,6 +34,7 @@ export async function sendPushNotification(userId: string, payload: { title: str
                     },
                 };
 
+                console.log(`[Push] Sending to endpoint: ${sub.endpoint.substring(0, 30)}...`);
                 return webpush.sendNotification(pushSubscription, JSON.stringify(payload));
             })
         );
@@ -39,9 +42,13 @@ export async function sendPushNotification(userId: string, payload: { title: str
         // Nettoyer les souscriptions expirées ou invalides
         for (let i = 0; i < results.length; i++) {
             const result = results[i];
-            if (result.status === 'rejected') {
+            if (result.status === 'fulfilled') {
+                console.log(`[Push] Successfully sent to subscription ${subscriptions[i].id}`);
+            } else {
                 const error = result.reason;
+                console.error(`[Push] Failed to send to subscription ${subscriptions[i].id}:`, error.message || error);
                 if (error.statusCode === 404 || error.statusCode === 410) {
+                    console.log(`[Push] Deleting invalid subscription: ${subscriptions[i].id}`);
                     await prisma.pushSubscription.delete({
                         where: { id: subscriptions[i].id },
                     });
@@ -49,6 +56,6 @@ export async function sendPushNotification(userId: string, payload: { title: str
             }
         }
     } catch (error) {
-        console.error('Error sending push notification:', error);
+        console.error('[Push] Fatal error in sendPushNotification:', error);
     }
 }

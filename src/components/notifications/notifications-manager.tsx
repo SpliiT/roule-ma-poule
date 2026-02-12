@@ -17,7 +17,10 @@ export function NotificationsManager() {
         }
 
         try {
+            if (forceRequest) toast.info('Initialisation de la souscription...');
             const registration = await navigator.serviceWorker.ready;
+            if (forceRequest) console.log('SW: Ready');
+
             const existingSubscription = await registration.pushManager.getSubscription();
 
             if (existingSubscription && !forceRequest) {
@@ -26,12 +29,10 @@ export function NotificationsManager() {
                 return;
             }
 
-            // If we are here and forceRequest is true, it means we want to subscribe
-            // The permission must have been granted ALREADY in the UI click handler
             if (forceRequest && Notification.permission === 'granted') {
                 const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
                 if (!publicKey) {
-                    console.error('PushManager: Missing VAPID public key');
+                    toast.error('Clé VAPID manquante côté client.');
                     return;
                 }
 
@@ -40,15 +41,22 @@ export function NotificationsManager() {
                     applicationServerKey: urlBase64ToUint8Array(publicKey),
                 };
 
-                const subscription = await registration.pushManager.subscribe(subscribeOptions);
-                await syncSubscription(subscription);
-                setIsSubscribed(true);
-                setPermissionStatus('granted');
-                toast.success('Notifications activées !');
+                try {
+                    if (forceRequest) toast.info('Génération de la souscription...');
+                    const subscription = await registration.pushManager.subscribe(subscribeOptions);
+                    if (forceRequest) toast.info('Souscription générée, synchronisation...');
+                    await syncSubscription(subscription);
+                    setIsSubscribed(true);
+                    setPermissionStatus('granted');
+                    toast.success('Notifications activées avec succès !');
+                } catch (subErr: any) {
+                    console.error('PushManager: Subscription error:', subErr);
+                    toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
+                }
             }
-        } catch (err) {
-            console.error('PushManager: Failed to subscribe:', err);
-            toast.error('Erreur lors de l\'activation des notifications.');
+        } catch (err: any) {
+            console.error('PushManager: Failed to setup push:', err);
+            toast.error(`Erreur setup: ${err.message || 'Inconnue'}`);
         }
     }, [user, isLoaded]);
 
@@ -67,9 +75,12 @@ export function NotificationsManager() {
 
     async function syncSubscription(subscription: any) {
         try {
+            console.log('PushManager: Syncing subscription...');
             await axios.post('/api/notifications/push/subscribe', subscription.toJSON());
-        } catch (err) {
+            console.log('PushManager: Sync complete');
+        } catch (err: any) {
             console.error('PushManager: Failed to sync subscription with server:', err);
+            toast.error(`Erreur de synchronisation serveur: ${err.response?.data?.error || err.message}`);
         }
     }
 
