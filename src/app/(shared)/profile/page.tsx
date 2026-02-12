@@ -96,10 +96,14 @@ export default function ProfilePage() {
                                     {notificationPermission === 'default' && (
                                         <Button
                                             className="w-full md:w-auto font-black italic uppercase tracking-widest shadow-lg active:translate-y-1 transition-all"
-                                            onClick={() => {
-                                                window.dispatchEvent(new CustomEvent('trigger-push-setup'));
-                                                // Update local state after click (though the manager will also trigger a refresh)
-                                                setTimeout(() => setNotificationPermission(Notification.permission), 500);
+                                            onClick={async () => {
+                                                if (typeof window !== 'undefined' && 'Notification' in window) {
+                                                    const permission = await Notification.requestPermission();
+                                                    setNotificationPermission(permission);
+                                                    if (permission === 'granted') {
+                                                        window.dispatchEvent(new CustomEvent('trigger-push-setup'));
+                                                    }
+                                                }
                                             }}
                                         >
                                             Activer

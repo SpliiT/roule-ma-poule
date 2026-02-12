@@ -90,9 +90,14 @@ export default function NotificationsPage() {
                             <Button
                                 size="sm"
                                 className="font-black italic uppercase text-[10px] tracking-widest h-8"
-                                onClick={() => {
-                                    window.dispatchEvent(new CustomEvent('trigger-push-setup'));
-                                    setTimeout(() => setNotificationPermission(Notification.permission), 500);
+                                onClick={async () => {
+                                    if (typeof window !== 'undefined' && 'Notification' in window) {
+                                        const permission = await Notification.requestPermission();
+                                        setNotificationPermission(permission);
+                                        if (permission === 'granted') {
+                                            window.dispatchEvent(new CustomEvent('trigger-push-setup'));
+                                        }
+                                    }
                                 }}
                             >
                                 Autoriser

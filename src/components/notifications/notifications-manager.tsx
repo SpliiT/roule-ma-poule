@@ -26,15 +26,9 @@ export function NotificationsManager() {
                 return;
             }
 
-            if (forceRequest) {
-                const permission = await Notification.requestPermission();
-                setPermissionStatus(permission);
-
-                if (permission !== 'granted') {
-                    toast.error('Les notifications ont été refusées.');
-                    return;
-                }
-
+            // If we are here and forceRequest is true, it means we want to subscribe
+            // The permission must have been granted ALREADY in the UI click handler
+            if (forceRequest && Notification.permission === 'granted') {
                 const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
                 if (!publicKey) {
                     console.error('PushManager: Missing VAPID public key');
@@ -49,10 +43,12 @@ export function NotificationsManager() {
                 const subscription = await registration.pushManager.subscribe(subscribeOptions);
                 await syncSubscription(subscription);
                 setIsSubscribed(true);
+                setPermissionStatus('granted');
                 toast.success('Notifications activées !');
             }
         } catch (err) {
             console.error('PushManager: Failed to subscribe:', err);
+            toast.error('Erreur lors de l\'activation des notifications.');
         }
     }, [user, isLoaded]);
 
