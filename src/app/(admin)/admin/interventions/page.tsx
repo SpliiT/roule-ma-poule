@@ -104,36 +104,36 @@ export default function AdminInterventionsPage() {
     });
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight italic font-black uppercase">Gestion des Interventions</h1>
-                    <p className="text-muted-foreground">Suivez et gérez l'ensemble des interventions du réseau.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight italic font-black uppercase">Gestion des Interventions</h1>
+                    <p className="text-sm text-muted-foreground">Suivez et gérez l'ensemble des interventions du réseau.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2" onClick={handleExportCSV}>
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <Button variant="outline" className="flex-1 sm:flex-none gap-2" onClick={handleExportCSV}>
                         <Download className="h-4 w-4" />
-                        Exporter CSV
+                        <span className="hidden xs:inline">Exporter</span>
                     </Button>
-                    <Button className="gap-2 font-black italic uppercase tracking-tighter" onClick={() => setCreateDialogOpen(true)}>
+                    <Button className="flex-[2] sm:flex-none gap-2 font-black italic uppercase tracking-tighter" onClick={() => setCreateDialogOpen(true)}>
                         <ClipboardList className="h-4 w-4" />
-                        Nouvelle Intervention
+                        <span>Nouvelle <span className="hidden xs:inline">Intervention</span></span>
                     </Button>
                 </div>
             </div>
             <Card className="border-2 border-primary/5 shadow-xl">
                 <CardHeader className="pb-3 border-b">
-                    <div className="flex items-center gap-4">
-                        <div className="relative flex-1">
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                        <div className="relative w-full md:flex-1">
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Rechercher une intervention, un client..."
-                                className="pl-10 bg-muted/30 border-primary/10"
+                                className="pl-10 bg-muted/30 border-primary/10 h-11 md:h-10"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                         <select
-                            className="border rounded-md px-3 py-2 text-sm bg-background"
+                            className="w-full md:w-auto border rounded-md px-3 py-2 text-sm bg-background h-11 md:h-10 font-bold"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                         >
@@ -155,124 +155,214 @@ export default function AdminInterventionsPage() {
                             </div>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead className="bg-muted/50 border-b">
-                                    <tr className="text-left font-bold uppercase text-[11px] tracking-widest text-muted-foreground">
-                                        <th className="p-4">Date & Heure</th>
-                                        <th className="p-4">Client</th>
-                                        <th className="p-4">Service</th>
-                                        <th className="p-4">Technicien</th>
-                                        <th className="p-4">Ville</th>
-                                        <th className="p-4">Statut</th>
-                                        <th className="p-4 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredInterventions.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={7} className="p-12 text-center text-muted-foreground italic">
-                                                Aucune intervention trouvée.
-                                            </td>
+                        <>
+                            <div className="overflow-x-auto hidden md:block">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-muted/50 border-b">
+                                        <tr className="text-left font-bold uppercase text-[11px] tracking-widest text-muted-foreground">
+                                            <th className="p-4">Date & Heure</th>
+                                            <th className="p-4">Client</th>
+                                            <th className="p-4">Service</th>
+                                            <th className="p-4">Technicien</th>
+                                            <th className="p-4">Ville</th>
+                                            <th className="p-4">Statut</th>
+                                            <th className="p-4 text-right">Actions</th>
                                         </tr>
-                                    ) : (
-                                        filteredInterventions.map((i: any) => (
-                                            <tr key={i.id} className="border-b hover:bg-primary/5 transition-colors group">
-                                                <td className="p-4">
-                                                    <div className="font-bold text-foreground underline decoration-primary/30 decoration-2 underline-offset-4">{format(new Date(i.scheduledAt), 'dd/MM/yyyy')}</div>
-                                                    <div className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" /> {format(new Date(i.scheduledAt), 'HH:mm')}
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-black text-primary text-xs">
-                                                            {(i.client.name || 'C').charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold">{i.client.name || 'Client'}</div>
-                                                            <div className="text-[10px] text-muted-foreground">{i.city}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary font-bold">
-                                                        {i.forfait.name}
-                                                    </Badge>
-                                                </td>
-                                                <td className="p-4">
-                                                    {i.technician ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-6 w-6 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[8px] font-bold text-blue-500">
-                                                                {i.technician.name?.charAt(0)}
-                                                            </div>
-                                                            <span className="font-medium text-xs">{i.technician.name}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-[10px] text-yellow-600 font-bold bg-yellow-500/10 px-2 py-1 rounded-full uppercase tracking-tighter">
-                                                            Non assigné
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-muted-foreground font-medium">
-                                                    <div className="flex items-center gap-1">
-                                                        <MapPin className="h-3 w-3 text-primary" />
-                                                        {i.city}
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    {getStatusBadge(i.status)}
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/20 group-hover:bg-primary/10 border border-transparent group-hover:border-primary/20">
-                                                                <MoreHorizontal className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end" className="w-56 border-2">
-                                                            <DropdownMenuLabel className="font-black italic uppercase text-[10px] tracking-widest text-muted-foreground">Actions intervention</DropdownMenuLabel>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                className="gap-2 focus:bg-primary/10 focus:text-primary cursor-pointer font-bold"
-                                                                onClick={() => {
-                                                                    setSelectedIntervention(i);
-                                                                    setAssignDialogOpen(true);
-                                                                }}
-                                                            >
-                                                                <UserPlus className="h-4 w-4" />
-                                                                Assigner un technicien
-                                                            </DropdownMenuItem>
-                                                            {i.status === 'PENDING' && (
-                                                                <DropdownMenuItem
-                                                                    className="gap-2 focus:bg-blue-500/10 focus:text-blue-500 cursor-pointer font-bold"
-                                                                    onClick={() => updateStatusMutation.mutate({ id: i.id, status: 'CONFIRMED' })}
-                                                                >
-                                                                    <CheckCircle2 className="h-4 w-4" />
-                                                                    Confirmer sans technicien
-                                                                </DropdownMenuItem>
-                                                            )}
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
-                                                                onClick={() => {
-                                                                    if (confirm('Voulez-vous vraiment annuler cette intervention ?')) {
-                                                                        updateStatusMutation.mutate({ id: i.id, status: 'CANCELLED' });
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <XCircle className="h-4 w-4" />
-                                                                Annuler l'intervention
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                    </thead>
+                                    <tbody>
+                                        {filteredInterventions.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="p-12 text-center text-muted-foreground italic">
+                                                    Aucune intervention trouvée.
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                        ) : (
+                                            filteredInterventions.map((i: any) => (
+                                                <tr key={i.id} className="border-b hover:bg-primary/5 transition-colors group">
+                                                    <td className="p-4">
+                                                        <div className="font-bold text-foreground underline decoration-primary/30 decoration-2 underline-offset-4">{format(new Date(i.scheduledAt), 'dd/MM/yyyy')}</div>
+                                                        <div className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" /> {format(new Date(i.scheduledAt), 'HH:mm')}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-black text-primary text-xs">
+                                                                {(i.client.name || 'C').charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold">{i.client.name || 'Client'}</div>
+                                                                <div className="text-[10px] text-muted-foreground">{i.city}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary font-bold">
+                                                            {i.forfait.name}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {i.technician ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="h-6 w-6 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[8px] font-bold text-blue-500">
+                                                                    {i.technician.name?.charAt(0)}
+                                                                </div>
+                                                                <span className="font-medium text-xs">{i.technician.name}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] text-yellow-600 font-bold bg-yellow-500/10 px-2 py-1 rounded-full uppercase tracking-tighter">
+                                                                Non assigné
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4 text-muted-foreground font-medium">
+                                                        <div className="flex items-center gap-1">
+                                                            <MapPin className="h-3 w-3 text-primary" />
+                                                            {i.city}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        {getStatusBadge(i.status)}
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/20 group-hover:bg-primary/10 border border-transparent group-hover:border-primary/20">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end" className="w-56 border-2">
+                                                                <DropdownMenuLabel className="font-black italic uppercase text-[10px] tracking-widest text-muted-foreground">Actions intervention</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    className="gap-2 focus:bg-primary/10 focus:text-primary cursor-pointer font-bold"
+                                                                    onClick={() => {
+                                                                        setSelectedIntervention(i);
+                                                                        setAssignDialogOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <UserPlus className="h-4 w-4" />
+                                                                    Assigner un technicien
+                                                                </DropdownMenuItem>
+                                                                {i.status === 'PENDING' && (
+                                                                    <DropdownMenuItem
+                                                                        className="gap-2 focus:bg-blue-500/10 focus:text-blue-500 cursor-pointer font-bold"
+                                                                        onClick={() => updateStatusMutation.mutate({ id: i.id, status: 'CONFIRMED' })}
+                                                                    >
+                                                                        <CheckCircle2 className="h-4 w-4" />
+                                                                        Confirmer sans technicien
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
+                                                                    onClick={() => {
+                                                                        if (confirm('Voulez-vous vraiment annuler cette intervention ?')) {
+                                                                            updateStatusMutation.mutate({ id: i.id, status: 'CANCELLED' });
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <XCircle className="h-4 w-4" />
+                                                                    Annuler l'intervention
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="md:hidden divide-y divide-border">
+                                {filteredInterventions.length === 0 ? (
+                                    <div className="p-12 text-center text-muted-foreground italic">
+                                        Aucune intervention trouvée.
+                                    </div>
+                                ) : (
+                                    filteredInterventions.map((i: any) => (
+                                        <div key={i.id} className="p-4 space-y-4">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <div className="font-black text-sm uppercase italic underline decoration-primary decoration-2 underline-offset-4">
+                                                            {format(new Date(i.scheduledAt), 'dd/MM/yyyy')}
+                                                        </div>
+                                                        <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" /> {format(new Date(i.scheduledAt), 'HH:mm')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="font-bold text-lg">{i.client.name}</div>
+                                                </div>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="outline" size="icon" className="h-10 w-10 border-2">
+                                                            <MoreHorizontal className="h-5 w-5" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-56 border-2">
+                                                        <DropdownMenuLabel className="font-black italic uppercase text-[10px] tracking-widest text-muted-foreground">Actions</DropdownMenuLabel>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            className="gap-2 focus:bg-primary/10 focus:text-primary cursor-pointer font-bold"
+                                                            onClick={() => {
+                                                                setSelectedIntervention(i);
+                                                                setAssignDialogOpen(true);
+                                                            }}
+                                                        >
+                                                            <UserPlus className="h-4 w-4" />
+                                                            Assigner
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem
+                                                            className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
+                                                            onClick={() => {
+                                                                if (confirm('Voulez-vous vraiment annuler ?')) {
+                                                                    updateStatusMutation.mutate({ id: i.id, status: 'CANCELLED' });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <XCircle className="h-4 w-4" />
+                                                            Annuler
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2">
+                                                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 font-bold uppercase text-[10px]">
+                                                    {i.forfait.name}
+                                                </Badge>
+                                                {getStatusBadge(i.status)}
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-dashed">
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">Ville</div>
+                                                    <div className="text-xs font-bold flex items-center gap-1">
+                                                        <MapPin className="h-3 w-3 text-primary" /> {i.city}
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">Technicien</div>
+                                                    {i.technician ? (
+                                                        <div className="text-xs font-bold flex items-center gap-1">
+                                                            <div className="h-4 w-4 rounded-full bg-blue-500/20 text-[6px] flex items-center justify-center text-blue-500">
+                                                                {i.technician.name?.charAt(0)}
+                                                            </div>
+                                                            {i.technician.name}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-[9px] font-black text-yellow-600 uppercase">Non assigné</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

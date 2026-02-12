@@ -19,10 +19,11 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
+        console.log('API Push: Received subscription request for user', user.id);
         const { endpoint, keys } = subscribeSchema.parse(body);
 
         // Enregistrer ou mettre à jour la souscription
-        await prisma.pushSubscription.upsert({
+        const result = await prisma.pushSubscription.upsert({
             where: { endpoint },
             update: {
                 userId: user.id,
@@ -37,9 +38,10 @@ export async function POST(req: Request) {
             },
         });
 
+        console.log('API Push: Subscription saved/updated in DB', result.id);
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Push subscription error:', error);
+        console.error('API Push: Error:', error);
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: 'Données invalides' }, { status: 400 });
         }

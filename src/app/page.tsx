@@ -11,39 +11,41 @@ export default function HomePage() {
       { }
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-20 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
             <Image
               src="/images/logo.png"
-              alt="Roule Ma Poule Logo"
-              width={64}
-              height={64}
-              className="object-contain"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="object-contain md:w-16 md:h-16"
             />
-            <span className="text-2xl font-black tracking-tighter text-foreground uppercase italic px-1">
-              Roule <span className="text-primary">Ma</span> Poule
+            <span className="text-lg md:text-2xl font-black tracking-tighter text-foreground uppercase italic px-1">
+              Roule <span className="text-primary">Ma</span> <span className="hidden xs:inline">Poule</span>
             </span>
           </Link>
-          <div className="flex items-center gap-3">
-            <SignedOut>
-              <Link href="/sign-in">
-                <Button variant="ghost" className="bg-accent" size="sm">
-                  Se connecter
-                </Button>
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link href="/dashboard">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <LayoutDashboard className="h-4 w-4" />
-                  Tableau de bord
-                </Button>
-              </Link>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-3">
+              <SignedOut>
+                <Link href="/sign-in">
+                  <Button variant="ghost" className="bg-accent" size="sm">
+                    Se connecter
+                  </Button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Tableau de bord
+                  </Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+            </div>
             <Link href="/bookings/new">
-              <Button size="sm" className="font-bold">
+              <Button size="sm" className="font-bold text-xs md:text-sm h-10 px-4 md:h-11 md:px-6">
                 <CalendarPlus className="h-4 w-4 mr-1" />
-                Réserver
+                <span>Réserver</span>
               </Button>
             </Link>
           </div>
@@ -62,15 +64,15 @@ export default function HomePage() {
                 <Wrench className="h-4 w-4" />
                 68 ans d&#39;expertise vélo — Lyon
               </div>
-              <h1 className="text-5xl font-black tracking-tighter text-foreground sm:text-6xl lg:text-7xl leading-[0.9]">
+              <h1 className="text-4xl xs:text-5xl font-black tracking-tighter text-foreground sm:text-6xl lg:text-7xl leading-[0.9]">
                 VOTRE VÉLO <br />
                 <span className="text-primary italic drop-shadow-sm">RÉPARÉ</span> <br />
                 <span className="relative">
                   CHEZ VOUS
-                  <div className="absolute -bottom-2 left-0 h-3 w-full bg-primary/30 -z-10 -rotate-1 rounded-full" />
+                  <div className="absolute -bottom-1 md:-bottom-2 left-0 h-2 md:h-3 w-full bg-primary/30 -z-10 -rotate-1 rounded-full" />
                 </span>
               </h1>
-              <p className="mt-8 text-xl text-muted-foreground md:text-2xl font-medium leading-relaxed max-w-xl">
+              <p className="mt-6 md:mt-8 text-lg md:text-2xl text-muted-foreground font-medium leading-relaxed max-w-xl">
                 Plus besoin de porter votre vélo à l&#39;atelier.
                 <span className="text-foreground font-bold"> On vient à vous </span>
                 avec tout le matos pour rouler l&#39;esprit libre.

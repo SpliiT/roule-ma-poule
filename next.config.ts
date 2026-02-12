@@ -3,7 +3,7 @@ import withPWAInit from '@ducanh2912/next-pwa';
 
 const withPWA = withPWAInit({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  disable: false, // Enable in dev for testing push notifications
   register: true,
   customWorkerSrc: 'src/worker',
 });

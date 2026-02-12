@@ -16,11 +16,11 @@ export default async function TechnicianLayout({
     return (
         <div className="flex min-h-screen">
             <TechnicianSidebar user={user} />
-            <main className="flex-1 pl-0 md:pl-64">
+            <main className="flex-1 pl-0 md:pl-64 pb-24 md:pb-0">
                 <div className="container mx-auto px-4 py-6 max-w-6xl">
                     {children}
                 </div>
             </main>
         </div>
     );
-}
+}

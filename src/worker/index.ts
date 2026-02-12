@@ -3,10 +3,15 @@
 export default null as any;
 
 self.addEventListener('push', (event: any) => {
-    if (!event.data) return;
+    console.log('SW: Push event received', event);
+    if (!event.data) {
+        console.warn('SW: Push event has no data');
+        return;
+    }
 
     try {
         const data = event.data.json();
+        console.log('SW: Push data parsed:', data);
         const { title, body, icon, data: customData } = data;
 
         const options = {
@@ -19,7 +24,7 @@ self.addEventListener('push', (event: any) => {
 
         event.waitUntil((self as any).registration.showNotification(title || 'Roule Ma Poule', options));
     } catch (err) {
-        console.error('Error handling push event:', err);
+        console.error('SW: Error handling push event:', err);
     }
 });
 
