@@ -62,6 +62,35 @@ export default function NotificationsPage() {
                 )}
             </header>
 
+            {typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted' && (
+                <div className="bg-primary/10 border-b border-primary/20 px-4 py-3">
+                    <div className="container mx-auto max-w-2xl flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                                <Bell className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-black italic uppercase tracking-tight">Activer les alertes mobiles</h4>
+                                <p className="text-[10px] text-muted-foreground font-medium leading-tight">
+                                    {Notification.permission === 'denied'
+                                        ? "Les notifications sont bloquées dans votre navigateur."
+                                        : "Recevez une notification WhatsApp-style même quand l'app est fermée."}
+                                </p>
+                            </div>
+                        </div>
+                        {Notification.permission === 'default' && (
+                            <Button
+                                size="sm"
+                                className="font-black italic uppercase text-[10px] tracking-widest h-8"
+                                onClick={() => window.dispatchEvent(new CustomEvent('trigger-push-setup'))}
+                            >
+                                Autoriser
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <main className="container mx-auto max-w-2xl px-4 py-6">
                 {isLoading ? (
                     <div className="flex h-64 items-center justify-center">

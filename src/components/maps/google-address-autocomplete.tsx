@@ -187,7 +187,7 @@ export function GoogleAddressAutocomplete({
             {!isValidated && isLoaded && !isSearching && (
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground px-1 italic">
                     <Search className="h-2.5 w-2.5" />
-                    Taper un nom (ex: "Zoï") et cliquer sur le résultat
+                    Rentrer votre adresse et cliquer sur le résultat
                 </div>
             )}
         </div>

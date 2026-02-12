@@ -1,49 +1,41 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 export function NotificationsManager() {
     const { user, isLoaded } = useUser();
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
 
-    useEffect(() => {
-        if (!isLoaded || !user) return;
+    const setupPush = useCallback(async (forceRequest = false) => {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            console.warn('Push manager: ServiceWorker or PushManager not supported');
+            return;
+        }
 
-        async function setupPush() {
-            console.log('PushManager: Starting setup...');
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                console.warn('Push manager: ServiceWorker or PushManager not supported');
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const existingSubscription = await registration.pushManager.getSubscription();
+
+            if (existingSubscription && !forceRequest) {
+                setIsSubscribed(true);
+                await syncSubscription(existingSubscription);
                 return;
             }
 
-            try {
-                const registration = await navigator.serviceWorker.ready;
-                console.log('PushManager: ServiceWorker ready', registration);
-
-                const existingSubscription = await registration.pushManager.getSubscription();
-                console.log('PushManager: Existing subscription:', existingSubscription);
-
-                if (existingSubscription) {
-                    setIsSubscribed(true);
-                    console.log('PushManager: Already subscribed, syncing...');
-                    await syncSubscription(existingSubscription);
-                    return;
-                }
-
-                // Request permission
-                console.log('PushManager: Requesting permission...');
+            if (forceRequest) {
                 const permission = await Notification.requestPermission();
-                console.log('PushManager: Permission result:', permission);
+                setPermissionStatus(permission);
+
                 if (permission !== 'granted') {
-                    console.warn('PushManager: Permission not granted');
+                    toast.error('Les notifications ont été refusées.');
                     return;
                 }
 
                 const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-                console.log('PushManager: Using VAPID key:', publicKey);
-
                 if (!publicKey) {
                     console.error('PushManager: Missing VAPID public key');
                     return;
@@ -54,30 +46,47 @@ export function NotificationsManager() {
                     applicationServerKey: urlBase64ToUint8Array(publicKey),
                 };
 
-                console.log('PushManager: Subscribing...');
                 const subscription = await registration.pushManager.subscribe(subscribeOptions);
-                console.log('PushManager: Subscription successful:', subscription);
                 await syncSubscription(subscription);
                 setIsSubscribed(true);
-            } catch (err) {
-                console.error('PushManager: Failed to subscribe:', err);
+                toast.success('Notifications activées !');
             }
+        } catch (err) {
+            console.error('PushManager: Failed to subscribe:', err);
         }
-
-        setupPush();
     }, [user, isLoaded]);
+
+    useEffect(() => {
+        if (!isLoaded || !user) return;
+
+        // Only check for existing subscription on load, don't ask for permission
+        setPermissionStatus(Notification.permission);
+        setupPush(false);
+
+        // Listen for internal events to trigger sync
+        const handleTrigger = () => setupPush(true);
+        window.addEventListener('trigger-push-setup', handleTrigger);
+        return () => window.removeEventListener('trigger-push-setup', handleTrigger);
+    }, [user, isLoaded, setupPush]);
 
     async function syncSubscription(subscription: any) {
         try {
-            console.log('PushManager: Syncing with server...');
-            const response = await axios.post('/api/notifications/push/subscribe', subscription.toJSON());
-            console.log('PushManager: Sync complete', response.data);
+            await axios.post('/api/notifications/push/subscribe', subscription.toJSON());
         } catch (err) {
             console.error('PushManager: Failed to sync subscription with server:', err);
         }
     }
 
-    return null; // Component works in background
+    return null;
+}
+
+// Custom hook to trigger push setup
+export function usePushNotifications() {
+    return {
+        requestPermission: () => {
+            window.dispatchEvent(new CustomEvent('trigger-push-setup'));
+        }
+    };
 }
 
 function urlBase64ToUint8Array(base64String: string) {

@@ -69,6 +69,22 @@ export function NotificationBell() {
                         </Button>
                     )}
                 </div>
+                {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default' && (
+                    <div className="p-3 border-b bg-primary/5">
+                        <p className="text-[10px] text-muted-foreground mb-2 leading-tight">
+                            Recevez des alertes en temps réel sur l'état de vos interventions.
+                        </p>
+                        <Button
+                            size="sm"
+                            className="w-full text-[10px] h-7 font-bold uppercase italic"
+                            onClick={() => {
+                                window.dispatchEvent(new CustomEvent('trigger-push-setup'));
+                            }}
+                        >
+                            Activer les notifications
+                        </Button>
+                    </div>
+                )}
                 <ScrollArea className="h-[300px]">
                     {isLoading ? (
                         <div className="flex h-32 items-center justify-center">
