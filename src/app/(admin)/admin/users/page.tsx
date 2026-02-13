@@ -25,7 +25,8 @@ import {
     UserCog,
     BadgeCheck,
     Ban,
-    Eye
+    Eye,
+    Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 export default function AdminUsersPage() {
@@ -127,6 +128,12 @@ export default function AdminUsersPage() {
                                                         Voir le profil
                                                     </Link>
                                                 </DropdownMenuItem>
+                                                <DropdownMenuItem asChild className="gap-2 focus:bg-primary/10 focus:text-primary cursor-pointer font-bold py-2.5">
+                                                    <Link href={`/admin/notifications?userId=${user.id}`}>
+                                                        <Bell className="h-4 w-4" />
+                                                        Envoyer une notification
+                                                    </Link>
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 {user.role !== 'TECHNICIEN' && user.role !== 'ADMIN' && (
                                                     <DropdownMenuItem
@@ -179,4 +186,4 @@ export default function AdminUsersPage() {
             </Card>
         </div>
     );
-}
+}

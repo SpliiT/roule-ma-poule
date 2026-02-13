@@ -275,3 +275,19 @@ model PushSubscription {
 
   @@index([userId])
 }
+model ScheduledNotification {
+  id          String   @id @default(cuid())
+  userId      String?  // Target user, null for broadcast
+  role        UserRole? // Filter by role if broadcast
+  title       String
+  body        String
+  url         String?
+  scheduledAt DateTime
+  sentAt      DateTime?
+  status      String   @default("PENDING") // PENDING, SENT, FAILED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+}

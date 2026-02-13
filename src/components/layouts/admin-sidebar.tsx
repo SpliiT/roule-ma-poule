@@ -36,6 +36,7 @@ const navItems = [
     { label: 'Zones Géo', href: '/admin/zones', icon: MapPin },
     { label: 'Modèles Planning', href: '/admin/planning', icon: Calendar },
     { label: 'Catalogue', href: '/admin/catalog', icon: Tag },
+    { label: 'Notifications', href: '/admin/notifications', icon: Bell },
     { label: 'Entreprise', href: '/admin/company', icon: Building2 },
     { label: 'Paramètres', href: '/admin/settings', icon: Settings },
 ];
