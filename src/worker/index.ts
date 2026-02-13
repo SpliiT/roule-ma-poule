@@ -43,8 +43,22 @@ self.addEventListener('activate', (event: any) => {
 });
 
 self.addEventListener('fetch', (event: any) => {
-    // Ne pas intercepter les requêtes non-GET ou les requêtes vers des origines différentes
-    if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+    const url = new URL(event.request.url);
+
+    // Ne pas intercepter :
+    // 1. Les requêtes non-GET
+    // 2. Les requêtes vers des origines différentes (sauf si nécessaire, ex: Google Fonts)
+    // 3. Les fichiers Next.js (HMR, static chunks en dev)
+    // 4. Les routes API (POST, GET dynamiques)
+    // 5. Les requêtes Clerk (authentification)
+    if (
+        event.request.method !== 'GET' ||
+        !event.request.url.startsWith(self.location.origin) ||
+        url.pathname.startsWith('/_next/') ||
+        url.pathname.startsWith('/api/') ||
+        url.pathname.startsWith('/clerk/') ||
+        url.search.includes('_rsc') // Next.js Server Components data
+    ) {
         return;
     }
 

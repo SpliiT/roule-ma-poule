@@ -11,16 +11,20 @@ export function NotificationsManager() {
     const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
 
     const setupPush = useCallback(async (forceRequest = false) => {
+        console.log('PushManager: Checking service worker and push support');
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             console.warn('Push manager: ServiceWorker or PushManager not supported');
             return;
         }
 
         try {
+            console.log('PushManager: Service worker and PushManager supported');
             if (forceRequest) toast.info('Initialisation de la souscription...');
             const registration = await navigator.serviceWorker.ready;
+            console.log('PushManager: Service worker ready', registration);
 
             const existingSubscription = await registration.pushManager.getSubscription();
+            console.log('PushManager: Existing subscription check complete, found:', existingSubscription);
 
             if (existingSubscription) {
                 console.log('SW: Existing subscription found, syncing...');
@@ -29,37 +33,47 @@ export function NotificationsManager() {
                 if (!forceRequest) return;
             }
 
+            console.log('PushManager: No existing subscription or forceRequest is true');
             if (forceRequest && Notification.permission === 'granted') {
-                const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-                if (!publicKey) {
-                    toast.error('Clé VAPID manquante côté client.');
-                    return;
-                }
+                console.log('PushManager: Notification permission granted, attempting to subscribe');
+                // const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+                // if (!publicKey) {
+                //     toast.error('Clé VAPID manquante côté client.');
+                //     console.error('PushManager: VAPID public key missing');
+                //     return;
+                // }
+                // console.log('PushManager: VAPID public key found');
 
-                const subscribeOptions = {
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(publicKey),
-                };
+                // const subscribeOptions = {
+                //     userVisibleOnly: true,
+                //     applicationServerKey: urlBase64ToUint8Array(publicKey),
+                // };
 
-                try {
-                    if (forceRequest) toast.info('Génération de la souscription...');
-                    const subscription = await registration.pushManager.subscribe(subscribeOptions);
-                    if (forceRequest) toast.info('Souscription générée, synchronisation...');
-                    await syncSubscription(subscription);
-                    setIsSubscribed(true);
-                    setPermissionStatus('granted');
-                    toast.success('Notifications activées avec succès !');
-                } catch (subErr: any) {
-                    console.error('PushManager: Subscription error:', subErr);
-                    toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
-                }
+                // try {
+                //     if (forceRequest) toast.info('Génération de la souscription...');
+                //     console.log('PushManager: Attempting to subscribe with options:', subscribeOptions);
+                //     const subscription = await registration.pushManager.subscribe(subscribeOptions);
+                //     console.log('PushManager: Subscription generated:', subscription);
+                //     if (forceRequest) toast.info('Souscription générée, synchronisation...');
+                //     await syncSubscription(subscription);
+                //     setIsSubscribed(true);
+                //     setPermissionStatus('granted');
+                //     toast.success('Notifications activées avec succès !');
+                // } catch (subErr: any) {
+                //     console.error('PushManager: Subscription error:', subErr);
+                //     toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
+                // }
             } else if (forceRequest && Notification.permission === 'default') {
+                console.log('PushManager: Notification permission is default, requesting permission');
                 // Request permission if not granted yet
                 const permission = await Notification.requestPermission();
                 setPermissionStatus(permission);
+                console.log('PushManager: Notification permission result:', permission);
                 if (permission === 'granted') {
                     setupPush(true);
                 }
+            } else {
+                console.log('PushManager: Not forceRequest or permission not granted, skipping subscription attempt');
             }
         } catch (err: any) {
             console.error('PushManager: Failed to setup push:', err);
@@ -68,19 +82,32 @@ export function NotificationsManager() {
     }, []);
 
     useEffect(() => {
-        if (!isLoaded || !user) return;
+        console.log('PushManager: useEffect triggered');
+        if (!isLoaded || !user) {
+            console.log('PushManager: Clerk user not loaded or not available, skipping setupPush');
+            return;
+        }
+        console.log('PushManager: Clerk user loaded:', user);
 
         setPermissionStatus(Notification.permission);
+        console.log('PushManager: Initial permission status:', Notification.permission);
         setupPush(false);
 
-        const handleTrigger = () => setupPush(true);
+        const handleTrigger = () => {
+            console.log('PushManager: trigger-push-setup event received');
+            setupPush(true);
+        };
         window.addEventListener('trigger-push-setup', handleTrigger);
-        return () => window.removeEventListener('trigger-push-setup', handleTrigger);
+        return () => {
+            console.log('PushManager: Cleaning up trigger-push-setup event listener');
+            window.removeEventListener('trigger-push-setup', handleTrigger);
+        };
     }, [user, isLoaded, setupPush]);
 
     async function syncSubscription(subscription: any) {
+        console.log('PushManager: Starting syncSubscription');
         try {
-            console.log('PushManager: Syncing subscription...');
+            console.log('PushManager: Syncing subscription to server with data:', subscription.toJSON());
             await axios.post('/api/notifications/push/subscribe', subscription.toJSON());
             console.log('PushManager: Sync complete');
         } catch (err: any) {
