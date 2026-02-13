@@ -31,6 +31,11 @@ export function NotificationsManager() {
                 setIsSubscribed(true);
                 await syncSubscription(existingSubscription);
                 if (!forceRequest) return;
+            } else if (!forceRequest && Notification.permission === 'granted') {
+                console.log('PushManager: Permission already granted but NO subscription found, triggering auto-sync...');
+                // Trigger subscription automatically if permission is granted but we don't have a sub in this browser
+                setupPush(true);
+                return;
             }
 
             console.log('PushManager: No existing subscription or forceRequest is true');

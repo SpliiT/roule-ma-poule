@@ -74,10 +74,12 @@ export function NotificationBell() {
                         </Button>
                     )}
                 </div>
-                {mounted && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default' && (
+                {mounted && typeof window !== 'undefined' && 'Notification' in window && (Notification.permission === 'default' || data?.isPushSubscribed === false) && (
                     <div className="p-3 border-b bg-primary/5">
                         <p className="text-[10px] text-muted-foreground mb-2 leading-tight">
-                            Recevez des alertes en temps réel sur l'état de vos interventions.
+                            {Notification.permission === 'granted'
+                                ? "Synchronisez vos notifications pour rester informé."
+                                : "Recevez des alertes en temps réel sur l'état de vos interventions."}
                         </p>
                         <Button
                             size="sm"
@@ -86,7 +88,7 @@ export function NotificationBell() {
                                 window.dispatchEvent(new CustomEvent('trigger-push-setup'));
                             }}
                         >
-                            Activer les notifications
+                            {Notification.permission === 'granted' ? "Synchroniser" : "Activer les notifications"}
                         </Button>
                     </div>
                 )}

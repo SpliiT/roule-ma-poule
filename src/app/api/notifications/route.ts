@@ -13,7 +13,16 @@ export async function GET() {
         const unreadCount = await prisma.notification.count({
             where: { userId: user.id, isRead: false },
         });
-        return NextResponse.json({ data: notifications, unreadCount });
+
+        const pushSubscriptionCount = await prisma.pushSubscription.count({
+            where: { userId: user.id },
+        });
+
+        return NextResponse.json({
+            data: notifications,
+            unreadCount,
+            isPushSubscribed: pushSubscriptionCount > 0
+        });
     } catch (error) {
         console.error('GET notifications error:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
@@ -41,4 +50,4 @@ export async function PATCH(req: Request) {
         console.error('PATCH notifications error:', error);
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
-}
+}
