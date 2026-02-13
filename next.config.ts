@@ -5,7 +5,7 @@ const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development' && process.env.PWA_DEV !== 'true',
   register: true,
-  customWorkerSrc: 'src/worker/index.ts',
+  customWorkerSrc: 'src/worker',
   customWorkerDest: 'public',
 });
 
