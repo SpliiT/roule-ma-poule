@@ -18,6 +18,11 @@ import { fr } from 'date-fns/locale';
 export function NotificationBell() {
     const queryClient = useQueryClient();
     const [open, setOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const { data, isLoading } = useQuery({
         queryKey: ['notifications'],
@@ -69,7 +74,7 @@ export function NotificationBell() {
                         </Button>
                     )}
                 </div>
-                {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default' && (
+                {mounted && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default' && (
                     <div className="p-3 border-b bg-primary/5">
                         <p className="text-[10px] text-muted-foreground mb-2 leading-tight">
                             Recevez des alertes en temps réel sur l'état de vos interventions.

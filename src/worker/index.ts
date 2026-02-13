@@ -5,9 +5,6 @@ export default null as any;
 const CACHE_NAME = 'roule-ma-poule-cache-v1';
 const urlsToCache = [
     '/',
-    '/index.html',
-    '/styles.css', // Assurez-vous que ce fichier existe ou ajustez le chemin
-    '/script.js', // Assurez-vous que ce fichier existe ou ajustez le chemin
     '/images/favicon.png',
     '/images/logo.png',
     '/images/mascotte.png',

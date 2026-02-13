@@ -36,6 +36,8 @@ export default function ProfilePage() {
                 </div>
                 <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
                     <UserProfile
+                        path="/profile"
+                        routing="path"
                         appearance={{
                             elements: {
                                 rootBox: "w-full",

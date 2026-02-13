@@ -39,7 +39,7 @@ export default function HomePage() {
                     Tableau de bord
                   </Button>
                 </Link>
-                <UserButton afterSignOutUrl="/" />
+                <UserButton />
               </SignedIn>
             </div>
             <Link href="/bookings/new">

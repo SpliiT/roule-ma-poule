@@ -19,14 +19,14 @@ export function NotificationsManager() {
         try {
             if (forceRequest) toast.info('Initialisation de la souscription...');
             const registration = await navigator.serviceWorker.ready;
-            if (forceRequest) console.log('SW: Ready');
 
             const existingSubscription = await registration.pushManager.getSubscription();
 
-            if (existingSubscription && !forceRequest) {
+            if (existingSubscription) {
+                console.log('SW: Existing subscription found, syncing...');
                 setIsSubscribed(true);
                 await syncSubscription(existingSubscription);
-                return;
+                if (!forceRequest) return;
             }
 
             if (forceRequest && Notification.permission === 'granted') {
@@ -53,21 +53,26 @@ export function NotificationsManager() {
                     console.error('PushManager: Subscription error:', subErr);
                     toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
                 }
+            } else if (forceRequest && Notification.permission === 'default') {
+                // Request permission if not granted yet
+                const permission = await Notification.requestPermission();
+                setPermissionStatus(permission);
+                if (permission === 'granted') {
+                    setupPush(true);
+                }
             }
         } catch (err: any) {
             console.error('PushManager: Failed to setup push:', err);
             toast.error(`Erreur setup: ${err.message || 'Inconnue'}`);
         }
-    }, [user, isLoaded]);
+    }, []);
 
     useEffect(() => {
         if (!isLoaded || !user) return;
 
-        // Only check for existing subscription on load, don't ask for permission
         setPermissionStatus(Notification.permission);
         setupPush(false);
 
-        // Listen for internal events to trigger sync
         const handleTrigger = () => setupPush(true);
         window.addEventListener('trigger-push-setup', handleTrigger);
         return () => window.removeEventListener('trigger-push-setup', handleTrigger);
@@ -80,14 +85,16 @@ export function NotificationsManager() {
             console.log('PushManager: Sync complete');
         } catch (err: any) {
             console.error('PushManager: Failed to sync subscription with server:', err);
-            toast.error(`Erreur de synchronisation serveur: ${err.response?.data?.error || err.message}`);
+            // Don't show toast for background sync failures to avoid spamming the user
+            if (permissionStatus === 'granted') {
+                // only toast if user explicitly tried to enable
+            }
         }
     }
 
     return null;
 }
 
-// Custom hook to trigger push setup
 export function usePushNotifications() {
     return {
         requestPermission: () => {

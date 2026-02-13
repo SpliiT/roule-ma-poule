@@ -5,11 +5,12 @@ const withPWA = withPWAInit({
   dest: 'public',
   disable: false, // Enable in dev for testing push notifications
   register: true,
-  customWorkerSrc: 'src/worker',
+  customWorkerSrc: 'src/worker/index.ts',
+  customWorkerDest: 'public',
 });
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+
   images: {
     remotePatterns: [
       {
