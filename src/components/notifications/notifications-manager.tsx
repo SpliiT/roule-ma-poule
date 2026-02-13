@@ -36,33 +36,33 @@ export function NotificationsManager() {
             console.log('PushManager: No existing subscription or forceRequest is true');
             if (forceRequest && Notification.permission === 'granted') {
                 console.log('PushManager: Notification permission granted, attempting to subscribe');
-                // const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-                // if (!publicKey) {
-                //     toast.error('Clé VAPID manquante côté client.');
-                //     console.error('PushManager: VAPID public key missing');
-                //     return;
-                // }
-                // console.log('PushManager: VAPID public key found');
+                const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+                if (!publicKey) {
+                    toast.error('Clé VAPID manquante côté client.');
+                    console.error('PushManager: VAPID public key missing');
+                    return;
+                }
+                console.log('PushManager: VAPID public key found');
 
-                // const subscribeOptions = {
-                //     userVisibleOnly: true,
-                //     applicationServerKey: urlBase64ToUint8Array(publicKey),
-                // };
+                const subscribeOptions = {
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(publicKey),
+                };
 
-                // try {
-                //     if (forceRequest) toast.info('Génération de la souscription...');
-                //     console.log('PushManager: Attempting to subscribe with options:', subscribeOptions);
-                //     const subscription = await registration.pushManager.subscribe(subscribeOptions);
-                //     console.log('PushManager: Subscription generated:', subscription);
-                //     if (forceRequest) toast.info('Souscription générée, synchronisation...');
-                //     await syncSubscription(subscription);
-                //     setIsSubscribed(true);
-                //     setPermissionStatus('granted');
-                //     toast.success('Notifications activées avec succès !');
-                // } catch (subErr: any) {
-                //     console.error('PushManager: Subscription error:', subErr);
-                //     toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
-                // }
+                try {
+                    if (forceRequest) toast.info('Génération de la souscription...');
+                    console.log('PushManager: Attempting to subscribe with options:', subscribeOptions);
+                    const subscription = await registration.pushManager.subscribe(subscribeOptions);
+                    console.log('PushManager: Subscription generated:', subscription);
+                    if (forceRequest) toast.info('Souscription générée, synchronisation...');
+                    await syncSubscription(subscription);
+                    setIsSubscribed(true);
+                    setPermissionStatus('granted');
+                    toast.success('Notifications activées avec succès !');
+                } catch (subErr: any) {
+                    console.error('PushManager: Subscription error:', subErr);
+                    toast.error(`Erreur de souscription: ${subErr.message || 'Inconnue'}`);
+                }
             } else if (forceRequest && Notification.permission === 'default') {
                 console.log('PushManager: Notification permission is default, requesting permission');
                 // Request permission if not granted yet

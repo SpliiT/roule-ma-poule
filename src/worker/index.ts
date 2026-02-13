@@ -101,9 +101,17 @@ self.addEventListener('push', async (event: any) => {
     }
 
     try {
-        const data = await event.data.json();
-        console.log('SW: Push data parsed:', data);
-        const { title, body, icon, data: customData } = data;
+        let payload: any = {};
+        try {
+            payload = await event.data.json();
+            console.log('SW: Push data parsed as JSON:', payload);
+        } catch (jsonErr) {
+            const text = event.data.text();
+            console.log('SW: Push data parsed as text:', text);
+            payload = { title: 'Roule Ma Poule', body: text };
+        }
+
+        const { title, body, icon, data: customData } = payload;
 
         const options = {
             body: body || 'Nouvelle notification',
