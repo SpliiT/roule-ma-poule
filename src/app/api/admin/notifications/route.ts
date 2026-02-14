@@ -8,6 +8,14 @@ export async function GET() {
         await requireRole('ADMIN');
 
         const notifications = await prisma.scheduledNotification.findMany({
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        role: true,
+                    }
+                }
+            },
             orderBy: { createdAt: 'desc' },
             take: 100,
         });

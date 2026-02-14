@@ -24,41 +24,34 @@ export async function GET(req: Request) {
 
         for (const notification of pendingNotifications) {
             try {
+                const metadata = (notification.metadata as any) || {};
+                const pushPayload = {
+                    title: notification.title,
+                    body: notification.body,
+                    icon: metadata.icon,
+                    image: metadata.image,
+                    badge: metadata.badge,
+                    data: {
+                        url: notification.url || (metadata.url)
+                    }
+                };
+
                 if (notification.userId) {
-                    // Cible unique
-                    await sendPushNotification(notification.userId, {
-                        title: notification.title,
-                        body: notification.body,
-                        data: { url: notification.url }
-                    });
+                    await sendPushNotification(notification.userId, pushPayload);
                 } else if (notification.role) {
-                    // Par rôle
                     const users = await prisma.user.findMany({
-                        where: { role: notification.role, pushSubscriptions: { some: {} } },
+                        where: { role: notification.role as any, pushSubscriptions: { some: {} } },
                         select: { id: true }
                     });
 
-                    await Promise.all(users.map(u =>
-                        sendPushNotification(u.id, {
-                            title: notification.title,
-                            body: notification.body,
-                            data: { url: notification.url }
-                        })
-                    ));
+                    await Promise.all(users.map(u => sendPushNotification(u.id, pushPayload)));
                 } else {
-                    // Broadcast total
                     const users = await prisma.user.findMany({
                         where: { pushSubscriptions: { some: {} } },
                         select: { id: true }
                     });
 
-                    await Promise.all(users.map(u =>
-                        sendPushNotification(u.id, {
-                            title: notification.title,
-                            body: notification.body,
-                            data: { url: notification.url }
-                        })
-                    ));
+                    await Promise.all(users.map(u => sendPushNotification(u.id, pushPayload)));
                 }
 
                 await prisma.scheduledNotification.update({

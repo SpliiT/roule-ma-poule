@@ -206,7 +206,7 @@ export default function AdminNotificationsPage() {
                                             <SelectContent>
                                                 {consumers.map((u: any) => (
                                                     <SelectItem key={u.id} value={u.id} className="font-bold">
-                                                        {u.name || u.email}
+                                                        {u.name || u.email} ({u.role})
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -419,9 +419,28 @@ export default function AdminNotificationsPage() {
                             Historique des Campagnes
                         </CardTitle>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-notifications-history'] })} className="font-bold italic uppercase text-[10px]">
-                        <Clock className="h-3 w-3 mr-2" /> Actualiser
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                if ('serviceWorker' in navigator) {
+                                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                                        for (const registration of registrations) {
+                                            registration.unregister();
+                                        }
+                                        toast.success('Service Worker supprimé. Rafraîchissez la page.');
+                                    });
+                                }
+                            }}
+                            className="font-bold italic uppercase text-[10px] text-destructive border-destructive/20 hover:bg-destructive/5"
+                        >
+                            Reset SW
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-notifications-history'] })} className="font-bold italic uppercase text-[10px]">
+                            <Clock className="h-3 w-3 mr-2" /> Actualiser
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     {!isMounted || isLoadingHistory ? (
@@ -447,10 +466,10 @@ export default function AdminNotificationsPage() {
                                                     <XCircle className="h-4 w-4" />}
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <h4 className="font-bold text-sm truncate">{notif.title}</h4>
-                                                <Badge variant="outline" className="text-[8px] font-black italic uppercase h-4 px-1">
-                                                    {notif.userId ? 'Direct' : notif.role ? notif.role : 'Broadcast'}
+                                                <Badge variant="outline" className="text-[8px] font-black italic uppercase h-4 px-1 border-primary/20 text-primary">
+                                                    {notif.user ? `${notif.user.name || 'User'} (${notif.user.role})` : notif.role ? `Rôle: ${notif.role}` : 'Broadcast'}
                                                 </Badge>
                                             </div>
                                             <p className="text-xs text-muted-foreground truncate">{notif.body}</p>

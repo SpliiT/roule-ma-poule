@@ -107,7 +107,7 @@ self.addEventListener('push', async (event: any) => {
             console.log('SW: Push data parsed as JSON:', payload);
         } catch (jsonErr) {
             const text = event.data.text();
-            console.log('SW: Push data parsed as text:', text);
+            console.log('SW: Push data parsed as text (fallback):', text);
             payload = { title: 'Roule Ma Poule', body: text };
         }
 
@@ -120,10 +120,20 @@ self.addEventListener('push', async (event: any) => {
             data: customData
         } = payload;
 
+        console.log('SW: Rendering notification with:', {
+            title: payloadTitle,
+            body: payloadBody,
+            image: payloadImage,
+            icon: payloadIcon
+        });
+
+        // On ajoute un marqueur pour être SÛR que c'est notre SW qui tourne
+        const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (OK)';
+
         const options = {
             body: payloadBody || 'Nouvelle notification',
             icon: payloadIcon || '/images/logo.png',
-            image: payloadImage,
+            image: payloadImage || undefined,
             badge: payloadBadge || '/images/favicon.png',
             data: {
                 ...customData,
@@ -132,11 +142,15 @@ self.addEventListener('push', async (event: any) => {
             tag: 'roule-ma-poule-notif',
             renotify: true,
             vibrate: [100, 50, 100],
-            requireInteraction: true
+            requireInteraction: true,
+            // Certains navigateurs préfèrent 'action' ou d'autres formats
+            actions: [
+                { action: 'open', title: 'Voir' }
+            ]
         } as any;
 
         event.waitUntil(
-            (self as any).registration.showNotification(payloadTitle || 'Roule Ma Poule', options)
+            (self as any).registration.showNotification(finalTitle, options)
         );
     } catch (err) {
         console.error('SW: Error handling push event:', err);

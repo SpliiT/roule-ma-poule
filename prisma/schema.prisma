@@ -27,6 +27,7 @@ model User {
   notifications           Notification[]
   pushSubscriptions       PushSubscription[]
   technicianZones         TechnicianZone[]
+  scheduledNotifications  ScheduledNotification[]
 
   @@index([clerkId])
   @@index([email])
@@ -278,6 +279,7 @@ model PushSubscription {
 model ScheduledNotification {
   id          String   @id @default(cuid())
   userId      String?  // Target user, null for broadcast
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   role        UserRole? // Filter by role if broadcast
   title       String
   body        String
