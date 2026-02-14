@@ -1,17 +1,28 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { NotificationsManager } from '@/components/notifications/notifications-manager';
 import { PWAInstallGuide } from '@/components/pwa/pwa-install-guide';
 import './globals.css';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
 });
+
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
+
+export const viewport: Viewport = {
+  themeColor: '#3B82F6',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: {
     default: 'Roule Ma Poule — Réparation vélo à domicile',
@@ -35,6 +46,7 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: '/images/logo.png',
+    icon: '/images/logo.png',
   },
   formatDetection: {
     telephone: false,

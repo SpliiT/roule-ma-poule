@@ -1,7 +1,7 @@
 {
     "id": "roule-ma-poule-pwa",
     "name": "Roule Ma Poule",
-    "short_name": "RouleMaPoule",
+    "short_name": "Roule Ma Poule",
     "description": "Réparation vélo à domicile à Lyon. 68 ans d'expertise, maintenant chez vous !",
     "start_url": "/",
     "display": "standalone",

@@ -93,68 +93,70 @@ self.addEventListener('fetch', (event: any) => {
     );
 });
 
-self.addEventListener('push', async (event: any) => {
+const getAbsoluteUrl = (path: string) => {
+    if (!path) return undefined;
+    if (path.startsWith('http')) return path;
+    const origin = self.location.origin;
+    return `${origin}${path.startsWith('/') ? '' : '/'}${path}`;
+};
+
+self.addEventListener('push', (event: any) => {
     console.log('SW: Push event received', event);
-    if (!event.data) {
-        console.warn('SW: Push event has no data');
-        return;
-    }
 
-    try {
-        let payload: any = {};
-        try {
-            payload = await event.data.json();
-            console.log('SW: Push data parsed as JSON:', payload);
-        } catch (jsonErr) {
-            const text = event.data.text();
-            console.log('SW: Push data parsed as text (fallback):', text);
-            payload = { title: 'Roule Ma Poule', body: text };
-        }
+    event.waitUntil(
+        (async () => {
+            try {
+                let payload: any = {};
+                if (event.data) {
+                    try {
+                        payload = event.data.json();
+                        console.log('SW: Push data parsed as JSON:', payload);
+                    } catch (jsonErr) {
+                        const text = event.data.text();
+                        console.log('SW: Push data parsed as text (fallback):', text);
+                        payload = { title: 'Roule Ma Poule', body: text };
+                    }
+                }
 
-        const {
-            title: payloadTitle,
-            body: payloadBody,
-            icon: payloadIcon,
-            image: payloadImage,
-            badge: payloadBadge,
-            data: customData
-        } = payload;
+                const {
+                    title: payloadTitle,
+                    body: payloadBody,
+                    icon: payloadIcon,
+                    image: payloadImage,
+                    badge: payloadBadge,
+                    data: customData
+                } = payload;
 
-        console.log('SW: Rendering notification with:', {
-            title: payloadTitle,
-            body: payloadBody,
-            image: payloadImage,
-            icon: payloadIcon
-        });
+                const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (V10)';
 
-        // On ajoute un marqueur pour être SÛR que c'est notre SW qui tourne
-        const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (OK)';
+                const options = {
+                    body: payloadBody || 'Nouvelle notification',
+                    icon: getAbsoluteUrl(payloadIcon || '/images/logo.png'),
+                    image: getAbsoluteUrl(payloadImage),
+                    badge: getAbsoluteUrl(payloadBadge || '/images/favicon.png'),
+                    data: {
+                        ...customData,
+                        url: getAbsoluteUrl(customData?.url || '/')
+                    },
+                    tag: 'roule-ma-poule-notif',
+                    renotify: true,
+                    vibrate: [100, 50, 100],
+                    requireInteraction: true,
+                    actions: [
+                        { action: 'open', title: 'Voir' }
+                    ]
+                };
 
-        const options = {
-            body: payloadBody || 'Nouvelle notification',
-            icon: payloadIcon || '/images/logo.png',
-            image: payloadImage || undefined,
-            badge: payloadBadge || '/images/favicon.png',
-            data: {
-                ...customData,
-                url: customData?.url || '/'
-            },
-            tag: 'roule-ma-poule-notif',
-            renotify: true,
-            vibrate: [100, 50, 100],
-            requireInteraction: true,
-            // Certains navigateurs préfèrent 'action' ou d'autres formats
-            actions: [
-                { action: 'open', title: 'Voir' }
-            ]
-        } as any;
-
-        event.waitUntil(
-            (self as any).registration.showNotification(finalTitle, options)
-        );
-    } catch (err) {
-        console.error('SW: Error handling push event:', err);
-    }
+                return (self as any).registration.showNotification(finalTitle, options);
+            } catch (err) {
+                console.error('SW: Error handling push event:', err);
+                return (self as any).registration.showNotification('Roule Ma Poule (Err V10)', {
+                    body: 'Nouvelle notification',
+                    icon: getAbsoluteUrl('/images/logo.png')
+                });
+            }
+        })()
+    );
 });
 
 self.addEventListener('notificationclick', (event: any) => {
