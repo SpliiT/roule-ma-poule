@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
     return {
         name: 'Roule Ma Poule',
-        short_name: 'RouleMaPoule',
+        short_name: 'Roule Ma Poule',
         description: 'Réservez une intervention de réparation ou entretien de vélo à domicile à Lyon.',
         start_url: '/',
         display: 'standalone',

@@ -14,7 +14,16 @@ if (vapidKeys.publicKey && vapidKeys.privateKey) {
     );
 }
 
-export async function sendPushNotification(userId: string, payload: { title: string; body: string; data?: any }) {
+export interface PushNotificationPayload {
+    title: string;
+    body: string;
+    icon?: string;
+    image?: string;
+    badge?: string;
+    data?: any;
+}
+
+export async function sendPushNotification(userId: string, payload: PushNotificationPayload) {
     try {
         console.log(`[Push] Attempting to send notification to user: ${userId}`);
         const subscriptions = await prisma.pushSubscription.findMany({

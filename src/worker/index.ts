@@ -111,12 +111,20 @@ self.addEventListener('push', async (event: any) => {
             payload = { title: 'Roule Ma Poule', body: text };
         }
 
-        const { title, body, icon, data: customData } = payload;
+        const {
+            title: payloadTitle,
+            body: payloadBody,
+            icon: payloadIcon,
+            image: payloadImage,
+            badge: payloadBadge,
+            data: customData
+        } = payload;
 
         const options = {
-            body: body || 'Nouvelle notification',
-            icon: '/images/mascotte.png',
-            badge: '/images/favicon.png',
+            body: payloadBody || 'Nouvelle notification',
+            icon: payloadIcon || '/images/logo.png',
+            image: payloadImage,
+            badge: payloadBadge || '/images/favicon.png',
             data: {
                 ...customData,
                 url: customData?.url || '/'
@@ -128,7 +136,7 @@ self.addEventListener('push', async (event: any) => {
         } as any;
 
         event.waitUntil(
-            (self as any).registration.showNotification(title || 'Roule Ma Poule', options)
+            (self as any).registration.showNotification(payloadTitle || 'Roule Ma Poule', options)
         );
     } catch (err) {
         console.error('SW: Error handling push event:', err);

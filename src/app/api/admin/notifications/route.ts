@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     try {
         const admin = await requireRole('ADMIN');
         const body = await req.json();
-        const { userId, role, title, body: messageBody, url, scheduledAt } = body;
+        const { userId, role, title, body: messageBody, url, scheduledAt, icon, image, badge } = body;
 
         if (!title || !messageBody) {
             return NextResponse.json({ error: 'Titre et message requis' }, { status: 400 });
@@ -40,93 +40,135 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'La date programmée doit être dans le futur' }, { status: 400 });
         }
 
+        const safeUserId = userId || null;
+        const safeRole = role || null;
+
+        console.log('[API] Notification Payload:', { safeUserId, safeRole, title, isScheduled });
+
         // Si ce n'est pas programmé, on envoie immédiatement
         if (!isScheduled) {
-            if (userId) {
+            if (safeUserId) {
+                console.log('[API] Sending to single user:', safeUserId);
                 // Envoi à un seul utilisateur
-                await sendPushNotification(userId, {
+                await sendPushNotification(safeUserId, {
                     title,
                     body: messageBody,
+                    icon,
+                    image,
+                    badge,
                     data: { url }
                 });
 
+                console.log('[API] Creating history record...');
                 // On enregistre quand même en base pour l'historique
-                await prisma.scheduledNotification.create({
-                    data: {
-                        userId,
-                        title,
-                        body: messageBody,
-                        url,
-                        scheduledAt: scheduleDate,
-                        sentAt: new Date(),
-                        status: 'SENT'
-                    }
-                });
-            } else if (role) {
+                try {
+                    await (prisma as any).scheduledNotification.create({
+                        data: {
+                            userId: safeUserId,
+                            title,
+                            body: messageBody,
+                            url,
+                            scheduledAt: scheduleDate,
+                            sentAt: new Date(),
+                            status: 'SENT',
+                            metadata: { icon, image, badge }
+                        }
+                    });
+                    console.log('[API] History record created successfully');
+                } catch (dbErr: any) {
+                    console.error('[API] History creation FAILED (but push was sent):', dbErr);
+                    // On ne bloque pas la réponse si le push a réussi
+                }
+            } else if (safeRole) {
+                console.log('[API] Sending to role:', safeRole);
                 // Envoi par rôle
                 const users = await prisma.user.findMany({
-                    where: { role, pushSubscriptions: { some: {} } },
+                    where: { role: safeRole as any, pushSubscriptions: { some: {} } },
                     select: { id: true }
                 });
+
+                console.log(`[API] Found ${users.length} users with role ${safeRole}`);
 
                 await Promise.all(users.map(u =>
                     sendPushNotification(u.id, {
                         title,
                         body: messageBody,
+                        icon,
+                        image,
+                        badge,
                         data: { url }
                     })
                 ));
 
-                await prisma.scheduledNotification.create({
-                    data: {
-                        role,
-                        title,
-                        body: messageBody,
-                        url,
-                        scheduledAt: scheduleDate,
-                        sentAt: new Date(),
-                        status: 'SENT'
-                    }
-                });
+                try {
+                    await (prisma as any).scheduledNotification.create({
+                        data: {
+                            role: safeRole as any,
+                            title,
+                            body: messageBody,
+                            url,
+                            scheduledAt: scheduleDate,
+                            sentAt: new Date(),
+                            status: 'SENT',
+                            metadata: { icon, image, badge }
+                        }
+                    });
+                    console.log('[API] Role history record created');
+                } catch (dbErr: any) {
+                    console.error('[API] Role history creation FAILED:', dbErr);
+                }
             } else {
+                console.log('[API] Sending BROADCAST');
                 // BROADCAST
                 const users = await prisma.user.findMany({
                     where: { pushSubscriptions: { some: {} } },
                     select: { id: true }
                 });
 
+                console.log(`[API] Found ${users.length} users for broadcast`);
+
                 await Promise.all(users.map(u =>
                     sendPushNotification(u.id, {
                         title,
                         body: messageBody,
+                        icon,
+                        image,
+                        badge,
                         data: { url }
                     })
                 ));
 
-                await prisma.scheduledNotification.create({
-                    data: {
-                        title,
-                        body: messageBody,
-                        url,
-                        scheduledAt: scheduleDate,
-                        sentAt: new Date(),
-                        status: 'SENT'
-                    }
-                });
+                try {
+                    await (prisma as any).scheduledNotification.create({
+                        data: {
+                            title,
+                            body: messageBody,
+                            url,
+                            scheduledAt: scheduleDate,
+                            sentAt: new Date(),
+                            status: 'SENT',
+                            metadata: { icon, image, badge }
+                        }
+                    });
+                    console.log('[API] Broadcast history record created');
+                } catch (dbErr: any) {
+                    console.error('[API] Broadcast history creation FAILED:', dbErr);
+                }
             }
 
             return NextResponse.json({ success: true, message: 'Notification envoyée instantanément' });
         } else {
             // Programmation
-            const scheduled = await prisma.scheduledNotification.create({
+            const scheduled = await (prisma as any).scheduledNotification.create({
                 data: {
-                    userId,
-                    role,
+                    userId: safeUserId,
+                    role: safeRole as any,
                     title,
                     body: messageBody,
                     url,
                     scheduledAt: scheduleDate,
-                    status: 'PENDING'
+                    status: 'PENDING',
+                    metadata: { icon, image, badge }
                 }
             });
 
@@ -139,6 +181,10 @@ export async function POST(req: Request) {
             code: error.code,
             meta: error.meta
         });
-        return NextResponse.json({ error: error.message || 'Erreur serveur' }, { status: 500 });
+        return NextResponse.json({
+            error: error.message || 'Erreur serveur',
+            details: error.toString(),
+            stack: error.stack
+        }, { status: 500 });
     }
 }
