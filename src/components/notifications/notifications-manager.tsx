@@ -94,8 +94,12 @@ export function NotificationsManager() {
         }
         console.log('PushManager: Clerk user loaded:', user);
 
-        setPermissionStatus(Notification.permission);
-        console.log('PushManager: Initial permission status:', Notification.permission);
+        if (typeof Notification !== 'undefined') {
+            setPermissionStatus(Notification.permission);
+            console.log('PushManager: Initial permission status:', Notification.permission);
+        } else {
+            console.warn('PushManager: Notification API not supported in this browser');
+        }
         setupPush(false);
 
         const handleTrigger = () => {
