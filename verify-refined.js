@@ -1,12 +1,12 @@
 async function verifyRefinedSearch() {
-    // Testing filtered search
+    
     const url = 'https://bikeindex.org/api/v3/search?query=specialized&stolenness=non&per_page=20';
     try {
         const res = await fetch(url);
         const data = await res.json();
         const bikes = data.bikes || [];
         
-        // Manual filter check (what my backend does now)
+        
         const withImages = bikes.filter(b => b.large_img || b.thumb);
         const stolen = withImages.filter(b => b.stolen);
         

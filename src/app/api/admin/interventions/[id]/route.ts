@@ -52,7 +52,7 @@ export async function PATCH(
                     data: { interventionId: id, status: newStatus },
                 },
             });
-            // Push notification pour le client
+            
             await sendPushNotification(currentIntervention.clientId, {
                 title: 'Statut mis à jour 🚲',
                 body: `Votre intervention est désormais ${newStatus === 'CONFIRMED' ? 'confirmée' : newStatus === 'CANCELLED' ? 'annulée' : newStatus === 'IN_PROGRESS' ? 'en cours' : newStatus === 'COMPLETED' ? 'terminée' : newStatus}.`,
@@ -69,7 +69,7 @@ export async function PATCH(
                         data: { interventionId: id },
                     },
                 });
-                // Push notification pour le technicien
+                
                 await sendPushNotification(validatedData.technicianId, {
                     title: 'Nouvelle mission ! 🛠️',
                     body: `Une intervention à ${currentIntervention.city} vous a été assignée.`,

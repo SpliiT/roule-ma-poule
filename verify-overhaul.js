@@ -2,7 +2,7 @@ async function verifyOverhaul() {
     console.log("Testing new API response format...");
     const url = 'http://localhost:3000/api/bikes/search?type=model&query=specialized%20sirrus';
     
-    // Simulating the backend logic since I can't hit localhost easily
+    
     const bikeIndexUrl = 'https://bikeindex.org/api/v3/search?query=specialized%20sirrus&per_page=5';
     try {
         const res = await fetch(bikeIndexUrl);
@@ -21,7 +21,7 @@ async function verifyOverhaul() {
 
         console.log("Simulated API Output (first result):", JSON.stringify(suggestions[0], null, 2));
         
-        // Testing mapping
+        
         const mapping = {
             'mountain': 'VTT',
             'road': 'ROAD',

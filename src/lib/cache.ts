@@ -1,8 +1,8 @@
-// src/lib/cache.ts
+
 
 interface CacheEntry<T> {
     value: T;
-    expiry: number; // Timestamp en millisecondes
+    expiry: number; 
 }
 
 const cache = new Map<string, CacheEntry<any>>();
@@ -13,7 +13,7 @@ export const getFromCache = <T>(key: string): T | undefined => {
         return undefined;
     }
     if (Date.now() > entry.expiry) {
-        cache.delete(key); // Supprimer l'entrée expirée
+        cache.delete(key); 
         return undefined;
     }
     return entry.value;

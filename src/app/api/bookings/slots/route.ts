@@ -15,12 +15,12 @@ export async function GET(req: Request) {
         const now = new Date();
         const isToday = targetDate.toDateString() === now.toDateString();
 
-        // 1. Définition de la plage horaire fixe (9h - 18h)
+        
         const START_HOUR = 9;
         const END_HOUR = 18;
         const INTERVAL_MIN = 15;
 
-        // 2. Récupération des interventions existantes pour vérifier la disponibilité
+        
         const dayStart = new Date(targetDate);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(targetDate);
@@ -37,31 +37,31 @@ export async function GET(req: Request) {
 
         const slots: { start: string; end: string; available: boolean }[] = [];
 
-        // 3. Génération des créneaux
+        
         for (let hour = START_HOUR; hour < END_HOUR; hour++) {
             for (let min = 0; min < 60; min += INTERVAL_MIN) {
-                // Pas de créneau à 18h00 pile comme heure de début
+                
                 if (hour === 18) break;
 
                 const slotStart = new Date(targetDate);
                 slotStart.setHours(hour, min, 0, 0);
 
-                // Contrainte : au moins 1 heure dans le futur
+                
                 const minTime = new Date(now.getTime() + 60 * 60 * 1000);
 
                 if (slotStart < minTime && isToday) {
-                    continue; // Trop tôt ou dans le passé
+                    continue; 
                 }
 
                 if (slotStart < now) {
-                    continue; // Sécurité supplémentaire pour le passé
+                    continue; 
                 }
 
                 const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
 
-                // On ne finit pas après 19h (optionnel, mais propre)
+                
                 if (slotEnd.getHours() > 19 || (slotEnd.getHours() === 19 && slotEnd.getMinutes() > 0)) {
-                    // Note: On pourrait être plus strict sur 18h ici si on veut que TOUTE l'intervention finisse à 18h
+                    
                 }
 
                 const startStr = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;

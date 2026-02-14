@@ -6,11 +6,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
-        // En prod, on pourrait vérifier un secret dans le header pour sécuriser le cron
-        // const authHeader = req.headers.get('authorization');
-        // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        //     return new Response('Unauthorized', { status: 401 });
-        // }
+        
+        
+        
+        
+        
 
         const now = new Date();
         const pendingNotifications = await prisma.scheduledNotification.findMany({

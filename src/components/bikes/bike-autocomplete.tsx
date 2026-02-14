@@ -60,7 +60,7 @@ export function BikeAutocomplete({
             if (data.suggestions) {
                 setSuggestions(data.suggestions);
             } else if (data.bikes) {
-                // Pour manufacturer
+                
                 setSuggestions(data.bikes.map((b: any) => ({ name: b.name || b.manufacturer })));
             }
         } catch (error) {
@@ -79,7 +79,7 @@ export function BikeAutocomplete({
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (searchTerm !== value) {
-                // Pour les modèles avec fabricant, on autorise la recherche même si searchTerm est court ou vide
+                
                 const isModelWithManufacturer = type === 'model' && manufacturer;
                 if (searchTerm.length >= 2 || (isModelWithManufacturer && searchTerm.length >= 0)) {
                     fetchSuggestions(searchTerm);

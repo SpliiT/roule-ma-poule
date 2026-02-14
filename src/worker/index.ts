@@ -1,4 +1,4 @@
-/// <reference lib="webworker" />
+
 
 export default null as any;
 
@@ -19,7 +19,7 @@ self.addEventListener('install', (event: any) => {
                 console.log('SW: Cache opened, adding URLs');
                 return cache.addAll(urlsToCache);
             })
-            .then(() => (self as any).skipWaiting()) // Force l'activation du nouveau SW immédiatement
+            .then(() => (self as any).skipWaiting()) 
             .catch(error => {
                 console.error('SW: Failed to cache during install:', error);
             })
@@ -38,26 +38,26 @@ self.addEventListener('activate', (event: any) => {
                     }
                 })
             );
-        }).then(() => (self as any).clients.claim()) // Prend le contrôle des clients immédiatement
+        }).then(() => (self as any).clients.claim()) 
     );
 });
 
 self.addEventListener('fetch', (event: any) => {
     const url = new URL(event.request.url);
 
-    // Ne pas intercepter :
-    // 1. Les requêtes non-GET
-    // 2. Les requêtes vers des origines différentes (sauf si nécessaire, ex: Google Fonts)
-    // 3. Les fichiers Next.js (HMR, static chunks en dev)
-    // 4. Les routes API (POST, GET dynamiques)
-    // 5. Les requêtes Clerk (authentification)
+    
+    
+    
+    
+    
+    
     if (
         event.request.method !== 'GET' ||
         !event.request.url.startsWith(self.location.origin) ||
         url.pathname.startsWith('/_next/') ||
         url.pathname.startsWith('/api/') ||
         url.pathname.startsWith('/clerk/') ||
-        url.search.includes('_rsc') // Next.js Server Components data
+        url.search.includes('_rsc') 
     ) {
         return;
     }
@@ -65,14 +65,14 @@ self.addEventListener('fetch', (event: any) => {
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Cache-first: Si la ressource est dans le cache, la servir
+                
                 if (response) {
                     return response;
                 }
-                // Sinon, aller sur le réseau
+                
                 return fetch(event.request)
                     .then(networkResponse => {
-                        // Si la requête réseau est réussie, mettre en cache la réponse et la retourner
+                        
                         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
                             caches.open(CACHE_NAME).then(cache => {
                                 cache.put(event.request, networkResponse.clone());
@@ -81,12 +81,12 @@ self.addEventListener('fetch', (event: any) => {
                         return networkResponse;
                     })
                     .catch(() => {
-                        // Si le réseau échoue, servir la page hors ligne pour les requêtes de navigation
+                        
                         if (event.request.mode === 'navigate') {
                             return caches.match('/offline');
                         }
-                        // Pour les autres types de requêtes (images, scripts, etc.), on peut retourner un fallback ou une erreur
-                        // Pour l'instant, on laisse le navigateur gérer l'erreur si ce n'est pas une navigation
+                        
+                        
                         throw new Error('Network request failed and no cache match.');
                     });
             })
@@ -95,9 +95,20 @@ self.addEventListener('fetch', (event: any) => {
 
 const getAbsoluteUrl = (path: string) => {
     if (!path) return undefined;
-    if (path.startsWith('http')) return path;
-    const origin = self.location.origin;
-    return `${origin}${path.startsWith('/') ? '' : '/'}${path}`;
+    let url = path;
+    if (!path.startsWith('http')) {
+        const origin = self.location.origin;
+        url = `${origin}${path.startsWith('/') ? '' : '/'}${path}`;
+    }
+
+    
+    if (url.includes('res.cloudinary.com')) {
+        
+        if (!url.includes('/f_jpg')) {
+            url = url.replace('/upload/', '/upload/f_jpg/');
+        }
+    }
+    return url;
 };
 
 self.addEventListener('push', (event: any) => {
@@ -127,7 +138,7 @@ self.addEventListener('push', (event: any) => {
                     data: customData
                 } = payload;
 
-                const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (V10)';
+                const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (V11)';
 
                 const options = {
                     body: payloadBody || 'Nouvelle notification',
@@ -141,16 +152,13 @@ self.addEventListener('push', (event: any) => {
                     tag: 'roule-ma-poule-notif',
                     renotify: true,
                     vibrate: [100, 50, 100],
-                    requireInteraction: true,
-                    actions: [
-                        { action: 'open', title: 'Voir' }
-                    ]
+                    requireInteraction: true
                 };
 
                 return (self as any).registration.showNotification(finalTitle, options);
             } catch (err) {
                 console.error('SW: Error handling push event:', err);
-                return (self as any).registration.showNotification('Roule Ma Poule (Err V10)', {
+                return (self as any).registration.showNotification('Roule Ma Poule (Err V11)', {
                     body: 'Nouvelle notification',
                     icon: getAbsoluteUrl('/images/logo.png')
                 });
@@ -166,14 +174,14 @@ self.addEventListener('notificationclick', (event: any) => {
 
     event.waitUntil(
         (self as any).clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients: any) => {
-            // Check if there is already a window/tab open with the same URL
+            
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
                 if (client.url === urlToOpen && 'focus' in client) {
                     return client.focus();
                 }
             }
-            // If not, open a new one
+            
             if ((self as any).clients.openWindow) {
                 return (self as any).clients.openWindow(urlToOpen);
             }

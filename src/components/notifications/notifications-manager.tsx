@@ -33,7 +33,7 @@ export function NotificationsManager() {
                 if (!forceRequest) return;
             } else if (!forceRequest && Notification.permission === 'granted') {
                 console.log('PushManager: Permission already granted but NO subscription found, triggering auto-sync...');
-                // Trigger subscription automatically if permission is granted but we don't have a sub in this browser
+                
                 setupPush(true);
                 return;
             }
@@ -70,7 +70,7 @@ export function NotificationsManager() {
                 }
             } else if (forceRequest && Notification.permission === 'default') {
                 console.log('PushManager: Notification permission is default, requesting permission');
-                // Request permission if not granted yet
+                
                 const permission = await Notification.requestPermission();
                 setPermissionStatus(permission);
                 console.log('PushManager: Notification permission result:', permission);
@@ -121,9 +121,9 @@ export function NotificationsManager() {
             console.log('PushManager: Sync complete');
         } catch (err: any) {
             console.error('PushManager: Failed to sync subscription with server:', err);
-            // Don't show toast for background sync failures to avoid spamming the user
+            
             if (permissionStatus === 'granted') {
-                // only toast if user explicitly tried to enable
+                
             }
         }
     }

@@ -1,9 +1,9 @@
 async function testFiltering() {
-    // Test searching for "sirrus" with and without manufacturer Specialized
+    
     const urls = [
         'https://bikeindex.org/api/v3/search?query=sirrus&per_page=5',
         'https://bikeindex.org/api/v3/search?query=sirrus&manufacturer=Specialized&per_page=5',
-        'https://bikeindex.org/api/v3/search?manufacturer=Specialized&per_page=5' // Empty query
+        'https://bikeindex.org/api/v3/search?manufacturer=Specialized&per_page=5' 
     ];
 
     for (const url of urls) {

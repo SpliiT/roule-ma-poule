@@ -9,14 +9,14 @@ export function PWAInstallGuide() {
     const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
     useEffect(() => {
-        // Detect if it's iOS
+        
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
-        // Check if already installed
+        
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches
             || (window.navigator as any).standalone === true;
 
-        // Check if we already showed it this session
+        
         let hasSeenPrompt = false;
         try {
             hasSeenPrompt = sessionStorage.getItem('pwa-prompt-seen') === 'true';

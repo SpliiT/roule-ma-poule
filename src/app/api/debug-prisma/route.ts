@@ -6,7 +6,7 @@ export async function GET() {
         const keys = Object.keys(prisma);
         const models = keys.filter(k => !k.startsWith('_') && !k.startsWith('$'));
 
-        // Test creation
+        
         let testCreateResult = null;
         let testCreateError = null;
 

@@ -1,9 +1,9 @@
 'use client';
-import { UserProfile, useUser } from '@clerk/nextjs';
+import { UserProfile, useUser, SignOutButton } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
-import { Bell, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Bell, ShieldCheck, AlertCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -140,6 +140,32 @@ export default function ProfilePage() {
                                     Les notifications ne sont pas supportées ou en attente d'initialisation sur cet appareil.
                                 </p>
                             )}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Session Management */}
+                <div className="mt-8 pb-12">
+                    <Card className="border-2 border-destructive/20 shadow-md overflow-hidden bg-background">
+                        <CardHeader className="bg-destructive/5 border-b border-destructive/10">
+                            <div className="flex items-center gap-3">
+                                <AlertCircle className="h-5 w-5 text-destructive" />
+                                <div>
+                                    <CardTitle className="text-xl font-black italic uppercase tracking-tighter text-destructive">Session</CardTitle>
+                                    <CardDescription>Gérer votre connexion à l'application.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
+                                <Button
+                                    variant="destructive"
+                                    className="w-full font-black italic uppercase tracking-widest h-12 shadow-lg shadow-destructive/20 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                    Se déconnecter
+                                </Button>
+                            </SignOutButton>
                         </CardContent>
                     </Card>
                 </div>

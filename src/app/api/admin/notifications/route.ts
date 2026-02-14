@@ -53,11 +53,11 @@ export async function POST(req: Request) {
 
         console.log('[API] Notification Payload:', { safeUserId, safeRole, title, isScheduled });
 
-        // Si ce n'est pas programmé, on envoie immédiatement
+        
         if (!isScheduled) {
             if (safeUserId) {
                 console.log('[API] Sending to single user:', safeUserId);
-                // Envoi à un seul utilisateur
+                
                 await sendPushNotification(safeUserId, {
                     title,
                     body: messageBody,
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
                 });
 
                 console.log('[API] Creating history record...');
-                // On enregistre quand même en base pour l'historique
+                
                 try {
                     await (prisma as any).scheduledNotification.create({
                         data: {
@@ -85,11 +85,11 @@ export async function POST(req: Request) {
                     console.log('[API] History record created successfully');
                 } catch (dbErr: any) {
                     console.error('[API] History creation FAILED (but push was sent):', dbErr);
-                    // On ne bloque pas la réponse si le push a réussi
+                    
                 }
             } else if (safeRole) {
                 console.log('[API] Sending to role:', safeRole);
-                // Envoi par rôle
+                
                 const users = await prisma.user.findMany({
                     where: { role: safeRole as any, pushSubscriptions: { some: {} } },
                     select: { id: true }
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
                 }
             } else {
                 console.log('[API] Sending BROADCAST');
-                // BROADCAST
+                
                 const users = await prisma.user.findMany({
                     where: { pushSubscriptions: { some: {} } },
                     select: { id: true }
@@ -166,7 +166,7 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true, message: 'Notification envoyée instantanément' });
         } else {
-            // Programmation
+            
             const scheduled = await (prisma as any).scheduledNotification.create({
                 data: {
                     userId: safeUserId,

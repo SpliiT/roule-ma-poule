@@ -44,7 +44,7 @@ export async function POST(
             },
         });
 
-        // Optional: Notify technician that they were rated
+        
         if (intervention.technicianId) {
             await prisma.notification.create({
                 data: {

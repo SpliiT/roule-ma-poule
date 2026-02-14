@@ -16,7 +16,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Début du seed...');
 
-    // ── Infos de la société ──
+    
     const company = await prisma.companyInfo.upsert({
         where: { id: 'company-1' },
         update: {},
@@ -32,7 +32,7 @@ async function main() {
         },
     });
 
-    // ── Forfaits ──
+    
     const forfaits = await Promise.all([
         prisma.forfait.upsert({
             where: { id: 'forfait-basique' },
@@ -80,7 +80,7 @@ async function main() {
         }),
     ]);
 
-    // ── Produits ──
+    
     const products = await Promise.all([
         prisma.product.upsert({
             where: { id: 'prod-huile' },
@@ -144,7 +144,7 @@ async function main() {
         }),
     ]);
 
-    // ── Zones (Lyon et environs) ──
+    
     const zones = await Promise.all([
         prisma.zone.upsert({
             where: { id: 'zone-lyon-centre' },

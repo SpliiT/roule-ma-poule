@@ -14,7 +14,9 @@ import {
     Menu,
     Settings,
     Bell,
+    LogOut,
 } from 'lucide-react';
+import { SignOutButton } from '@clerk/nextjs';
 import {
     Sheet,
     SheetContent,
@@ -184,9 +186,16 @@ export function ClientSidebar({ user }: ClientSidebarProps) {
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Client</p>
                                     </div>
                                 </div>
-                                <Link href="/profile">
-                                    <Settings className="h-6 w-6 text-muted-foreground" />
-                                </Link>
+                                <div className="flex items-center gap-2">
+                                    <Link href="/profile">
+                                        <Settings className="h-6 w-6 text-muted-foreground" />
+                                    </Link>
+                                    <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
+                                        <button className="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors">
+                                            <LogOut className="h-6 w-6" />
+                                        </button>
+                                    </SignOutButton>
+                                </div>
                             </div>
                         </SheetContent>
                     </Sheet>

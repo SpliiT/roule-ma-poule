@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         console.log('API Push: Received subscription request for user', user.id);
         const { endpoint, keys } = subscribeSchema.parse(body);
 
-        // Enregistrer ou mettre à jour la souscription
+        
         const result = await prisma.pushSubscription.upsert({
             where: { endpoint },
             update: {

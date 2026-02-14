@@ -48,7 +48,7 @@ export async function sendPushNotification(userId: string, payload: PushNotifica
             })
         );
 
-        // Nettoyer les souscriptions expirées ou invalides
+        
         for (let i = 0; i < results.length; i++) {
             const result = results[i];
             if (result.status === 'fulfilled') {

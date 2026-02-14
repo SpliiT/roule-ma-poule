@@ -20,7 +20,9 @@ import {
     Menu,
     Bell,
     User as UserIcon,
+    LogOut,
 } from 'lucide-react';
+import { SignOutButton } from '@clerk/nextjs';
 import {
     Sheet,
     SheetContent,
@@ -203,9 +205,16 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Admin</p>
                                     </div>
                                 </div>
-                                <Link href="/admin/settings">
-                                    <Settings className="h-6 w-6 text-muted-foreground" />
-                                </Link>
+                                <div className="flex items-center gap-2">
+                                    <Link href="/admin/settings">
+                                        <Settings className="h-6 w-6 text-muted-foreground" />
+                                    </Link>
+                                    <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
+                                        <button className="p-2 text-destructive hover:bg-destructive/10 rounded-full transition-colors">
+                                            <LogOut className="h-6 w-6" />
+                                        </button>
+                                    </SignOutButton>
+                                </div>
                             </div>
                         </SheetContent>
                     </Sheet>

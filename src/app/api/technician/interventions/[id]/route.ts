@@ -63,11 +63,11 @@ export async function PATCH(
         if (!current) {
             return NextResponse.json({ error: 'Intervention introuvable' }, { status: 404 });
         }
-        // Si l'intervention est assignée à quelqu'un d'autre
+        
         if (current.technicianId && current.technicianId !== user.id) {
             return NextResponse.json({ error: 'Intervention déjà assignée à un autre technicien' }, { status: 403 });
         }
-        // Si non assignée, on l'assigne automatiquement au premier technicien qui interagit avec
+        
         if (!current.technicianId) {
             await prisma.intervention.update({
                 where: { id },
@@ -117,7 +117,7 @@ export async function PATCH(
                     data: { interventionId: id, status: data.status },
                 },
             });
-            // Push notification pour le client
+            
             await sendPushNotification(current.clientId, {
                 title: data.status === 'COMPLETED' ? 'Vélo prêt ! ✨' : 'Intervention en cours 🛠️',
                 body: data.status === 'COMPLETED'

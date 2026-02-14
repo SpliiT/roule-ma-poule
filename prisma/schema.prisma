@@ -278,16 +278,16 @@ model PushSubscription {
 }
 model ScheduledNotification {
   id          String   @id @default(cuid())
-  userId      String?  // Target user, null for broadcast
+  userId      String?  
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  role        UserRole? // Filter by role if broadcast
+  role        UserRole? 
   title       String
   body        String
   url         String?
   scheduledAt DateTime
   sentAt      DateTime?
-  status      String   @default("PENDING") // PENDING, SENT, FAILED
-  metadata    Json?    // For custom icon, image, badge, actions, etc.
+  status      String   @default("PENDING") 
+  metadata    Json?    
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

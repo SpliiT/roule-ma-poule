@@ -119,7 +119,7 @@ export async function POST(req: Request) {
             },
         });
 
-        // Push notification pour le client
+        
         await sendPushNotification(user.id, {
             title: 'Réservation confirmée ! 📅',
             body: `Votre demande pour le forfait "${forfait.name}" a bien été prise en compte.`,

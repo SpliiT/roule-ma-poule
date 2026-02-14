@@ -30,7 +30,7 @@ export function NotificationBell() {
             const { data } = await axios.get('/api/notifications');
             return data;
         },
-        refetchInterval: 30000, // Refresh every 30 seconds
+        refetchInterval: 30000, 
     });
 
     const markReadMutation = useMutation({

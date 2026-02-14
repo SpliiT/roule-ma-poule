@@ -25,7 +25,7 @@ interface BikeSearchResult {
     model: string;
     year: number | null;
     image: string | null;
-    type: BikeType; // Maintenant renvoyé mappé par le backend
+    type: BikeType; 
     isElectric: boolean;
     isLocal?: boolean;
 }

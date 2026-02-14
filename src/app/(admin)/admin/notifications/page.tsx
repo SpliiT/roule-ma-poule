@@ -7,7 +7,7 @@ import axios from 'axios';
 import { CloudinaryUpload } from '@/components/ui/cloudinary-upload';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-// ... rest of imports
+
 import {
     Card,
     CardContent,
@@ -95,7 +95,7 @@ export default function AdminNotificationsPage() {
         onSuccess: () => {
             toast.success('Notification envoyée ou programmée avec succès');
             queryClient.invalidateQueries({ queryKey: ['admin-notifications-history'] });
-            // Reset form
+            
             setTitle('');
             setBody('');
             setUrl('');
