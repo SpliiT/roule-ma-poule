@@ -41,6 +41,7 @@ describe('Clerk Webhook API', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
         process.env = { ...originalEnv, CLERK_WEBHOOK_SECRET: 'test_secret' };
     });
 

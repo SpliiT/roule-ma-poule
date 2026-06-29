@@ -10,6 +10,7 @@ describe('Routing Service', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
         process.env = { ...originalEnv, NEXT_PUBLIC_MAPTILER_API_KEY: 'test-api-key' };
     });
 
