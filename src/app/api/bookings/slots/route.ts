@@ -18,9 +18,9 @@ export async function GET(req: Request) {
         
         const START_HOUR = 9;
         const END_HOUR = 18;
-        const INTERVAL_MIN = 15;
+        const INTERVAL_MIN = 30; // Better interval for bookings
 
-        
+        // Reset to local midnight
         const dayStart = new Date(targetDate);
         dayStart.setHours(0, 0, 0, 0);
         const dayEnd = new Date(targetDate);
@@ -37,16 +37,14 @@ export async function GET(req: Request) {
 
         const slots: { start: string; end: string; available: boolean }[] = [];
 
-        
+        // Generate slots
         for (let hour = START_HOUR; hour < END_HOUR; hour++) {
             for (let min = 0; min < 60; min += INTERVAL_MIN) {
                 
-                if (hour === 18) break;
-
                 const slotStart = new Date(targetDate);
                 slotStart.setHours(hour, min, 0, 0);
 
-                
+                // Minimum 1h delay for today's bookings
                 const minTime = new Date(now.getTime() + 60 * 60 * 1000);
 
                 if (slotStart < minTime && isToday) {
@@ -59,9 +57,9 @@ export async function GET(req: Request) {
 
                 const slotEnd = new Date(slotStart.getTime() + duration * 60 * 1000);
 
-                
-                if (slotEnd.getHours() > 19 || (slotEnd.getHours() === 19 && slotEnd.getMinutes() > 0)) {
-                    
+                // Do not allow slots that end after business hours
+                if (slotEnd.getHours() > END_HOUR || (slotEnd.getHours() === END_HOUR && slotEnd.getMinutes() > 0)) {
+                    continue;
                 }
 
                 const startStr = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;

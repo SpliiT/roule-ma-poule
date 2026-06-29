@@ -106,6 +106,9 @@ export default function HomePage() {
                     <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
                       <Image src="/images/avatars/user-3.jpg" alt="Client satisfait" width={40} height={40} className="object-cover object-center w-full h-full" />
                     </div>
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-4.jpeg" alt="Client satisfait" width={40} height={40} className="object-cover object-center w-full h-full" />
+                    </div>
                     <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-primary text-primary-foreground text-xs font-bold">
                       +500
                     </div>
