@@ -85,11 +85,18 @@ export default function HomePage() {
                 </Link>
                 <div className="flex items-center gap-3 px-4 py-2 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50">
                   <div className="flex -space-x-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
-                        <Image src={`https://i.pravatar.cc/150?u=${i + 10}`} alt="Client" width={40} height={40} />
-                      </div>
-                    ))}
+                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-1.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    </div>
+                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-2.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    </div>
+                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-3.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    </div>
+                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold">
+                      +500
+                    </div>
                   </div>
                   <div className="text-xs font-bold leading-tight">
                     <div className="flex items-center text-primary mb-0.5">

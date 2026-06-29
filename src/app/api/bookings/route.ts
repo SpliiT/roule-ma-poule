@@ -21,52 +21,52 @@ const bookingSchema = z.object({
 });
 export async function POST(req: Request) {
     try {
-        const user = await getCurrentUser();
-        if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-        const body = await req.json();
-        const validatedData = bookingSchema.parse(body);
-        const forfait = await prisma.forfait.findUnique({
-            where: { id: validatedData.forfaitId },
+        const client = await getCurrentUser();
+        if (!client) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+
+        const payload = await req.json();
+        const bookingRequest = bookingSchema.parse(payload);
+        
+        const selectedForfait = await prisma.forfait.findUnique({
+            where: { id: bookingRequest.forfaitId },
         });
-        if (!forfait) return NextResponse.json({ error: 'Forfait introuvable' }, { status: 404 });
-        let totalPrice = Number(forfait.price);
-        const productDetails: { productId: string; quantity: number; priceAtTime: number }[] = [];
-        if (validatedData.products.length > 0) {
-            const productIds = validatedData.products.map((p: { productId: string }) => p.productId);
-            const dbProducts = await prisma.product.findMany({
-                where: { id: { in: productIds }, isActive: true },
+        
+        if (!selectedForfait) {
+            return NextResponse.json({ error: 'Forfait introuvable' }, { status: 404 });
+        }
+
+        let totalOrderPrice = Number(selectedForfait.price);
+        const orderProducts: { productId: string; quantity: number; priceAtTime: number }[] = [];
+        
+        if (bookingRequest.products.length > 0) {
+            const requestedProductIds = bookingRequest.products.map(p => p.productId);
+            const availableProducts = await prisma.product.findMany({
+                where: { id: { in: requestedProductIds }, isActive: true },
             });
-            for (const item of validatedData.products) {
-                const dbProduct = dbProducts.find((p: { id: string }) => p.id === item.productId);
-                if (!dbProduct) {
-                    return NextResponse.json({ error: `Produit ${item.productId} introuvable` }, { status: 404 });
+            
+            for (const item of bookingRequest.products) {
+                const matchedProduct = availableProducts.find(p => p.id === item.productId);
+                if (!matchedProduct) {
+                    return NextResponse.json({ error: `Produit ${item.productId} introuvable ou inactif` }, { status: 404 });
                 }
-                const price = Number(dbProduct.price);
-                totalPrice += price * item.quantity;
-                productDetails.push({
+                const unitPrice = Number(matchedProduct.price);
+                totalOrderPrice += unitPrice * item.quantity;
+                orderProducts.push({
                     productId: item.productId,
                     quantity: item.quantity,
-                    priceAtTime: price,
+                    priceAtTime: unitPrice,
                 });
             }
         }
-        const scheduledAt = new Date(validatedData.scheduledAt);
-        const duration = forfait.duration;
-        const scheduledEnd = new Date(scheduledAt.getTime() + duration * 60 * 1000);
-        const conflictingIntervention = await prisma.intervention.findFirst({
-            where: {
-                scheduledAt: { lt: scheduledEnd },
-                status: { not: 'CANCELLED' },
-                AND: {
-                    scheduledAt: {
-                        gte: new Date(scheduledAt.getTime() - 180 * 60 * 1000),
-                    },
-                },
-            },
-        });
-        let technicianId: string | null = null;
-        let zoneId: string | null = null;
-        const allZones = await prisma.zone.findMany({
+
+        const scheduledStartTime = new Date(bookingRequest.scheduledAt);
+        const serviceDuration = selectedForfait.duration;
+        const scheduledEndTime = new Date(scheduledStartTime.getTime() + serviceDuration * 60 * 1000);
+        
+        let assignedTechnicianId: string | null = null;
+        let assignedZoneId: string | null = null;
+        
+        const activeZones = await prisma.zone.findMany({
             where: { isActive: true },
             include: {
                 technicians: {
@@ -74,16 +74,17 @@ export async function POST(req: Request) {
                 },
             },
         });
-        for (const zone of allZones) {
+        
+        for (const zone of activeZones) {
             try {
                 const geometry = typeof zone.geometry === 'string' ? JSON.parse(zone.geometry) : zone.geometry as any;
                 if (geometry && geometry.coordinates) {
                     const coords = geometry.coordinates[0];
-                    if (isPointInPolygon(validatedData.latitude, validatedData.longitude, coords)) {
-                        zoneId = zone.id;
-                        const activeTech = zone.technicians.find((tz: any) => tz.technician?.isActive);
-                        if (activeTech) {
-                            technicianId = activeTech.technicianId;
+                    if (isPointInPolygon(bookingRequest.latitude, bookingRequest.longitude, coords)) {
+                        assignedZoneId = zone.id;
+                        const availableTech = zone.technicians.find(tz => tz.technician?.isActive);
+                        if (availableTech) {
+                            assignedTechnicianId = availableTech.technicianId;
                         }
                         break;
                     }
@@ -91,9 +92,8 @@ export async function POST(req: Request) {
             } catch { }
         }
 
-        // Si l'intervention n'est pas dans une zone, trouver le technicien le plus proche
-        if (!technicianId) {
-            const allTechnicians = await prisma.user.findMany({
+        if (!assignedTechnicianId) {
+            const allActiveTechnicians = await prisma.user.findMany({
                 where: { role: 'TECHNICIEN', isActive: true },
                 include: {
                     addresses: { where: { isDefault: true } }
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
             let minDistance = Infinity;
             let closestTechId: string | null = null;
 
-            for (const tech of allTechnicians) {
+            for (const tech of allActiveTechnicians) {
                 let techLat = tech.currentLat;
                 let techLng = tech.currentLng;
 
@@ -115,38 +115,43 @@ export async function POST(req: Request) {
                 }
 
                 if (techLat !== null && techLng !== null) {
-                    const d = getDistanceFromLatLonInKm(validatedData.latitude, validatedData.longitude, techLat, techLng);
-                    if (d < minDistance) {
-                        minDistance = d;
+                    const distanceToClient = getDistanceFromLatLonInKm(
+                        bookingRequest.latitude, 
+                        bookingRequest.longitude, 
+                        techLat, 
+                        techLng
+                    );
+                    if (distanceToClient < minDistance) {
+                        minDistance = distanceToClient;
                         closestTechId = tech.id;
                     }
                 }
             }
 
             if (closestTechId) {
-                technicianId = closestTechId;
+                assignedTechnicianId = closestTechId;
             }
         }
 
-        const intervention = await prisma.intervention.create({
+        const newIntervention = await prisma.intervention.create({
             data: {
-                clientId: user.id,
-                bikeId: validatedData.bikeId,
-                forfaitId: validatedData.forfaitId,
-                technicianId,
-                zoneId,
-                address: validatedData.street,
-                postalCode: validatedData.postalCode,
-                city: validatedData.city,
-                latitude: validatedData.latitude,
-                longitude: validatedData.longitude,
-                scheduledAt,
-                totalPrice,
-                duration,
+                clientId: client.id,
+                bikeId: bookingRequest.bikeId,
+                forfaitId: bookingRequest.forfaitId,
+                technicianId: assignedTechnicianId,
+                zoneId: assignedZoneId,
+                address: bookingRequest.street,
+                postalCode: bookingRequest.postalCode,
+                city: bookingRequest.city,
+                latitude: bookingRequest.latitude,
+                longitude: bookingRequest.longitude,
+                scheduledAt: scheduledStartTime,
+                totalPrice: totalOrderPrice,
+                duration: serviceDuration,
                 status: 'PENDING',
-                products: productDetails.length > 0 ? {
+                products: orderProducts.length > 0 ? {
                     createMany: {
-                        data: productDetails,
+                        data: orderProducts,
                     },
                 } : undefined,
                 statusHistory: {
@@ -158,43 +163,43 @@ export async function POST(req: Request) {
             },
         });
 
-        
-        await sendPushNotification(user.id, {
+        await sendPushNotification(client.id, {
             title: 'Réservation confirmée ! 📅',
-            body: `Votre demande pour le forfait "${forfait.name}" a bien été prise en compte.`,
-            data: { interventionId: intervention.id, url: '/dashboard' }
+            body: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
+            data: { interventionId: newIntervention.id, url: '/dashboard' }
         });
 
         await prisma.notification.create({
             data: {
-                userId: user.id,
+                userId: client.id,
                 type: 'BOOKING_CREATED',
                 title: 'Réservation enregistrée',
-                message: `Votre demande pour le forfait "${forfait.name}" a bien été prise en compte.`,
-                data: { interventionId: intervention.id },
+                message: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
+                data: { interventionId: newIntervention.id },
             },
         });
+        
         try {
-            const fullIntervention = await prisma.intervention.findUnique({
-                where: { id: intervention.id },
+            const interventionWithDetails = await prisma.intervention.findUnique({
+                where: { id: newIntervention.id },
                 include: {
                     client: { select: { email: true, name: true } },
                     forfait: { select: { name: true } },
                 },
             });
-            if (fullIntervention) {
-                await sendBookingConfirmation(fullIntervention as any);
+            if (interventionWithDetails) {
+                await sendBookingConfirmation(interventionWithDetails as any);
             }
         } catch (emailError) {
-            console.error('Erreur envoi email confirmation:', emailError);
+            console.error('Email failed to send for intervention', newIntervention.id);
         }
-        return NextResponse.json({ data: intervention }, { status: 201 });
+        
+        return NextResponse.json({ data: newIntervention }, { status: 201 });
     } catch (error) {
-        console.error('Erreur POST bookings:', error);
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: 'Données invalides', details: error.issues }, { status: 400 });
+            return NextResponse.json({ error: 'Données de réservation invalides', details: error.issues }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+        return NextResponse.json({ error: 'Impossible de finaliser la réservation' }, { status: 500 });
     }
 }
 

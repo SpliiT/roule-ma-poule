@@ -17,29 +17,29 @@ export async function GET() {
         });
         return NextResponse.json({ data: zones });
     } catch (error) {
-        console.error('GET zones error:', error);
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
 }
 export async function POST(req: Request) {
     try {
         await requireRole('ADMIN');
-        const body = await req.json();
-        const { name, geometry, color, description, technicianIds } = body;
+        const payload = await req.json();
+        const { name, geometry, color, description, technicianIds } = payload;
+        
         if (!name || !geometry) {
             return NextResponse.json({ error: 'Nom et géométrie requis' }, { status: 400 });
         }
-        let finalTechnicianIds = technicianIds || [];
+        
+        let assignedTechnicianIds = technicianIds || [];
 
-        if (finalTechnicianIds.length === 0) {
-            // Calculer le centre de la zone (très basique : moyenne des points du premier polygone)
+        if (assignedTechnicianIds.length === 0) {
             let centerLat = 0;
             let centerLng = 0;
             let parsedGeometry;
             
             try {
                 parsedGeometry = typeof geometry === 'string' ? JSON.parse(geometry) : geometry;
-                if (parsedGeometry && parsedGeometry.coordinates && parsedGeometry.coordinates[0]) {
+                if (parsedGeometry?.coordinates?.[0]) {
                     const coords = parsedGeometry.coordinates[0];
                     let sumLat = 0, sumLng = 0;
                     coords.forEach((c: number[]) => { sumLng += c[0]; sumLat += c[1]; });
@@ -47,11 +47,11 @@ export async function POST(req: Request) {
                     centerLng = sumLng / coords.length;
                 }
             } catch (e) {
-                console.error("Erreur parsing geometry", e);
+                // Ignore parse errors, fallback will catch it
             }
 
             if (centerLat !== 0 && centerLng !== 0) {
-                const allTechnicians = await prisma.user.findMany({
+                const availableTechnicians = await prisma.user.findMany({
                     where: { role: 'TECHNICIEN', isActive: true },
                     include: { addresses: { where: { isDefault: true } } }
                 });
@@ -59,42 +59,44 @@ export async function POST(req: Request) {
                 let minDistance = Infinity;
                 let closestTechId: string | null = null;
 
-                for (const tech of allTechnicians) {
+                for (const tech of availableTechnicians) {
                     let techLat = tech.currentLat;
                     let techLng = tech.currentLng;
+                    
                     if (techLat === null || techLng === null) {
                         if (tech.addresses && tech.addresses.length > 0) {
                             techLat = tech.addresses[0].latitude;
                             techLng = tech.addresses[0].longitude;
                         }
                     }
+                    
                     if (techLat !== null && techLng !== null) {
-                        const d = getDistanceFromLatLonInKm(centerLat, centerLng, techLat, techLng);
+                        const distance = getDistanceFromLatLonInKm(centerLat, centerLng, techLat, techLng);
                         
-                        if (d < minDistance) {
-                            minDistance = d;
+                        if (distance < minDistance) {
+                            minDistance = distance;
                             closestTechId = tech.id;
                         }
                     }
                 }
 
                 if (closestTechId) {
-                    finalTechnicianIds = [closestTechId];
+                    assignedTechnicianIds = [closestTechId];
                 }
             }
         }
 
-        const zone = await prisma.zone.create({
+        const newZone = await prisma.zone.create({
             data: {
                 name,
                 geometry,
                 color: color || '#3B82F6',
                 description: description || null,
                 isActive: true,
-                ...(finalTechnicianIds.length > 0 && {
+                ...(assignedTechnicianIds.length > 0 && {
                     technicians: {
-                        create: finalTechnicianIds.map((technicianId: string) => ({
-                            technicianId,
+                        create: assignedTechnicianIds.map((techId: string) => ({
+                            technicianId: techId,
                         })),
                     },
                 }),
@@ -107,9 +109,8 @@ export async function POST(req: Request) {
                 },
             },
         });
-        return NextResponse.json({ data: zone });
+        return NextResponse.json({ data: newZone });
     } catch (error) {
-        console.error('POST zone error:', error);
         return NextResponse.json({ error: 'Erreur lors de la création de la zone' }, { status: 500 });
     }
 }
