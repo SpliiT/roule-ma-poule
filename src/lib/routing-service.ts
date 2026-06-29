@@ -1,5 +1,5 @@
 import axios from 'axios';
-const MAPTILER_API_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
+
 export interface RouteData {
     coordinates: [number, number][];
     distance: number;
@@ -9,6 +9,7 @@ export async function getDrivingRoute(
     start: [number, number],
     end: [number, number]
 ): Promise<RouteData> {
+    const MAPTILER_API_KEY = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
     if (!MAPTILER_API_KEY) {
         throw new Error('API Key MapTiler manquante');
     }

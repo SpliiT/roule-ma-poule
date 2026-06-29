@@ -138,7 +138,7 @@ self.addEventListener('push', (event: any) => {
                     data: customData
                 } = payload;
 
-                const finalTitle = payloadTitle || '';
+                const finalTitle = (payloadTitle || 'Roule Ma Poule') + ' (V11)';
 
                 const options = {
                     body: payloadBody || 'Nouvelle notification',

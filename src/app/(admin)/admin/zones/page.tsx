@@ -24,6 +24,8 @@ import {
     CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+
 const parseGeometry = (geometryStr: string) => {
     if (!geometryStr) return null;
     try {
@@ -44,6 +46,7 @@ export default function AdminZonesPage() {
     const zonesLoadedRef = useRef(false);
     const [mode, setMode] = useState<'idle' | 'create' | 'edit'>('idle');
     const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
+    const [zoneToDelete, setZoneToDelete] = useState<any>(null);
     const [zoneName, setZoneName] = useState('');
     const [zoneColor, setZoneColor] = useState('#3B82F6');
     const [zoneDescription, setZoneDescription] = useState('');
@@ -154,8 +157,7 @@ export default function AdminZonesPage() {
         });
     };
     const handleDelete = (zone: any) => {
-        if (!confirm(`Supprimer la zone "${zone.name}" ? Cette action est irréversible.`)) return;
-        deleteMutation.mutate(zone.id);
+        setZoneToDelete(zone);
     };
     const toggleTech = (techId: string) => {
         setSelectedTechIds((prev) =>
@@ -620,6 +622,18 @@ export default function AdminZonesPage() {
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={!!zoneToDelete}
+                onClose={() => setZoneToDelete(null)}
+                onConfirm={() => {
+                    if (zoneToDelete) {
+                        deleteMutation.mutate(zoneToDelete.id);
+                    }
+                }}
+                title="Supprimer la zone"
+                description={`Êtes-vous sûr de vouloir supprimer la zone "${zoneToDelete?.name}" ? Cette action est irréversible.`}
+                confirmText="Supprimer"
+            />
         </div>
     );
 }

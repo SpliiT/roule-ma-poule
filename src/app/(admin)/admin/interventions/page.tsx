@@ -34,11 +34,13 @@ import { fr } from 'date-fns/locale';
 import { AssignTechnicianDialog } from '@/components/admin/assign-technician-dialog';
 import { CreateInterventionDialog } from '@/components/admin/create-intervention-dialog';
 import { toast } from 'sonner';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 export default function AdminInterventionsPage() {
     const queryClient = useQueryClient();
     const [assignDialogOpen, setAssignDialogOpen] = useState(false);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [selectedIntervention, setSelectedIntervention] = useState<any>(null);
+    const [interventionToCancel, setInterventionToCancel] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const { data: interventions = [], isLoading } = useQuery({
@@ -256,11 +258,7 @@ export default function AdminInterventionsPage() {
                                                                 <DropdownMenuSeparator />
                                                                 <DropdownMenuItem
                                                                     className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
-                                                                    onClick={() => {
-                                                                        if (confirm('Voulez-vous vraiment annuler cette intervention ?')) {
-                                                                            updateStatusMutation.mutate({ id: i.id, status: 'CANCELLED' });
-                                                                        }
-                                                                    }}
+                                                                    onClick={() => setInterventionToCancel(i)}
                                                                 >
                                                                     <XCircle className="h-4 w-4" />
                                                                     Annuler l'intervention
@@ -317,11 +315,7 @@ export default function AdminInterventionsPage() {
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
-                                                            onClick={() => {
-                                                                if (confirm('Voulez-vous vraiment annuler ?')) {
-                                                                    updateStatusMutation.mutate({ id: i.id, status: 'CANCELLED' });
-                                                                }
-                                                            }}
+                                                            onClick={() => setInterventionToCancel(i)}
                                                         >
                                                             <XCircle className="h-4 w-4" />
                                                             Annuler
@@ -376,6 +370,18 @@ export default function AdminInterventionsPage() {
             <CreateInterventionDialog
                 open={createDialogOpen}
                 onOpenChange={setCreateDialogOpen}
+            />
+            <ConfirmModal
+                isOpen={!!interventionToCancel}
+                onClose={() => setInterventionToCancel(null)}
+                onConfirm={() => {
+                    if (interventionToCancel) {
+                        updateStatusMutation.mutate({ id: interventionToCancel.id, status: 'CANCELLED' });
+                    }
+                }}
+                title="Annuler l'intervention"
+                description="Êtes-vous sûr de vouloir annuler cette intervention ?"
+                confirmText="Annuler"
             />
         </div>
     );

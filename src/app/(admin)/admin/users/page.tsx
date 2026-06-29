@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -29,7 +30,9 @@ import {
     Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 export default function AdminUsersPage() {
+    const [userToDeactivate, setUserToDeactivate] = useState<any>(null);
     const queryClient = useQueryClient();
     const { data: users = [], isLoading } = useQuery({
         queryKey: ['admin-users-list'],
@@ -157,11 +160,7 @@ export default function AdminUsersPage() {
                                                 {user.isActive ? (
                                                     <DropdownMenuItem
                                                         className="gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold py-2.5"
-                                                        onClick={() => {
-                                                            if (confirm(`Désactiver le compte de ${user.name || user.email} ?`)) {
-                                                                updateMutation.mutate({ id: user.id, data: { isActive: false } });
-                                                            }
-                                                        }}
+                                                        onClick={() => setUserToDeactivate(user)}
                                                     >
                                                         <Ban className="h-4 w-4" />
                                                         Désactiver le compte
@@ -184,6 +183,18 @@ export default function AdminUsersPage() {
                     )}
                 </CardContent>
             </Card>
+            <ConfirmModal
+                isOpen={!!userToDeactivate}
+                onClose={() => setUserToDeactivate(null)}
+                onConfirm={() => {
+                    if (userToDeactivate) {
+                        updateMutation.mutate({ id: userToDeactivate.id, data: { isActive: false } });
+                    }
+                }}
+                title="Désactiver l'utilisateur"
+                description={`Êtes-vous sûr de vouloir désactiver le compte de ${userToDeactivate?.name || userToDeactivate?.email} ?`}
+                confirmText="Désactiver"
+            />
         </div>
     );
 }

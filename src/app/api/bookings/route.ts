@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendBookingConfirmation } from '@/lib/email';
 import { sendPushNotification } from '@/lib/push';
+import { getDistanceFromLatLonInKm, isPointInPolygon } from '@/lib/utils';
 import { z } from 'zod';
 const bookingSchema = z.object({
     bikeId: z.string(),
@@ -89,6 +90,44 @@ export async function POST(req: Request) {
                 }
             } catch { }
         }
+
+        // Si l'intervention n'est pas dans une zone, trouver le technicien le plus proche
+        if (!technicianId) {
+            const allTechnicians = await prisma.user.findMany({
+                where: { role: 'TECHNICIEN', isActive: true },
+                include: {
+                    addresses: { where: { isDefault: true } }
+                }
+            });
+
+            let minDistance = Infinity;
+            let closestTechId: string | null = null;
+
+            for (const tech of allTechnicians) {
+                let techLat = tech.currentLat;
+                let techLng = tech.currentLng;
+
+                if (techLat === null || techLng === null) {
+                    if (tech.addresses && tech.addresses.length > 0) {
+                        techLat = tech.addresses[0].latitude;
+                        techLng = tech.addresses[0].longitude;
+                    }
+                }
+
+                if (techLat !== null && techLng !== null) {
+                    const d = getDistanceFromLatLonInKm(validatedData.latitude, validatedData.longitude, techLat, techLng);
+                    if (d < minDistance) {
+                        minDistance = d;
+                        closestTechId = tech.id;
+                    }
+                }
+            }
+
+            if (closestTechId) {
+                technicianId = closestTechId;
+            }
+        }
+
         const intervention = await prisma.intervention.create({
             data: {
                 clientId: user.id,
@@ -158,14 +197,4 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
     }
 }
-function isPointInPolygon(lat: number, lng: number, polygon: number[][]): boolean {
-    let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const xi = polygon[i][1], yi = polygon[i][0];
-        const xj = polygon[j][1], yj = polygon[j][0];
-        const intersect = ((yi > lng) !== (yj > lng)) &&
-            (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-    }
-    return inside;
-}
+
