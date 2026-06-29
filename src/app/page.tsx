@@ -1,14 +1,26 @@
 'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CalendarPlus, Home, Zap, CheckCircle, Wrench, MapPin, Shield, LayoutDashboard, Star } from 'lucide-react';
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+
 export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if the application is running in standalone mode (PWA installed)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    if (isStandalone) {
+      router.replace('/dashboard');
+    }
+  }, [router]);
+
   return (
     <main className="min-h-screen bg-background">
-      { }
       <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
         <div className="container mx-auto flex h-20 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
