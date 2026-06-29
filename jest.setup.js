@@ -1,7 +1,16 @@
 import '@testing-library/jest-dom';
-import React, { act } from 'react';
+import React from 'react';
 
-// Polyfill pour React 19 / @testing-library/react où React.act pourrait manquer
 if (typeof React.act !== 'function') {
-    React.act = act;
+    React.act = function (callback) {
+        const result = callback();
+        if (result !== null && typeof result === 'object' && typeof result.then === 'function') {
+            return result;
+        }
+        return {
+            then: function (resolve) {
+                resolve(result);
+            }
+        };
+    };
 }
