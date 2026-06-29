@@ -22,6 +22,7 @@ import {
     X,
     Users,
     CheckCircle2,
+    MousePointerClick,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
@@ -496,8 +497,8 @@ export default function AdminZonesPage() {
                                 </div>
                                 { }
                                 {!drawnGeometry && mode === 'create' && (
-                                    <p className="text-[10px] text-center text-muted-foreground animate-pulse">
-                                        👉 Cliquez sur la carte pour dessiner le polygone
+                                    <p className="text-[10px] text-center text-muted-foreground flex items-center justify-center gap-1 animate-pulse">
+                                        <MousePointerClick className="h-3 w-3" /> Cliquez sur la carte pour dessiner le polygone
                                     </p>
                                 )}
                                 { }

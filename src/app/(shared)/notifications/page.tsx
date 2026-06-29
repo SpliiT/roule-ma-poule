@@ -82,7 +82,7 @@ export default function NotificationsPage() {
                                 <p className="text-[10px] text-muted-foreground font-medium leading-tight">
                                     {notificationPermission === 'denied'
                                         ? "Les notifications sont bloquées dans votre navigateur."
-                                        : "Recevez une notification WhatsApp-style même quand l'app est fermée."}
+                                        : "Recevez des alertes instantanées même quand l'application est en arrière-plan."}
                                 </p>
                             </div>
                         </div>

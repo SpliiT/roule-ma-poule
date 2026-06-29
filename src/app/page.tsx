@@ -97,16 +97,16 @@ export default function HomePage() {
                 </Link>
                 <div className="flex items-center gap-3 px-4 py-2 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50">
                   <div className="flex -space-x-3">
-                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
-                      <Image src="/images/avatars/user-1.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-1.jpg" alt="Client satisfait" width={40} height={40} className="object-cover object-center w-full h-full" />
                     </div>
-                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
-                      <Image src="/images/avatars/user-2.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-2.jpg" alt="Client satisfait" width={40} height={40} className="object-cover object-center w-full h-full" />
                     </div>
-                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
-                      <Image src="/images/avatars/user-3.jpg" alt="Client satisfait" width={40} height={40} className="object-cover" />
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted">
+                      <Image src="/images/avatars/user-3.jpg" alt="Client satisfait" width={40} height={40} className="object-cover object-center w-full h-full" />
                     </div>
-                    <div className="h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-muted flex items-center justify-center bg-primary text-primary-foreground text-xs font-bold">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-full border-2 border-background ring-2 ring-primary/10 overflow-hidden bg-primary text-primary-foreground text-xs font-bold">
                       +500
                     </div>
                   </div>
@@ -156,8 +156,8 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3">
             {[
               { icon: CalendarPlus, title: "1. Réservez", desc: "Choisissez votre forfait et votre créneau en 2 min chrono.", color: "text-primary", bg: "bg-primary/10" },
-              { icon: Wrench, title: "2. On arrive", desc: "Le technicien se déplace avec son atelier mobile complet.", color: "text-accent", bg: "bg-accent/10" },
-              { icon: CheckCircle, title: "3. Profitez", desc: "Votre vélo est prêt ! Payez sur place et repartez direct.", color: "text-success", bg: "bg-success/10" }
+              { icon: Wrench, title: "2. On arrive", desc: "Le technicien se déplace avec son atelier mobile complet.", color: "text-primary", bg: "bg-primary/10" },
+              { icon: CheckCircle, title: "3. Profitez", desc: "Votre vélo est prêt ! Payez sur place et repartez direct.", color: "text-primary", bg: "bg-primary/10" }
             ].map((step, idx) => (
               <Card key={idx} className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all shadow-xl shadow-transparent hover:shadow-primary/5 rounded-[2.5rem] overflow-hidden group">
                 <CardContent className="p-10 text-foreground">
@@ -181,9 +181,9 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: Home, title: "Zéro déplacement", sub: "À domicile ou au bureau", color: "text-primary" },
-              { icon: Zap, title: "Service Express", sub: "Sous 48 heures garanties", color: "text-accent" },
+              { icon: Zap, title: "Service Express", sub: "Sous 48 heures garanties", color: "text-primary" },
               { icon: Shield, title: "Garanti 100%", sub: "Expertise cycle certifiée", color: "text-primary" },
-              { icon: MapPin, title: "100% Lyonnais", sub: "Partout dans le Grand Lyon", color: "text-success" }
+              { icon: MapPin, title: "100% Lyonnais", sub: "Partout dans le Grand Lyon", color: "text-primary" }
             ].map((benefit, idx) => (
               <div key={idx} className="group flex flex-col items-center text-center p-8 rounded-[2rem] border-2 border-transparent hover:border-border/50 hover:bg-muted/10 transition-all duration-300 text-foreground">
                 <div className={`mb-6 rounded-2xl bg-muted p-5 ${benefit.color} group-hover:bg-primary/5 transition-colors`}>

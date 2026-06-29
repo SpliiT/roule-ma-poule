@@ -7,7 +7,7 @@ import { MapView } from '@/components/maps/map-view';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Bike, Clock, MapPin, Phone } from 'lucide-react';
+import { ChevronLeft, Bike, Clock, MapPin, Phone, Star } from 'lucide-react';
 export default function ClientTrackingPage() {
     const { id } = useParams();
     const router = useRouter();
@@ -83,7 +83,7 @@ export default function ClientTrackingPage() {
                                 <div>
                                     <p className="font-black italic uppercase text-lg leading-none">{tracking.technicianName || 'Technicien'}</p>
                                     <div className="flex items-center gap-1 text-yellow-500 mt-1">
-                                        {[1, 2, 3, 4, 5].map(s => <span key={s} className="text-xs">★</span>)}
+                                        {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-3 w-3 fill-current" />)}
                                         <span className="text-[10px] text-muted-foreground ml-1 font-bold">5.0</span>
                                     </div>
                                 </div>

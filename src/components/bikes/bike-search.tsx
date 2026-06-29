@@ -15,7 +15,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { Check, ChevronsUpDown, Loader2, Search } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2, Search, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BikeType } from '@/types/bikes';
 
@@ -172,7 +172,9 @@ export function BikeSearch({ onSelect, className }: BikeSearchProps) {
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold text-sm truncate">{bike.brand}</span>
                                                 {bike.isElectric && (
-                                                    <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1 rounded font-bold uppercase">⚡ Elec</span>
+                                                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded flex items-center gap-1 font-bold uppercase">
+                                                        <Zap className="h-3 w-3" /> Elec
+                                                    </span>
                                                 )}
                                             </div>
                                             <span className="text-xs text-muted-foreground truncate">
