@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -33,6 +33,7 @@ export default function NewBookingPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState<BookingStep>('address');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [bookingData, setBookingData] = useState({
         address: null as any,
         bikeId: null as any,
@@ -44,6 +45,35 @@ export default function NewBookingPage() {
         slot: null as any,
         products: [] as SelectedProduct[],
     });
+
+    useEffect(() => {
+        const savedData = sessionStorage.getItem('roulemapoule_bookingData');
+        const savedStep = sessionStorage.getItem('roulemapoule_bookingStep');
+        
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                if (parsed.date) {
+                    parsed.date = new Date(parsed.date);
+                }
+                setBookingData(parsed);
+            } catch (e) {
+                console.error("Failed to parse saved booking data", e);
+            }
+        }
+        if (savedStep && STEPS.includes(savedStep as BookingStep)) {
+            setCurrentStep(savedStep as BookingStep);
+        }
+        setIsLoaded(true);
+    }, []);
+
+    useEffect(() => {
+        if (isLoaded) {
+            sessionStorage.setItem('roulemapoule_bookingData', JSON.stringify(bookingData));
+            sessionStorage.setItem('roulemapoule_bookingStep', currentStep);
+        }
+    }, [bookingData, currentStep, isLoaded]);
+
     const stepIndex = STEPS.indexOf(currentStep);
     const progress = ((stepIndex + 1) / STEPS.length) * 100;
     const nextStep = () => {
@@ -69,6 +99,8 @@ export default function NewBookingPage() {
             };
             await axios.post('/api/bookings', payload);
             toast.success('Votre réservation a été confirmée !');
+            sessionStorage.removeItem('roulemapoule_bookingData');
+            sessionStorage.removeItem('roulemapoule_bookingStep');
             router.push('/dashboard');
         } catch (error) {
             console.error(error);
@@ -77,9 +109,13 @@ export default function NewBookingPage() {
             setIsSubmitting(false);
         }
     };
+    
     const forfaitPrice = bookingData.servicePrice || 0;
     const productsTotal = bookingData.products.reduce((sum, p) => sum + p.price * p.quantity, 0);
     const totalPrice = forfaitPrice + productsTotal;
+
+    if (!isLoaded) return null; // Prevent hydration mismatch
+
     return (
         <div className="container mx-auto max-w-4xl py-8">
             <div className="mb-8">
@@ -94,7 +130,7 @@ export default function NewBookingPage() {
                 <Progress value={progress} className="h-2" />
             </div>
             <div className="grid gap-8 lg:grid-cols-3">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 min-w-0">
                     <Card className="min-h-[450px]">
                         <CardContent className="pt-6">
                             {currentStep === 'address' && (

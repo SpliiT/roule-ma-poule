@@ -153,6 +153,18 @@
     padding: 4px;
     font-size: 16px;
 }
+.zone-hover-popup .maplibregl-popup-content {
+    background: hsl(30 10% 4%);
+    color: hsl(43 96% 58%);
+    border: 2px solid hsl(43 96% 58%);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 15px 0px rgba(250, 204, 21, 0.2);
+}
+.zone-hover-popup .maplibregl-popup-tip {
+    border-top-color: hsl(43 96% 58%);
+}
 
 .dark {
     --background: hsl(30 10% 2%);

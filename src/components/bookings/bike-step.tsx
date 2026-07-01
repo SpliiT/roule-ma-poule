@@ -27,7 +27,7 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
                     <h2 className="text-xl font-semibold">Quel vélo réparer ?</h2>
                 </div>
                 <Button variant="outline" size="sm" asChild className="gap-1">
-                    <Link href="/bikes/add">
+                    <Link href="/bikes/add?returnTo=/bookings/new">
                         <Plus className="h-3.5 w-3.5" />
                         Ajouter un vélo
                     </Link>
@@ -40,7 +40,7 @@ export function BikeStep({ selectedBikeId, onNext, onBack }: BikeStepProps) {
                         Vous n'avez pas encore de vélo enregistré.
                     </p>
                     <Button asChild>
-                        <Link href="/bikes/add">Ajouter mon premier vélo</Link>
+                        <Link href="/bikes/add?returnTo=/bookings/new">Ajouter mon premier vélo</Link>
                     </Button>
                 </div>
             ) : (

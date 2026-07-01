@@ -13,6 +13,7 @@ interface Product {
     price: number | string;
     stock: number;
     category: string | null;
+    imageUrl?: string | null;
 }
 interface SelectedProduct {
     productId: string;
@@ -30,7 +31,7 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['products-for-booking'],
         queryFn: async () => {
-            const { data } = await axios.get('/api/admin/products');
+            const { data } = await axios.get('/api/products');
             return (data.data || []).filter((p: Product) => p.stock > 0);
         },
     });
@@ -83,25 +84,39 @@ export function ProductsStep({ onNext, onBack, selectedProducts = [] }: Products
                     <p className="text-muted-foreground text-sm">Aucun produit disponible actuellement</p>
                 </div>
             ) : (
-                <div className="grid gap-3">
+                <div className="flex flex-col gap-3">
                     {products.map((product: Product) => {
                         const qty = getQuantity(product.id);
                         return (
-                            <Card key={product.id} className={`transition-colors ${qty > 0 ? 'border-primary/50 bg-primary/5' : ''}`}>
+                            <Card key={product.id} className={`transition-colors min-w-0 ${qty > 0 ? 'border-primary/50 bg-primary/5' : ''}`}>
                                 <CardContent className="flex items-center justify-between p-4">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium text-sm truncate">{product.name}</p>
-                                            {product.category && (
-                                                <Badge variant="outline" className="text-[10px]">{product.category}</Badge>
-                                            )}
-                                        </div>
-                                        {product.description && (
-                                            <p className="text-xs text-muted-foreground truncate mt-0.5">{product.description}</p>
+                                    <div className="flex-1 min-w-0 flex items-center gap-4">
+                                        {product.imageUrl && (
+                                            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+                                                <img 
+                                                    src={product.imageUrl} 
+                                                    alt={product.name} 
+                                                    className="absolute inset-0 h-full w-full object-cover text-transparent" 
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                    }}
+                                                />
+                                            </div>
                                         )}
-                                        <p className="text-sm font-semibold text-primary mt-1">
-                                            {Number(product.price).toFixed(2)}€
-                                        </p>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-medium text-sm truncate">{product.name}</p>
+                                                {product.category && (
+                                                    <Badge variant="outline" className="text-[10px]">{product.category}</Badge>
+                                                )}
+                                            </div>
+                                            {product.description && (
+                                                <p className="text-xs text-muted-foreground truncate mt-0.5">{product.description}</p>
+                                            )}
+                                            <p className="text-sm font-semibold text-primary mt-1">
+                                                {Number(product.price).toFixed(2)}€
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2 ml-4">
                                         {qty > 0 ? (

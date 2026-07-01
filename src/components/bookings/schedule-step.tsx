@@ -57,7 +57,7 @@ export function ScheduleStep({ onNext, onBack, zoneId, duration = 60 }: Schedule
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        className="rounded-md border shadow w-full"
+                        className="rounded-md border shadow"
                         disabled={(d) => {
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);

@@ -12,6 +12,15 @@ export async function GET() {
                         technician: { select: { id: true, name: true, email: true } },
                     },
                 },
+                _count: {
+                    select: {
+                        interventions: {
+                            where: {
+                                status: { in: ['PENDING', 'CONFIRMED'] },
+                            },
+                        },
+                    },
+                },
             },
             orderBy: { createdAt: 'desc' },
         });

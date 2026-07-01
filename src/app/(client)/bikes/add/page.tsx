@@ -1,7 +1,7 @@
 'use client';
 
 import { useBikes } from '@/hooks/use-bikes';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -10,12 +10,18 @@ import { BikeFormValues } from '@/lib/validations/auth';
 
 export default function AddBikePage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const returnTo = searchParams.get('returnTo');
     const { createBike, isCreating } = useBikes();
 
     async function onSubmit(values: BikeFormValues) {
         try {
             await createBike(values);
-            router.push('/bikes');
+            if (returnTo) {
+                router.push(returnTo);
+            } else {
+                router.push('/bikes');
+            }
         } catch (error) {
             console.error(error);
         }
@@ -25,9 +31,9 @@ export default function AddBikePage() {
         <div className="container mx-auto max-w-2xl py-8">
             <div className="mb-8">
                 <Button variant="ghost" asChild className="mb-4 gap-2 px-0 hover:bg-transparent">
-                    <Link href="/bikes">
+                    <Link href={returnTo || "/bikes"}>
                         <ArrowLeft className="h-4 w-4" />
-                        Retour à la liste
+                        Retour
                     </Link>
                 </Button>
                 <div className="flex items-center justify-between">

@@ -51,7 +51,46 @@ export async function DELETE(
     try {
         await requireRole('ADMIN');
         const { id } = await params;
+
+        const futureInterventions = await prisma.intervention.findMany({
+            where: {
+                zoneId: id,
+                status: { in: ['PENDING', 'CONFIRMED'] },
+            },
+            select: { id: true, clientId: true },
+        });
+
+        if (futureInterventions.length > 0) {
+            await prisma.intervention.updateMany({
+                where: {
+                    id: { in: futureInterventions.map((i: any) => i.id) }
+                },
+                data: {
+                    status: 'CANCELLED',
+                    zoneId: null,
+                    clientNotes: "Annulée par l'administrateur car notre zone d'intervention a été modifiée."
+                }
+            });
+
+            const notifications = futureInterventions.map((intervention: any) => ({
+                userId: intervention.clientId,
+                type: 'INTERVENTION_CANCELLED',
+                title: 'Intervention annulée',
+                message: 'Votre intervention a été annulée car nous ne couvrons plus cette zone géographique.',
+            }));
+            
+            await prisma.notification.createMany({
+                data: notifications
+            });
+        }
+
+        await prisma.intervention.updateMany({
+            where: { zoneId: id },
+            data: { zoneId: null },
+        });
+
         await prisma.zone.delete({ where: { id } });
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('DELETE zone error:', error);
