@@ -15,6 +15,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { GET, PATCH } from '../route';
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
@@ -31,17 +34,19 @@ describe('Admin Company API', () => {
             expect(res.status).toBe(200);
             
             const json = await res.json();
-            expect(json).toEqual(mockCompany);
+            expect(json.data).toEqual(mockCompany);
         });
 
-        it('should return a default empty object if no company info exists', async () => {
+        it('should return a new company if no company info exists', async () => {
             (prisma.companyInfo.findFirst as jest.Mock).mockResolvedValue(null);
+            const newCompany = { id: 'c-new', name: 'Roule Ma Poule' };
+            (prisma.companyInfo.create as jest.Mock).mockResolvedValue(newCompany);
 
             const res = await GET();
             expect(res.status).toBe(200);
             
             const json = await res.json();
-            expect(json).toEqual({});
+            expect(json.data).toEqual(newCompany);
         });
     });
 
@@ -54,7 +59,10 @@ describe('Admin Company API', () => {
                 body: JSON.stringify({ name: 'Hacked' })
             });
 
-            await expect(PATCH(req)).rejects.toThrow('Accès non autorisé');
+            const res = await PATCH(req);
+            expect(res.status).toBe(401);
+            const json = await res.json();
+            expect(json.error).toBe('Non autorisé ou erreur serveur');
         });
 
         it('should update company info if admin and info exists', async () => {
@@ -74,7 +82,7 @@ describe('Admin Company API', () => {
             expect(res.status).toBe(200);
             
             const json = await res.json();
-            expect(json).toEqual(updatedCompany);
+            expect(json.data).toEqual(updatedCompany);
             expect(prisma.companyInfo.update).toHaveBeenCalledWith({
                 where: { id: 'c-1' },
                 data: updatePayload

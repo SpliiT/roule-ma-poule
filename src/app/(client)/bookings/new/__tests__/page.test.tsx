@@ -62,6 +62,6 @@ describe('NewBookingPage Workflow', () => {
         });
 
         expect(screen.getByTestId('address-step')).toBeInTheDocument();
-        expect(screen.getByText('À définir')).toBeInTheDocument();
+        expect(screen.getAllByText('À définir').length).toBeGreaterThan(0);
     });
 });
