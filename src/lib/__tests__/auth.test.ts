@@ -15,6 +15,12 @@ jest.mock('@/lib/prisma', () => ({
     },
 }));
 
+jest.mock('next/headers', () => ({
+    cookies: jest.fn().mockReturnValue({
+        get: jest.fn().mockReturnValue(undefined),
+    }),
+}));
+
 describe('Auth Lib', () => {
     beforeEach(() => {
         jest.clearAllMocks();
