@@ -75,7 +75,7 @@ async function fetchGeometry(query: string) {
         }
         return null;
     } catch (error) {
-        console.error(`❌ Erreur Nominatim pour ${query}:`, error.message);
+        console.error(`❌ Erreur Nominatim pour ${query}:`, error instanceof Error ? error.message : String(error));
         return null;
     }
 }
