@@ -48,7 +48,9 @@ jobs:
 
       - name: Build Project on Vercel
         if: success() && github.ref == 'refs/heads/master'
-        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         if: success() && github.ref == 'refs/heads/master'
