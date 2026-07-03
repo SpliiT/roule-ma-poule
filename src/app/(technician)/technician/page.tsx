@@ -135,9 +135,9 @@ export default function TechnicianDashboardPage() {
                             <p className="font-black italic uppercase text-neutral-400 tracking-widest">Calcul de l'itinéraire...</p>
                         </div>
                     ) : interventions.length === 0 ? (
-                        <Card className="border-dashed border-2 bg-neutral-50 rounded-3xl">
+                        <Card className="bg-neutral-900/50 rounded-3xl border-2 border-dashed border-white/10">
                             <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-                                <Calendar className="mb-4 h-12 w-12 text-neutral-200" />
+                                <Calendar className="mb-4 h-12 w-12 text-neutral-500/50" />
                                 <h3 className="text-xl font-black italic uppercase text-neutral-400">Piste libre !</h3>
                                 <p className="text-neutral-500 font-medium">Aucune intervention n'est prévue pour le moment.</p>
                             </CardContent>

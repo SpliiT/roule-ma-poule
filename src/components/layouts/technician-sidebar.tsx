@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { User } from '@/types';
@@ -39,6 +39,7 @@ interface TechnicianSidebarProps {
 }
 export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
     const pathname = usePathname();
+    const { user: clerkUser } = useUser();
     return (
         <>
             { }
@@ -96,7 +97,7 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
                         <UserButton />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
-                                {user.name || user.email}
+                                {clerkUser?.fullName || user.name || user.email}
                             </p>
                             <p className="text-xs text-muted-foreground">
                                 Technicien
@@ -197,7 +198,7 @@ export function TechnicianSidebar({ user }: TechnicianSidebarProps) {
                                 <div className="flex items-center gap-3">
                                     <UserButton />
                                     <div className="min-w-0">
-                                        <p className="text-sm font-black truncate">{user.name || user.email}</p>
+                                        <p className="text-sm font-black truncate">{clerkUser?.fullName || user.name || user.email}</p>
                                         <div className="flex items-center gap-1.5 mt-0.5">
                                             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                                             <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest text-success">En ligne</span>

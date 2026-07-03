@@ -87,11 +87,17 @@ export default function NewBookingPage() {
     const handleConfirm = async () => {
         setIsSubmitting(true);
         try {
+            const scheduledDateTime = new Date(bookingData.date!);
+            if (bookingData.slot) {
+                const [hours, minutes] = bookingData.slot.split(':');
+                scheduledDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+            }
+
             const payload = {
                 ...bookingData.address,
                 bikeId: bookingData.bikeId,
                 forfaitId: bookingData.serviceId,
-                scheduledAt: bookingData.date,
+                scheduledAt: scheduledDateTime,
                 products: bookingData.products.map(p => ({
                     productId: p.productId,
                     quantity: p.quantity,

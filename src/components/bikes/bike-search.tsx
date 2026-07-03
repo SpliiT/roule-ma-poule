@@ -94,7 +94,7 @@ export function BikeSearch({ onSelect, className }: BikeSearchProps) {
                         <ChevronsUpDown className="ml-2 h-5 w-5 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[500px] p-0" align="start">
+                <PopoverContent className="w-[calc(100vw-3rem)] sm:w-[500px] p-0" align="start">
                     <Command shouldFilter={false}>
                         <CommandInput
                             placeholder="Ex: Specialized Sirrus, Decathlon Rockrider..."

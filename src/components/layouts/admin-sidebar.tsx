@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import type { User } from '@/types';
@@ -47,6 +47,7 @@ interface AdminSidebarProps {
 }
 export function AdminSidebar({ user }: AdminSidebarProps) {
     const pathname = usePathname();
+    const { user: clerkUser } = useUser();
     return (
         <>
             { }
@@ -100,7 +101,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                         <UserButton />
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">
-                                {user.name || user.email}
+                                {clerkUser?.fullName || user.name || user.email}
                             </p>
                             <p className="text-xs text-muted-foreground">
                                 Administrateur
@@ -201,7 +202,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                                 <div className="flex items-center gap-3">
                                     <UserButton />
                                     <div className="min-w-0">
-                                        <p className="text-sm font-black truncate">{user.name || user.email}</p>
+                                        <p className="text-sm font-black truncate">{clerkUser?.fullName || user.name || user.email}</p>
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Admin</p>
                                     </div>
                                 </div>
