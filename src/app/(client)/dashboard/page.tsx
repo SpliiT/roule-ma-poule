@@ -225,8 +225,10 @@ export default function ClientDashboardPage() {
                                                             <p className="text-xs font-black italic uppercase text-neutral-300">{booking.bike.model}</p>
                                                         </div>
                                                     </div>
-                                                    <Button variant="ghost" size="sm" className="group/link font-black italic uppercase text-[10px] tracking-widest text-primary hover:text-primary hover:bg-primary/5 px-4 rounded-xl">
-                                                        Détails <ArrowRight className="ml-2 h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
+                                                    <Button variant="ghost" size="sm" className="group/link font-black italic uppercase text-[10px] tracking-widest text-primary hover:text-primary hover:bg-primary/5 px-4 rounded-xl" asChild>
+                                                        <Link href={`/client/interventions/${booking.id}/tracking`}>
+                                                            Détails <ArrowRight className="ml-2 h-3 w-3 group-hover/link:translate-x-1 transition-transform" />
+                                                        </Link>
                                                     </Button>
                                                 </div>
                                             </div>
