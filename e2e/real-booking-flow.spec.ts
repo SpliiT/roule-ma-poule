@@ -1,6 +1,27 @@
 import { test, expect } from '@playwright/test';
+import { prisma } from '../src/lib/prisma';
 
 test.describe('Booking Flow End-to-End', () => {
+    test.afterAll(async () => {
+        const username = process.env.E2E_USERNAME;
+        if (username) {
+            console.log(`Nettoyage : suppression des interventions de ${username}`);
+            try {
+                const user = await prisma.user.findUnique({
+                    where: { email: username }
+                });
+                if (user) {
+                    const result = await prisma.intervention.deleteMany({
+                        where: { clientId: user.id }
+                    });
+                    console.log(`${result.count} intervention(s) supprimée(s).`);
+                }
+            } catch (err) {
+                console.error('Erreur lors du nettoyage des interventions :', err);
+            }
+        }
+    });
+
     test('Parcours complet de réservation avec connexion UI', async ({ page }) => {
         test.setTimeout(60000);
         
