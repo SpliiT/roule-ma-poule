@@ -12,13 +12,14 @@ interface Props {
     selectedZoneId: string | null;
     showOtherZones: boolean;
     drawnGeometry: any;
+    activeColor?: string;
     onGeometryUpdate: (geo: any) => void;
     onZoneClick: (zone: any) => void;
     mapControllerRef?: React.MutableRefObject<any>;
 }
 
 export function ZoneMap({
-    zones, mode, mapStyle, selectedZoneId, showOtherZones, drawnGeometry, onGeometryUpdate, onZoneClick, mapControllerRef
+    zones, mode, mapStyle, selectedZoneId, showOtherZones, drawnGeometry, activeColor, onGeometryUpdate, onZoneClick, mapControllerRef
 }: Props) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapRef = useRef<maplibregl.Map | null>(null);
@@ -37,13 +38,16 @@ export function ZoneMap({
         if (mapControllerRef) {
             mapControllerRef.current = {
                 deleteAll: () => drawRef.current?.deleteAll(),
-                changeMode: (m: string) => drawRef.current?.changeMode(m),
+                changeMode: (m: string, options?: any) => drawRef.current?.changeMode(m, options),
                 addGeometry: (geo: any) => drawRef.current?.add(geo),
                 getAllFeatures: () => drawRef.current?.getAll(),
                 fitBounds: (bounds: maplibregl.LngLatBounds, options: any) => mapRef.current?.fitBounds(bounds, options)
             };
         }
     }, [mapControllerRef]);
+
+    const drawnGeometryRef = useRef(drawnGeometry);
+    useEffect(() => { drawnGeometryRef.current = drawnGeometry; }, [drawnGeometry]);
 
     // 1. Initialisation de la carte
     useEffect(() => {
@@ -143,37 +147,37 @@ export function ZoneMap({
                 'id': 'gl-draw-polygon-and-line-vertex-stroke-inactive',
                 'type': 'circle',
                 'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
-                'paint': { 'circle-radius': 5, 'circle-color': '#fff' }
+                'paint': { 'circle-radius': 10, 'circle-color': '#fff' }
             },
             {
                 'id': 'gl-draw-polygon-and-line-vertex-inactive',
                 'type': 'circle',
                 'filter': ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point'], ['!=', 'mode', 'static']],
-                'paint': { 'circle-radius': 3, 'circle-color': '#fbb03b' }
+                'paint': { 'circle-radius': 7, 'circle-color': '#fbb03b' }
             },
             {
                 'id': 'gl-draw-point-point-stroke-inactive',
                 'type': 'circle',
                 'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature'], ['!=', 'mode', 'static']],
-                'paint': { 'circle-radius': 5, 'circle-color': '#fff' }
+                'paint': { 'circle-radius': 10, 'circle-color': '#fff' }
             },
             {
                 'id': 'gl-draw-point-inactive',
                 'type': 'circle',
                 'filter': ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature'], ['!=', 'mode', 'static']],
-                'paint': { 'circle-radius': 3, 'circle-color': '#3bb2d0' }
+                'paint': { 'circle-radius': 7, 'circle-color': '#3bb2d0' }
             },
             {
                 'id': 'gl-draw-point-stroke-active',
                 'type': 'circle',
                 'filter': ['all', ['==', '$type', 'Point'], ['==', 'active', 'true'], ['!=', 'meta', 'vertex']],
-                'paint': { 'circle-radius': 7, 'circle-color': '#fff' }
+                'paint': { 'circle-radius': 12, 'circle-color': '#fff' }
             },
             {
                 'id': 'gl-draw-point-active',
                 'type': 'circle',
                 'filter': ['all', ['==', '$type', 'Point'], ['!=', 'meta', 'vertex'], ['==', 'active', 'true']],
-                'paint': { 'circle-radius': 5, 'circle-color': '#fbb03b' }
+                'paint': { 'circle-radius': 9, 'circle-color': '#fbb03b' }
             },
             {
                 'id': 'gl-draw-polygon-fill-static',
@@ -198,13 +202,16 @@ export function ZoneMap({
 
         const d = new MapboxDraw({
             displayControlsDefault: false,
-            controls: { polygon: false, trash: false },
+            controls: { polygon: true, trash: true },
+            clickBuffer: 10,
+            touchBuffer: 25,
             styles: drawStyles as any,
         });
         m.addControl(d as any, 'top-left');
 
         m.on('load', () => {
-            if (drawnGeometry) d.add(drawnGeometry);
+            (m as any)._initialLoadDone = true;
+            if (drawnGeometryRef.current) d.add(drawnGeometryRef.current);
         });
         m.on('draw.create', (e: any) => onGeometryUpdate(e.features[0].geometry));
         m.on('draw.update', (e: any) => onGeometryUpdate(e.features[0].geometry));
@@ -213,35 +220,15 @@ export function ZoneMap({
         drawRef.current = d;
 
         return () => {}; // map unmount handled safely
-    }, [mapStyle, drawnGeometry]);
+    }, [mapStyle]);
 
     // 2. Rendu des zones
     useEffect(() => {
         const m = mapRef.current;
-        if (!m || !zones.length) return;
+        if (!m) return;
 
         const renderZones = () => {
             zones.forEach((zone: any) => {
-                const id = `zone-${zone.id}`;
-                if (m.getLayer(`${id}-fill`)) m.removeLayer(`${id}-fill`);
-                if (m.getLayer(`${id}-outline`)) m.removeLayer(`${id}-outline`);
-                if (m.getSource(id)) m.removeSource(id);
-            });
-
-            const style = m.getStyle();
-            if (style?.sources) {
-                Object.keys(style.sources).forEach((key) => {
-                    if (key.startsWith('zone-') && !zones.find((z: any) => `zone-${z.id}` === key)) {
-                        if (m.getLayer(`${key}-fill`)) m.removeLayer(`${key}-fill`);
-                        if (m.getLayer(`${key}-outline`)) m.removeLayer(`${key}-outline`);
-                        if (m.getSource(key)) m.removeSource(key);
-                    }
-                });
-            }
-            
-            const zonesToRender = mode === 'edit' && !showOtherZones ? zones.filter((z: any) => z.id === selectedZoneId) : zones;
-            
-            zonesToRender.forEach((zone: any) => {
                 const id = `zone-${zone.id}`;
                 const geo = parseGeometry(zone.geometry);
                 if (!geo) return;
@@ -252,34 +239,105 @@ export function ZoneMap({
                     geo.features.forEach((f: any) => f.properties = { ...f.properties, name: zone.name, id: zone.id });
                 }
 
-                m.addSource(id, { type: 'geojson', data: geo as any });
-                m.addLayer({
-                    id: `${id}-fill`,
-                    type: 'fill',
-                    source: id,
-                    paint: {
-                        'fill-color': zone.color || '#3B82F6',
-                        'fill-opacity': selectedZoneId === zone.id ? 0.4 : 0.2,
-                    },
+                try {
+                    // Update source if exists, else add
+                    const source = m.getSource(id);
+                    if (source) {
+                        (source as maplibregl.GeoJSONSource).setData(geo as any);
+                    } else {
+                        m.addSource(id, { type: 'geojson', data: geo as any });
+                    }
+
+                    // Visibility logic
+                    let isVisible = true;
+                    if (mode === 'edit') {
+                        isVisible = showOtherZones && zone.id !== selectedZoneId;
+                    } else if (mode === 'create') {
+                        isVisible = showOtherZones;
+                    }
+                    const visibility = isVisible ? 'visible' : 'none';
+
+                    // Update fill layer
+                    if (m.getLayer(`${id}-fill`)) {
+                        m.setLayoutProperty(`${id}-fill`, 'visibility', visibility);
+                        m.setPaintProperty(`${id}-fill`, 'fill-color', zone.color || '#3B82F6');
+                    } else {
+                        m.addLayer({
+                            id: `${id}-fill`,
+                            type: 'fill',
+                            source: id,
+                            layout: { visibility },
+                            paint: {
+                                'fill-color': zone.color || '#3B82F6',
+                                'fill-opacity': 0.2,
+                            },
+                        });
+                    }
+
+                    // Update outline layer
+                    if (m.getLayer(`${id}-outline`)) {
+                        m.setLayoutProperty(`${id}-outline`, 'visibility', visibility);
+                        m.setPaintProperty(`${id}-outline`, 'line-color', zone.color || '#3B82F6');
+                    } else {
+                        m.addLayer({
+                            id: `${id}-outline`,
+                            type: 'line',
+                            source: id,
+                            layout: { visibility },
+                            paint: {
+                                'line-color': zone.color || '#3B82F6',
+                                'line-width': 2,
+                            },
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error updating zone', zone.id, e);
+                }
+            });
+            
+            // Clean up removed zones (zones that are no longer in the props)
+            const style = m.getStyle();
+            if (style?.sources) {
+                Object.keys(style.sources).forEach((key) => {
+                    if (key.startsWith('zone-') && !zones.find((z: any) => `zone-${z.id}` === key)) {
+                        try {
+                            if (m.getLayer(`${key}-fill`)) m.removeLayer(`${key}-fill`);
+                            if (m.getLayer(`${key}-outline`)) m.removeLayer(`${key}-outline`);
+                            if (m.getSource(key)) m.removeSource(key);
+                        } catch (e) {}
+                    }
                 });
-                m.addLayer({
-                    id: `${id}-outline`,
-                    type: 'line',
-                    source: id,
-                    paint: {
-                        'line-color': zone.color || '#3B82F6',
-                        'line-width': selectedZoneId === zone.id ? 4 : 2,
-                    },
-                });
+            }
+
+            // Apply active color to MapboxDraw layers
+            const drawColor = activeColor || '#fbb03b';
+            ['gl-draw-polygon-fill-active.cold', 'gl-draw-polygon-fill-active.hot'].forEach(id => {
+                if (m.getLayer(id)) {
+                    try { m.setPaintProperty(id, 'fill-color', drawColor); } catch (e) {}
+                    try { m.setPaintProperty(id, 'fill-outline-color', drawColor); } catch (e) {}
+                }
+            });
+            ['gl-draw-line-active.cold', 'gl-draw-line-active.hot'].forEach(id => {
+                if (m.getLayer(id)) {
+                    try { m.setPaintProperty(id, 'line-color', drawColor); } catch (e) {}
+                }
+            });
+            ['gl-draw-polygon-and-line-vertex-inactive.cold', 'gl-draw-polygon-and-line-vertex-inactive.hot', 'gl-draw-point-active.cold', 'gl-draw-point-active.hot'].forEach(id => {
+                if (m.getLayer(id)) {
+                    try { m.setPaintProperty(id, 'circle-color', drawColor); } catch (e) {}
+                }
             });
         };
 
-        if (m.isStyleLoaded()) {
+        if ((m as any)._initialLoadDone) {
+            // Map is already loaded, we can run immediately.
+            // If isStyleLoaded is false because of diffing, it might throw, but our try/catches handle it.
             renderZones();
         } else {
+            // Map is still initializing, wait for the first load event.
             m.once('load', renderZones);
         }
-    }, [zones, selectedZoneId, mapStyle, mode, showOtherZones]);
+    }, [zones, selectedZoneId, mapStyle, mode, showOtherZones, activeColor]);
 
     return <div ref={mapContainer} className="w-full h-full min-h-[500px]" />;
 }

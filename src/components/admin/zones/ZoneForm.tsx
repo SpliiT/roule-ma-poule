@@ -112,6 +112,12 @@ export function ZoneForm({
                     </div>
                 )}
 
+                {mode === 'edit' && (
+                    <div className="bg-primary/5 text-primary/80 p-2 rounded-md border border-primary/20 text-xs">
+                        Pour modifier la forme, déplacez les points orange sur la carte. Vous pouvez utiliser les contrôles en haut à gauche pour redessiner ou supprimer la zone.
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-2">
                     <Button className="flex-1 gap-2 h-8 text-xs" onClick={handleSave} disabled={isSaving}>
                         {isSaving ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}

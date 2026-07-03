@@ -55,12 +55,14 @@ export default function AdminZonesPage() {
     const startCreate = useCallback(() => {
         resetForm();
         setMode('create');
+        setShowOtherZones(false);
         mapControllerRef.current?.changeMode('draw_polygon');
     }, [resetForm]);
 
     const startEdit = useCallback((zone: any) => {
         setMode('edit');
         setSelectedZoneId(zone.id);
+        setShowOtherZones(false);
         setZoneName(zone.name);
         setZoneColor(zone.color || '#3B82F6');
         setZoneDescription(zone.description || '');
@@ -74,6 +76,9 @@ export default function AdminZonesPage() {
             const ids = mapControllerRef.current?.addGeometry(geo);
             if (ids?.length) {
                 setDrawnGeometry(geo.geometry || geo);
+                setTimeout(() => {
+                    mapControllerRef.current?.changeMode('direct_select', { featureId: ids[0] });
+                }, 50);
             }
             // Fit bounds
             import('maplibre-gl').then(maplibregl => {
@@ -165,6 +170,7 @@ export default function AdminZonesPage() {
                             selectedZoneId={selectedZoneId}
                             showOtherZones={showOtherZones}
                             drawnGeometry={drawnGeometry}
+                            activeColor={zoneColor}
                             onGeometryUpdate={setDrawnGeometry}
                             onZoneClick={(zone) => {
                                 if (selectedZoneId === zone.id) resetForm();

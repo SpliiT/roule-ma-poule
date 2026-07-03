@@ -3,12 +3,12 @@ import { prisma } from '../src/lib/prisma';
 
 test.describe('Booking Flow End-to-End', () => {
     test.afterAll(async () => {
-        const username = process.env.E2E_USERNAME;
-        if (username) {
-            console.log(`Nettoyage : suppression des interventions de ${username}`);
+        const email = process.env.E2E_MAIL;
+        if (email) {
+            console.log(`Nettoyage : suppression des interventions de ${email}`);
             try {
-                const user = await prisma.user.findUnique({
-                    where: { email: username }
+                const user = await prisma.user.findFirst({
+                    where: { email: email }
                 });
                 if (user) {
                     const result = await prisma.intervention.deleteMany({
@@ -31,7 +31,7 @@ test.describe('Booking Flow End-to-End', () => {
         
         // 2. Remplir le nom d'utilisateur et continuer
         const usernameInput = page.locator('input[name="identifier"], input[type="text"]').first();
-        await usernameInput.fill(process.env.E2E_USERNAME || '');
+        await usernameInput.fill(process.env.E2E_MAIL || '');
         await page.getByRole('button', { name: /continuer/i }).click();
         
         // 3. Remplir le mot de passe et se connecter
@@ -40,7 +40,20 @@ test.describe('Booking Flow End-to-End', () => {
         await passwordInput.fill(process.env.E2E_PASSWORD || '');
         await page.getByRole('button', { name: /continuer/i }).click();
         
-        // 4. Attendre la redirection post-connexion
+        // 4. Attendre la redirection post-connexion (gérer l'éventuel 2FA Clerk)
+        await page.waitForURL(url => url.pathname.includes('/dashboard') || url.pathname.includes('/sign-in/factor-two'));
+        
+        if (page.url().includes('factor-two')) {
+            const otpInput = page.getByRole('textbox', { name: /verification code/i }).first();
+            await otpInput.waitFor({ state: 'visible' });
+            await otpInput.fill('424242'); // Code de test par défaut Clerk
+            
+            const btnContinuer = page.getByRole('button', { name: /continuer/i });
+            if (await btnContinuer.isVisible()) {
+                await btnContinuer.click();
+            }
+        }
+
         await page.waitForURL('**/dashboard');
         
         // 5. Lancer la réservation
@@ -109,7 +122,7 @@ test.describe('Booking Flow End-to-End', () => {
         await dayBtn.click();
         
         // Sélectionner une heure
-        const timeSlot = page.locator('button').filter({ hasText: /:\d\d/ }).first();
+        const timeSlot = page.locator('button:not([disabled])').filter({ hasText: /:\d\d/ }).first();
         await timeSlot.click();
         
         await page.getByRole('button', { name: /Suivant/i }).click();

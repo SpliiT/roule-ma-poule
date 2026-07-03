@@ -14,11 +14,13 @@ interface GoogleAddressAutocompleteProps {
     }) => void;
     defaultValue?: string;
     className?: string;
+    bounds?: { north: number; south: number; east: number; west: number };
 }
 export function GoogleAddressAutocomplete({
     onAddressSelect,
     defaultValue = '',
-    className
+    className,
+    bounds
 }: GoogleAddressAutocompleteProps) {
     const [inputValue, setInputValue] = useState(defaultValue);
     const [predictions, setPredictions] = useState<any[]>([]);
@@ -72,7 +74,7 @@ export function GoogleAddressAutocomplete({
             const request = {
                 input,
                 sessionToken: sessionTokenRef.current,
-                locationRestriction: {
+                locationRestriction: bounds || {
                     north: 46.05,
                     south: 45.45,
                     east: 5.15,

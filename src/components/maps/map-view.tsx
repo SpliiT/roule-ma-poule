@@ -34,8 +34,9 @@ export function MapView({
     useEffect(() => {
         if (map.current || !mapContainer.current) return;
         const maptilerKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
-        const styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE_URL ||
-            `https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${maptilerKey}`;
+        const styleUrl = maptilerKey 
+            ? `https://api.maptiler.com/maps/basic-v2-dark/style.json?key=${maptilerKey}` 
+            : 'https://tiles.openfreemap.org/styles/liberty';
         map.current = new maplibregl.Map({
             container: mapContainer.current,
             style: styleUrl,

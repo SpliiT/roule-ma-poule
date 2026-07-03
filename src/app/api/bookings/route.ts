@@ -163,35 +163,40 @@ export async function POST(req: Request) {
             },
         });
 
-        await sendPushNotification(client.id, {
-            title: 'Réservation confirmée ! 📅',
-            body: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
-            data: { interventionId: newIntervention.id, url: '/dashboard' }
-        });
+        const e2eEmail = process.env.E2E_MAIL;
+        const isTestUser = e2eEmail ? client.email === e2eEmail : false;
 
-        await prisma.notification.create({
-            data: {
-                userId: client.id,
-                type: 'BOOKING_CREATED',
-                title: 'Réservation enregistrée',
-                message: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
-                data: { interventionId: newIntervention.id },
-            },
-        });
-        
-        try {
-            const interventionWithDetails = await prisma.intervention.findUnique({
-                where: { id: newIntervention.id },
-                include: {
-                    client: { select: { email: true, name: true } },
-                    forfait: { select: { name: true } },
+        if (!isTestUser) {
+            await sendPushNotification(client.id, {
+                title: 'Réservation confirmée ! 📅',
+                body: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
+                data: { interventionId: newIntervention.id, url: '/dashboard' }
+            });
+
+            await prisma.notification.create({
+                data: {
+                    userId: client.id,
+                    type: 'BOOKING_CREATED',
+                    title: 'Réservation enregistrée',
+                    message: `Votre demande pour le forfait "${selectedForfait.name}" a bien été prise en compte.`,
+                    data: { interventionId: newIntervention.id },
                 },
             });
-            if (interventionWithDetails) {
-                await sendBookingConfirmation(interventionWithDetails as any);
+            
+            try {
+                const interventionWithDetails = await prisma.intervention.findUnique({
+                    where: { id: newIntervention.id },
+                    include: {
+                        client: { select: { email: true, name: true } },
+                        forfait: { select: { name: true } },
+                    },
+                });
+                if (interventionWithDetails) {
+                    await sendBookingConfirmation(interventionWithDetails as any);
+                }
+            } catch (emailError) {
+                console.error('Email failed to send for intervention', newIntervention.id);
             }
-        } catch (emailError) {
-            console.error('Email failed to send for intervention', newIntervention.id);
         }
         
         return NextResponse.json({ data: newIntervention }, { status: 201 });
