@@ -40,6 +40,9 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Run Jest tests
+        run: npm run test
+
       - name: Run Playwright tests
         run: npm run test:e2e
 
