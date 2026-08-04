@@ -19,6 +19,21 @@ const bookingSchema = z.object({
         quantity: z.number().int().positive(),
     })).default([]),
 });
+/**
+ * Route API responsable de la création d'une nouvelle réservation (Intervention).
+ * Ce point d'entrée central orchestre plusieurs logiques critiques :
+ * 
+ * 1. Validation stricte des données entrantes avec Zod.
+ * 2. Vérification de la tarification et de la disponibilité des produits ajoutés.
+ * 3. Logique Spatiale : Vérifie si les coordonnées GPS du client tombent dans 
+ *    une des zones d'intervention définies par l'administrateur (GeoJSON/PostGIS).
+ * 4. Attribution intelligente d'un technicien (via la zone couverte, ou par proximité).
+ * 5. Création atomique de l'Intervention en base de données.
+ * 6. Envoi asynchrone des notifications de confirmation (Web Push et Email).
+ * 
+ * @param {Request} req - La requête HTTP POST contenant le payload de réservation.
+ * @returns {Promise<NextResponse>} Réponse JSON avec les détails de l'intervention ou une erreur HTTP (400, 401, 404, 500).
+ */
 export async function POST(req: Request) {
     try {
         const client = await getCurrentUser();
@@ -75,6 +90,7 @@ export async function POST(req: Request) {
             },
         });
         
+        // Recherche de la zone d'intervention correspondante via algorithme spatial
         for (const zone of activeZones) {
             try {
                 const geometry = typeof zone.geometry === 'string' ? JSON.parse(zone.geometry) : zone.geometry as any;

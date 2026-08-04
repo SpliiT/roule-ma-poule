@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getDistanceFromLatLonInKm } from '@/lib/utils';
+/**
+ * Route API (GET) sécurisée - Espace Administrateur.
+ * Récupère la liste complète des zones géographiques d'intervention (GeoJSON).
+ * Inclut de manière optimisée (via `_count`) le nombre d'interventions en cours 
+ * pour chaque zone, facilitant la supervision globale.
+ * 
+ * @returns {Promise<NextResponse>} Réponse JSON avec la liste des zones.
+ */
 export async function GET() {
     try {
         await requireRole('ADMIN');
@@ -29,6 +37,19 @@ export async function GET() {
         return NextResponse.json({ error: 'Non autorisé ou erreur serveur' }, { status: 401 });
     }
 }
+/**
+ * Route API (POST) sécurisée - Espace Administrateur.
+ * Crée une nouvelle zone d'intervention géographique.
+ * 
+ * Logique Métier Avancée :
+ * Si l'administrateur n'assigne aucun technicien explicitement à la nouvelle zone,
+ * le système calcule mathématiquement le point central (barycentre) du polygone GeoJSON.
+ * Il boucle ensuite sur les techniciens actifs pour trouver le plus proche (via la formule 
+ * de Haversine) et lui assigne automatiquement la zone avec une priorité par défaut.
+ * 
+ * @param {Request} req - Requête contenant le nom, la géométrie (string JSON), et optionnellement les techniciens.
+ * @returns {Promise<NextResponse>} Réponse JSON de la zone créée avec ses relations.
+ */
 export async function POST(req: Request) {
     try {
         await requireRole('ADMIN');

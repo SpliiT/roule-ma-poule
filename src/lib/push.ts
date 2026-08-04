@@ -1,6 +1,12 @@
 import webpush from 'web-push';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * Configuration initiale du protocole Web Push avec les clés VAPID (Voluntary Application Server Identification).
+ * Les clés VAPID permettent aux serveurs push des navigateurs (ex: Google FCM) 
+ * d'identifier notre serveur (Roule Ma Poule) comme l'expéditeur légitime,
+ * garantissant que seul ce serveur peut envoyer des notifications.
+ */
 const vapidKeys = {
     publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     privateKey: process.env.VAPID_PRIVATE_KEY!,
@@ -14,6 +20,9 @@ if (vapidKeys.publicKey && vapidKeys.privateKey) {
     );
 }
 
+/**
+ * Type décrivant le corps (payload) d'une notification Push envoyée au client.
+ */
 export interface PushNotificationPayload {
     title: string;
     body: string;
@@ -23,6 +32,18 @@ export interface PushNotificationPayload {
     data?: any;
 }
 
+/**
+ * Envoie une notification Web Push à un utilisateur spécifique.
+ * 
+ * Fonctionnement :
+ * 1. Récupère tous les abonnements (appareils) actifs de l'utilisateur en base de données.
+ * 2. Diffuse la notification en parallèle via web-push.
+ * 3. En cas d'échec de distribution (ex: l'utilisateur a révoqué la permission, erreur 404/410), 
+ *    l'abonnement invalide est automatiquement nettoyé (supprimé de la BDD).
+ * 
+ * @param {string} userId - L'identifiant (ID Prisma) de l'utilisateur cible.
+ * @param {PushNotificationPayload} payload - Le contenu visuel de la notification.
+ */
 export async function sendPushNotification(userId: string, payload: PushNotificationPayload) {
     try {
         console.log(`[Push] Attempting to send notification to user: ${userId}`);

@@ -1,10 +1,22 @@
 import axios from 'axios';
 
+/**
+ * Interface définissant la structure d'une réponse d'itinéraire (Routing).
+ */
 export interface RouteData {
     coordinates: [number, number][];
     distance: number;
     duration: number;
 }
+/**
+ * Calcule l'itinéraire routier optimal entre deux points GPS en utilisant l'API externe MapTiler.
+ * Essentiel pour guider les techniciens lors de leurs tournées à domicile.
+ * 
+ * @param {[number, number]} start - Les coordonnées de départ sous forme [longitude, latitude].
+ * @param {[number, number]} end - Les coordonnées d'arrivée sous forme [longitude, latitude].
+ * @throws {Error} Si la clé API est manquante ou si le service ne trouve aucun itinéraire.
+ * @returns {Promise<RouteData>} L'itinéraire géométrique, la distance totale et la durée estimée.
+ */
 export async function getDrivingRoute(
     start: [number, number],
     end: [number, number]
