@@ -1,0 +1,133 @@
+# Documentation Technique Globale - Roule Ma Poule
+
+## 1. Architecture et Vue d'Ensemble
+
+**Roule Ma Poule** est une Progressive Web App (PWA) développée pour **LeCycleLyonnais**, permettant la gestion d'interventions de réparation de vélos à domicile.
+
+### 1.1 Stack Technologique
+- **Frontend / Framework** : Next.js 16 (App Router), React 19, TypeScript
+- **Styling** : Tailwind CSS 4, Radix UI (composants headless)
+- **Base de données** : PostgreSQL avec l'extension PostGIS (pour la géolocalisation spatiale)
+- **ORM** : Prisma (`@prisma/client` v7.3)
+- **Authentification** : Clerk (`@clerk/nextjs`)
+- **Cartographie** : MapLibre GL JS, API Google Maps (géocodage/autocomplétion)
+- **Médias** : Cloudinary (hébergement des photos d'intervention et de vélos)
+- **Emails** : Nodemailer + React Email
+- **PWA / Service Workers** : `@ducanh2912/next-pwa` avec Web Push Notifications
+- **Tests** : Jest (Unitaires), Playwright (End-to-End)
+
+### 1.2 Structure du Projet
+Le code est organisé majoritairement dans le répertoire `src/` :
+- `src/app/` : Gère le routage via Next.js App Router. Séparé en 3 espaces distincts (`(admin)`, `(client)`, `(technician)`) et une partie API (`api/`).
+- `src/components/` : Composants UI réutilisables (souvent basés sur shadcn/ui avec Radix).
+- `src/lib/` : Services de l'application (Prisma, Auth Clerk, Email, Web-Push, Cartographie).
+- `prisma/` : Schéma de base de données (`schema.prisma`) et seeds.
+- `e2e/` : Scénarios de tests E2E avec Playwright.
+
+### 1.3 Intégration Continue (CI/CD)
+Le projet utilise GitHub Actions (`.github/workflows/ci.yml`). À chaque push/PR sur `master` :
+1. Installation des dépendances (Node 20).
+2. Récupération des variables d'environnement depuis Vercel.
+3. Génération du client Prisma.
+4. Exécution de la suite de tests Playwright (`npm run test:e2e`).
+5. Déploiement automatique sur **Vercel** si les tests réussissent.
+
+---
+
+## 2. Modèle de Données (Prisma)
+
+La base de données repose sur PostgreSQL + PostGIS. Voici les entités principales :
+
+- **User** : Représente tous les utilisateurs (Client, Technicien, Admin). Lié à Clerk via `clerkId`. Gère le rôle via l'enum `UserRole`.
+- **Address** : Carnet d'adresses des utilisateurs avec coordonnées GPS (`latitude`, `longitude`).
+- **Bike** : Vélos des clients (marque, modèle, type, électrique ou non, photo).
+- **Zone** : Zones d'intervention géographiques définies par un polygone (`geometry`).
+- **TechnicianZone** : Table de liaison attribuant un technicien à une ou plusieurs zones, avec une notion de priorité.
+- **Forfait** : Les forfaits de réparation proposés (nom, durée, prix).
+- **Product** : Pièces détachées ou produits vendus lors d'une intervention.
+- **Intervention** : L'entité centrale. Lie un `Client`, un `Bike`, un `Forfait`, éventuellement un `Technician` et une `Zone`. Contient l'état (`status` : PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED), les notes, les photos, et la facturation.
+- **InterventionProduct** : Produits consommés lors d'une intervention avec quantité et prix unitaire bloqué au moment de l'utilisation.
+- **InterventionStatusHistory** : Historique de changement d'état d'une intervention.
+- **Planning** : Jours et horaires de disponibilité pour une `Zone` donnée.
+- **Notification / ScheduledNotification / PushSubscription** : Gestion des alertes in-app et push pour les utilisateurs.
+
+---
+
+## 3. Workflows Utilisateurs (Par Rôle)
+
+### 3.1 Workflow Client (`src/app/(client)`)
+Le client s'inscrit via Clerk. Son rôle par défaut est `CLIENT`.
+- **Gestion du Parc** : Le client peut ajouter, modifier, ou supprimer ses vélos (`/bikes`). Les photos sont uploadées via Cloudinary.
+- **Carnet d'Adresses** : Il peut enregistrer ses adresses favorites. L'autocomplétion Google Maps aide à la saisie.
+- **Réservation d'Intervention** (`/bookings`) : 
+  1. Le client choisit un vélo.
+  2. Il sélectionne un forfait.
+  3. Il indique l'adresse. L'application vérifie si l'adresse est couverte par une `Zone` active (via PostGIS/Prisma).
+  4. Il choisit un créneau horaire basé sur le `Planning` de la zone.
+  5. Il valide sa réservation.
+- **Suivi** : Le client peut voir le statut de ses interventions (`/dashboard`), annuler (si permis), et noter la prestation une fois terminée.
+
+### 3.2 Workflow Technicien (`src/app/(technician)`)
+- **Dashboard / Planning du jour** : Le technicien voit les interventions qui lui sont assignées (`technicianId` sur l'intervention).
+- **En cours de route** : Utilisation de la cartographie (MapLibre) pour générer l'itinéraire (via `src/lib/routing-service.ts`) vers l'adresse du client.
+- **Clôture de l'Intervention** :
+  1. Le technicien passe le statut à `IN_PROGRESS` en arrivant.
+  2. Une fois terminé, il peut ajouter des notes (`technicianNotes`), uploader des photos de la réparation.
+  3. Il peut ajouter des pièces détachées (`InterventionProduct`) consommées depuis le catalogue (`Product`). Le prix total s'ajuste.
+  4. Il passe le statut à `COMPLETED`.
+
+### 3.3 Workflow Administrateur (`src/app/(admin)/admin`)
+- **Gestion des Zones** : Dessin de zones d'intervention sur la carte (Mapbox/MapLibre Draw) sauvegardées en GeoJSON.
+- **Plannings** : Configuration des jours et heures d'ouverture par zone.
+- **Catalogue** : CRUD complet sur les `Forfaits` et les `Produits` (pièces détachées).
+- **Utilisateurs** : Visualisation de la base clients, élévation de privilèges (ex: définir un utilisateur comme technicien ou admin), assignation de techniciens à des zones.
+- **Supervision** : Vue globale de toutes les interventions, assignation manuelle si besoin, suivi des statuts.
+
+---
+
+## 4. Référence de l'API (`src/app/api`)
+
+Toutes les routes sont sécurisées via Clerk (`auth()`).
+
+- **`/api/webhooks/clerk`** : Webhook appelé par Clerk lors de la création/modification/suppression d'un compte pour synchroniser la table `User` dans Prisma.
+- **`/api/interventions`** : (GET, POST, PATCH) Création, lecture et mise à jour des interventions.
+- **`/api/bikes` & `/api/addresses`** : (GET, POST, DELETE) Gestion des données client.
+- **`/api/admin/zones` & `/api/admin/plannings`** : Définition des secteurs couverts et de leurs horaires.
+- **`/api/admin/users`** : API pour le dashboard admin (gestion des rôles).
+- **`/api/products` & `/api/forfaits`** : API catalogue.
+- **`/api/notifications`** : (GET, PATCH) Récupération et marquage en "lu" des notifications.
+- **`/api/cron`** : Route appelée par des jobs cron Vercel pour vérifier/déclencher l'envoi de `ScheduledNotification`.
+
+---
+
+## 5. Services Techniques et Mécanismes Clés
+
+### 5.1 Notifications et Web Push
+L'application intègre `@ducanh2912/next-pwa` pour transformer Next.js en PWA.
+- **Service Worker (`src/worker`)** : Gère la réception des événements `push` via l'API Web Push et affiche les notifications sur le terminal de l'utilisateur (mobile/desktop).
+- **Backend (`src/lib/push.ts`)** : Utilise la librairie `web-push`. Les abonnements (`PushSubscription`) sont enregistrés en base lorsqu'un utilisateur accepte de recevoir des notifications.
+
+### 5.2 Géolocalisation et Cartographie
+- **Google Maps API** : Principalement utilisée côté frontend pour l'autocomplétion des adresses via `@googlemaps/js-api-loader`.
+- **MapLibre GL / Turf.js** : Utilisé dans l'administration pour dessiner des polygones (Zones) et afficher les cartes pour les techniciens sans frais massifs liés à Google Maps.
+- **PostGIS** : Permet au backend de faire des requêtes spatiales (ex: *Est-ce que le point X,Y est dans le polygone Z ?*).
+
+### 5.3 Sécurité et Autorisation
+L'authentification est gérée par **Clerk**. Un utilitaire `src/lib/auth.ts` exporte des fonctions comme `requireRole(['ADMIN'])` qui vérifient le rôle dans Prisma ou via les métadonnées Clerk avant d'autoriser l'accès à une route API ou une Server Action.
+
+---
+
+## 6. Stratégie de Tests
+
+La qualité du code est assurée par deux niveaux de tests :
+
+### 6.1 Tests Unitaires (Jest)
+Situés dans `src/lib/__tests__/`. Ils visent principalement la logique métier isolée, les fonctions de formatage, les calculs de prix, ou le parsing de données.
+- **Lancement** : `npm run test`
+
+### 6.2 Tests End-to-End (Playwright)
+Situés dans le dossier `e2e/`. Ils simulent un navigateur complet pour vérifier les workflows majeurs :
+- `auth.spec.ts` : Tests de connexion, de déconnexion et de protection des routes par rôle.
+- `real-booking-flow.spec.ts` : Vérifie de bout en bout le tunnel de réservation d'un client (sélection de vélo, forfait, éligibilité de zone, prise de créneau horaire).
+- `admin-zones.spec.ts` : Vérifie la capacité de l'admin à manipuler le système géographique.
+- **Lancement** : `npm run test:e2e` (exécuté automatiquement par GitHub Actions). Les identifiants de test (ex: compte client, admin) sont passés via le fichier `.env` ou les secrets GitHub Actions.
