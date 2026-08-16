@@ -8,7 +8,7 @@ import { Check, ArrowLeft, Loader2, Settings } from 'lucide-react';
 import type { Forfait, Product } from '@prisma/client';
 interface ServiceStepProps {
     selectedServiceId: string | null;
-    onNext: (serviceId: string) => void;
+    onNext: (serviceId: string, serviceName?: string, servicePrice?: number, serviceDuration?: number) => void;
     onBack: () => void;
 }
 export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepProps) {
@@ -38,7 +38,7 @@ export function ServiceStep({ selectedServiceId, onNext, onBack }: ServiceStepPr
                         key={forfait.id}
                         className={`cursor-pointer transition-all hover:border-primary/50 ${selectedServiceId === forfait.id ? 'border-primary ring-1 ring-primary' : ''
                             }`}
-                        onClick={() => onNext(forfait.id)}
+                        onClick={() => onNext(forfait.id, forfait.name, Number(forfait.price), forfait.duration)}
                     >
                         <CardContent className="p-5">
                             <div className="mb-2 flex items-center justify-between">

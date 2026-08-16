@@ -17,9 +17,13 @@ export default function TechnicianUpcomingPage() {
         },
     });
 
-    const upcomingInterventions = interventions.filter((i: any) =>
-        new Date(i.scheduledAt) > new Date() && i.status === 'CONFIRMED'
-    );
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const upcomingInterventions = interventions.filter((i: any) => {
+        if (i.status === 'COMPLETED' || i.status === 'CANCELLED') return false;
+        return new Date(i.scheduledAt) > endOfToday;
+    });
 
     return (
         <div className="space-y-10 pb-12">

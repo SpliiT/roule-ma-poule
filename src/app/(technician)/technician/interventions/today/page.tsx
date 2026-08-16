@@ -16,9 +16,16 @@ export default function TechnicianTodayPage() {
         },
     });
 
-    const todayInterventions = interventions.filter((i: any) =>
-        i.status !== 'COMPLETED' && i.status !== 'CANCELLED'
-    );
+    const today = new Date();
+    const todayInterventions = interventions.filter((i: any) => {
+        if (i.status === 'COMPLETED' || i.status === 'CANCELLED') return false;
+        const scheduledDate = new Date(i.scheduledAt);
+        return (
+            scheduledDate.getFullYear() === today.getFullYear() &&
+            scheduledDate.getMonth() === today.getMonth() &&
+            scheduledDate.getDate() === today.getDate()
+        );
+    });
 
     return (
         <div className="space-y-10 pb-12">

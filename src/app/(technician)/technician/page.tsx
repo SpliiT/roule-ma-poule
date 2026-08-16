@@ -30,7 +30,13 @@ export default function TechnicianDashboardPage() {
         },
     });
 
-    const pendingCount = interventions.filter((i: any) => i.status === 'CONFIRMED' || i.status === 'PENDING').length;
+    const today = new Date();
+    const activeInterventions = interventions.filter((i: any) => i.status !== 'COMPLETED' && i.status !== 'CANCELLED');
+    const todayInterventions = activeInterventions.filter((i: any) => {
+        const d = new Date(i.scheduledAt);
+        return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+    });
+    const pendingCount = activeInterventions.length;
 
     return (
         <div className="space-y-10 pb-12">
