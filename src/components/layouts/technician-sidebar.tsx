@@ -17,6 +17,7 @@ import {
     Bell,
     User as UserIcon,
     LogOut,
+    Clock,
 } from 'lucide-react';
 import { SignOutButton } from '@clerk/nextjs';
 import {
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/sheet";
 const navItems = [
     { label: 'Tableau de bord', href: '/technician', icon: LayoutDashboard },
+    { label: 'À valider', href: '/technician/interventions/pending', icon: Clock },
     { label: 'Aujourd\'hui', href: '/technician/interventions/today', icon: ClipboardList },
     { label: 'À venir', href: '/technician/interventions/upcoming', icon: CalendarDays },
     { label: 'Historique', href: '/technician/interventions/history', icon: ClipboardList },

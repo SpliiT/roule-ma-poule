@@ -21,7 +21,7 @@ export default function TechnicianUpcomingPage() {
     endOfToday.setHours(23, 59, 59, 999);
 
     const upcomingInterventions = interventions.filter((i: any) => {
-        if (i.status === 'COMPLETED' || i.status === 'CANCELLED') return false;
+        if (i.status !== 'CONFIRMED' && i.status !== 'IN_PROGRESS') return false;
         return new Date(i.scheduledAt) > endOfToday;
     });
 

@@ -5,7 +5,7 @@ import { sendStatusUpdate } from '@/lib/email';
 import { sendPushNotification } from '@/lib/push';
 import { z } from 'zod';
 const updateSchema = z.object({
-    status: z.enum(['IN_PROGRESS', 'COMPLETED']).optional(),
+    status: z.enum(['CONFIRMED', 'IN_PROGRESS', 'COMPLETED']).optional(),
     technicianNotes: z.string().optional(),
     photos: z.array(z.string().url()).optional(),
     isPaid: z.boolean().optional(),
@@ -106,12 +106,21 @@ export async function PATCH(
                     notes: `Mis à jour par le technicien`,
                 },
             });
+            const isConfirmed = data.status === 'CONFIRMED';
+            const isCompleted = data.status === 'COMPLETED';
+
             await prisma.notification.create({
                 data: {
                     userId: current.clientId,
                     type: 'STATUS_CHANGED',
-                    title: data.status === 'COMPLETED' ? 'Intervention terminée !' : 'Intervention en cours',
-                    message: data.status === 'COMPLETED'
+                    title: isConfirmed
+                        ? 'Rendez-vous confirmé ! ✨'
+                        : isCompleted
+                        ? 'Intervention terminée !'
+                        : 'Intervention en cours',
+                    message: isConfirmed
+                        ? 'Votre rendez-vous d\'intervention a été validé par votre technicien !'
+                        : isCompleted
                         ? 'Votre vélo a été réparé avec succès !'
                         : 'Le technicien a commencé le travail sur votre vélo.',
                     data: { interventionId: id, status: data.status },
@@ -119,8 +128,14 @@ export async function PATCH(
             });
             
             await sendPushNotification(current.clientId, {
-                title: data.status === 'COMPLETED' ? 'Vélo prêt ! ✨' : 'Intervention en cours 🛠️',
-                body: data.status === 'COMPLETED'
+                title: isConfirmed
+                    ? 'Rendez-vous confirmé ! ✨'
+                    : isCompleted
+                    ? 'Vélo prêt ! ✨'
+                    : 'Intervention en cours 🛠️',
+                body: isConfirmed
+                    ? 'Votre rendez-vous d\'intervention a été validé.'
+                    : isCompleted
                     ? 'Votre vélo a été réparé avec succès !'
                     : 'Le technicien a commencé le travail sur votre vélo.',
                 data: { interventionId: id, url: `/dashboard` }
