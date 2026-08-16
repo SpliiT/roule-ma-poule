@@ -31,12 +31,16 @@ export default function TechnicianDashboardPage() {
     });
 
     const today = new Date();
-    const activeInterventions = interventions.filter((i: any) => i.status !== 'COMPLETED' && i.status !== 'CANCELLED');
-    const todayInterventions = activeInterventions.filter((i: any) => {
+    const todayInterventions = interventions.filter((i: any) => {
+        if (i.status !== 'CONFIRMED' && i.status !== 'IN_PROGRESS') return false;
         const d = new Date(i.scheduledAt);
-        return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+        return (
+            d.getFullYear() === today.getFullYear() &&
+            d.getMonth() === today.getMonth() &&
+            d.getDate() === today.getDate()
+        );
     });
-    const pendingCount = activeInterventions.length;
+    const pendingCount = interventions.filter((i: any) => i.status === 'PENDING').length;
 
     return (
         <div className="space-y-10 pb-12">
@@ -130,7 +134,7 @@ export default function TechnicianDashboardPage() {
                         Planning du Jour
                     </h2>
                     <Badge variant="outline" className="font-bold border-2 px-3 py-1">
-                        {interventions.length} TOTAL
+                        {todayInterventions.length} AUJOURD'HUI
                     </Badge>
                 </div>
 
@@ -140,16 +144,16 @@ export default function TechnicianDashboardPage() {
                             <Loader2 className="text-primary h-10 w-10 animate-spin" />
                             <p className="font-black italic uppercase text-neutral-400 tracking-widest">Calcul de l'itinéraire...</p>
                         </div>
-                    ) : interventions.length === 0 ? (
+                    ) : todayInterventions.length === 0 ? (
                         <Card className="bg-neutral-900/50 rounded-3xl border-2 border-dashed border-white/10">
                             <CardContent className="flex flex-col items-center justify-center py-20 text-center">
                                 <Calendar className="mb-4 h-12 w-12 text-neutral-500/50" />
-                                <h3 className="text-xl font-black italic uppercase text-neutral-400">Piste libre !</h3>
-                                <p className="text-neutral-500 font-medium">Aucune intervention n'est prévue pour le moment.</p>
+                                <h3 className="text-xl font-black italic uppercase text-neutral-400">Piste libre pour aujourd'hui !</h3>
+                                <p className="text-neutral-500 font-medium">Aucune intervention validée n'est prévue pour aujourd'hui.</p>
                             </CardContent>
                         </Card>
                     ) : (
-                        interventions.map((i: any) => (
+                        todayInterventions.map((i: any) => (
                             <Card key={i.id} className="group overflow-hidden border-none shadow-2xl bg-neutral-950 text-white rounded-[2.5rem]">
                                 <div className="flex flex-col lg:flex-row">
                                     {/* Timeline Column */}
