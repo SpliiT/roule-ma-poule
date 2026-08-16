@@ -105,6 +105,15 @@ export default function PresentationPage() {
       setIsUnlocked(true);
     }
     setIsLoading(false);
+
+    // Auto-update Service Worker to clear stale Next.js static chunk caches after deployments
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.update();
+        }
+      });
+    }
   }, []);
 
   const handleUnlock = (e: React.FormEvent) => {

@@ -7,6 +7,9 @@ const withPWA = withPWAInit({
   register: true,
   customWorkerSrc: 'src/worker',
   customWorkerDest: 'public',
+  cacheOnFrontEndNav: false,
+  aggressiveFrontEndNavCaching: false,
+  reloadOnOnline: false,
 });
 
 const nextConfig: NextConfig = {
